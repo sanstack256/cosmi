@@ -1,26 +1,210 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+body {
+  background-color: black;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* COSMI Glow Button */
+/* button */
+.btn {
+  margin: 10px;
+  padding: 15px 30px;
+  border: none;
+  outline: none;
+  color: #FFF;
+  cursor: pointer;
+  position: relative;
+  z-index: 0;
+  border-radius: 12px;
+box-shadow: inset 0 0 10px rgb(255, 255, 255);
+}
+.btn::after {
+  content: "";
+  z-index: -1;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: #333;
+  left: 0;
+  top: 0;
+  border-radius: 10px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* glow */
+.btn::before {
+  content: "";
+  background: linear-gradient(
+    45deg,
+    #FF0000, #FF7300, #FFFB00, #48FF00,
+    #00FFD5, #002BFF, #FF00C8, #FF0000
+  );
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  background-size: 600%;
+  z-index: -1;
+  width: calc(100% + 4px);
+  height: calc(100% + 4px);
+  filter: blur(8px);
+  animation: glowing 20s linear infinite;
+  transition: opacity 0.3s ease-in-out; /* fade in + fade out */
+  border-radius: 10px;
+  opacity: 0;
+}
+
+/* hover = glow appears */
+.btn:hover::before {
+  opacity: 1;
+}
+
+/* NEW: keep glow a bit longer during click */
+.btn:active::before {
+  opacity: 1;
+  transition: opacity 3s ease-in-out; /* soft glow delay */
+}
+
+/* after-click text change */
+.btn:active:after {
+  background: transparent;
+}
+
+
+
+.btn:active {
+  color: #000;
+  font-weight: bold;
+}
+
+@keyframes glowing {
+  0% {background-position: 0 0;}
+  50% {background-position: 400% 0;}
+  100% {background-position: 0 0;}
+}
+
+/* Keep glow active for 3 seconds when clicked */
+.btn.clicked::before {
+  opacity: 1 !important;
+  transition: opacity 0.5s ease-out; /* smooth fade */
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 4s linear infinite;
+}
+
+/* ================================
+   COSMI LOADER
+================================ */
+
+.cosmi-loader {
+  --color-one: #a78bfa;        /* violet-400 */
+  --color-two: #7c3aed;        /* violet-600 */
+  --color-three: #a78bfa80;
+  --color-four: #7c3aed80;
+  --color-five: #a78bfa40;
+  --time-animation: 2s;
+  --size: 1;
+
+  position: relative;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  transform: scale(var(--size));
+  box-shadow:
+    0 0 25px 0 var(--color-three),
+    0 20px 50px 0 var(--color-four);
+  animation: cosmi-colorize calc(var(--time-animation) * 3)
+    ease-in-out infinite;
+}
+
+.cosmi-loader::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border-top: solid 1px var(--color-one);
+  border-bottom: solid 1px var(--color-two);
+  background: linear-gradient(
+    180deg,
+    var(--color-five),
+    var(--color-four)
+  );
+  box-shadow:
+    inset 0 10px 10px 0 var(--color-three),
+    inset 0 -10px 10px 0 var(--color-four);
+}
+
+.cosmi-loader .box {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    180deg,
+    var(--color-one) 30%,
+    var(--color-two) 70%
+  );
+  mask: url(#clipping);
+  -webkit-mask: url(#clipping);
+}
+
+.cosmi-loader svg {
+  position: absolute;
+}
+
+.cosmi-loader svg #clipping {
+  filter: contrast(15);
+  animation: cosmi-roundness
+    calc(var(--time-animation) / 2)
+    linear infinite;
+}
+
+.cosmi-loader svg #clipping polygon {
+  filter: blur(7px);
+}
+
+.cosmi-loader svg #clipping polygon:nth-child(odd) {
+  animation: cosmi-rotation var(--time-animation)
+    linear infinite;
+}
+
+.cosmi-loader svg #clipping polygon:nth-child(even) {
+  animation: cosmi-rotation var(--time-animation)
+    linear infinite reverse;
+}
+
+@keyframes cosmi-rotation {
+  to {
+    transform: rotate(360deg);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@keyframes cosmi-roundness {
+  0%, 100% { filter: contrast(15); }
+  20%, 40% { filter: contrast(3); }
+}
+
+@keyframes cosmi-colorize {
+  0% { filter: hue-rotate(0deg); }
+  50% { filter: hue-rotate(-40deg); }
+  100% { filter: hue-rotate(0deg); }
+}
+
+@keyframes cosmi-fade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-cosmi-fade {
+  animation: cosmi-fade 0.35s ease-out;
 }
