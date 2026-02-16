@@ -1,47 +1,58 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import Image from "next/image";
 
 export default function HeroVisual() {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    let t = 0;
-    const el = ref.current;
-    if (!el) return;
-
-    function animate() {
-      t += 0.003;
-      const y = Math.sin(t) * 12;
-      const r = t * 10;
-
-      el.style.transform = `
-        translateY(${y}px)
-        rotate(${r}deg)
-      `;
-
-      requestAnimationFrame(animate);
-    }
-
-    animate();
-  }, []);
-
   return (
-    <div className="relative w-[420px] h-[420px]">
-      {/* Glow */}
-      <div className="absolute inset-0 rounded-full bg-violet-500/20 blur-3xl" />
-
-      {/* Ring */}
+    <section className="relative mt-24">
+      {/* BLEED CONTAINER (Linear-style) */}
       <div
-        ref={ref}
-        className="absolute inset-0 rounded-full border border-white/20 backdrop-blur-xl"
-      />
+        className="
+          relative
+          w-screen
+          left-1/2
+          right-1/2
+          -ml-[50vw]
+          -mr-[50vw]
+          overflow-hidden
+          pointer-events-none
+        "
+      >
+        {/* PERSPECTIVE */}
+        <div className="relative h-[70vh] perspective-[1800px]">
+          {/* IMAGE WRAPPER */}
+          <div
+            className="
+              absolute
+              bottom-[-20%]
+              left-1/2
+              -translate-x-1/2
+              transform-gpu
+              rotate-x-[24deg]
+              rotate-z-[-12deg]
+              scale-[1.18]
+            "
+          >
+            <Image
+              src="/hero/dashboard.png"
+              alt="Cosmi dashboard"
+              width={1800}
+              height={1100}
+              priority
+              className="rounded-xl shadow-[0_120px_300px_rgba(0,0,0,0.95)]"
+            />
 
-      {/* Invoice card */}
-      <div className="absolute inset-16 rounded-xl bg-white/90 shadow-xl p-4 text-black">
-        <div className="font-semibold">Invoice</div>
-        <div className="text-xs text-slate-500 mt-1">Cosmi</div>
+            {/* TOP FADE */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent rounded-xl" />
+
+            {/* BOTTOM FADE */}
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/90 rounded-xl" />
+          </div>
+        </div>
+
+        {/* GLOBAL VIGNETTE */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.06)_0%,rgba(0,0,0,0.85)_70%)]" />
       </div>
-    </div>
+    </section>
   );
 }
