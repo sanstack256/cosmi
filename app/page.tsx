@@ -12,23 +12,24 @@ export default function Home() {
         <div className="flex items-center gap-10">
           <h1 className="text-2xl font-bold">
             <span className="text-white">Cosmi</span>
-            <span className="text-indigo-400">.io</span>
+            <span className="text-indigo-400">.com</span>
           </h1>
 
           <div className="hidden md:flex gap-8 text-gray-300">
-            <a href="#home" className="hover:text-white transition">
+            <a href="#home" className="text-white hover:text-violet-300">
               Home
             </a>
-            <a href="#features" className="hover:text-white transition">
+            <a href="#features" className="text-white hover:text-violet-300">
               Features
             </a>
-            <a href="#pricing" className="hover:text-white transition">
+            <Link href="/pricing" className="text-white hover:text-violet-300">
               Pricing
-            </a>
-            <a href="#howitworks" className="hover:text-white transition">
+            </Link>
+
+            <a href="#howitworks" className="text-white hover:text-violet-300">
               How it Works
             </a>
-            <a href="#contact" className="hover:text-white transition">
+            <a href="#contact" className="text-white hover:text-violet-300">
               Contact
             </a>
           </div>
@@ -44,28 +45,76 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <section className="flex flex-col items-center text-center mt-24 px-6">
-        <h2 className="text-5xl md:text-6xl font-bold mb-[29px] leading-tight text-white">
-          Get Paid Faster  <br />
-          <span className="text-indigo-400">with  </span> Smart{" "}
-          <span className="text-indigo-400">Invoicing</span>
-        </h2>
+<section className="relative flex flex-col items-center text-center mt-24 px-6 pb-48">
 
-        <p className="text-gray-300 text-lg max-w-2xl mb-[29px]">
-          Create professional invoices instantly with Cosmi.io — the next-gen
-          invoicing assistant built for creators, consultants, and small teams.
-        </p>
+  {/* Content Layer */}
+  <div className="relative z-10 flex flex-col items-center">
+    <h2 className="text-5xl md:text-6xl font-bold mb-[29px] leading-tight text-white">
+      Get Paid Faster <br />
+      <span className="text-indigo-400">with</span> Smart{" "}
+      <span className="text-indigo-400">Invoicing</span>
+    </h2>
 
-        {/* Try it now button - uses .btn styles you provided in globals.css */}
-        <button className="btn px-[23px] py-[15px] text-lg font-semibold">
-          Try It Now
-        </button>
-      </section>
+    <p className="text-gray-300 text-lg max-w-2xl mb-[29px]">
+      Create polished invoices in seconds, automate reminders,
+      and get paid on time every time.
+    </p>
+
+    <button className="btn px-[23px] py-[15px] text-lg font-semibold">
+      Start Free
+    </button>
+  </div>
+
+  {/* 🔥 Purple Glow Curve (Front Layer) */}
+  <svg
+  className="absolute -bottom-12 left-0 w-full h-[220px] z-20 pointer-events-none"
+  viewBox="0 0 1440 200"
+  preserveAspectRatio="none"
+>
+  <defs>
+    <filter
+      id="glow"
+      x="-100%"
+      y="-100%"
+      width="300%"
+      height="300%"
+    >
+<feGaussianBlur stdDeviation="25" result="blur1" />
+<feGaussianBlur stdDeviation="8" in="SourceGraphic" result="blur2" />
+
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <linearGradient id="purpleGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stopColor="transparent" />
+      <stop offset="20%" stopColor="#7c3aed" />
+      <stop offset="50%" stopColor="#a855f7" />
+      <stop offset="80%" stopColor="#7c3aed" />
+      <stop offset="100%" stopColor="transparent" />
+    </linearGradient>
+  </defs>
+
+  <path
+    d="M0,130 C360,0 1080,0 1440,130"
+    fill="none"
+    stroke="url(#purpleGradient)"
+    strokeWidth="3.5"
+    filter="url(#glow)"
+  />
+</svg>
+
+
+</section>
+
+
 
       {/* Features Section */}
       <section
         id="features"
-        className="mt-40 px-6 max-w-5xl mx-auto text-center text-white"
+        className="mt-15 px-6 max-w-5xl mx-auto text-center text-white"
       >
         <h3 className="text-4xl font-bold mb-16">
           Powerful <span className="text-indigo-400">Features</span>, Seamlessly
@@ -170,12 +219,12 @@ export default function Home() {
           </div>
 
           {/* Download or Share */}
-          <div className="flex flex-col items-center text-center max-w-sm bg-white/5 p-8 rounded-2xl border border-indigo-500/20 hover:border-indigo-400/40 hover:shadow-[0_0_25px_rgba(99,102,241,0.4)] transition-all duration-300">
+          <div className="flex flex-col items-center text-center max-w-sm bg-white/5 p-6 rounded-2xl border border-indigo-500/20 hover:border-indigo-400/40 hover:shadow-[0_0_25px_rgba(99,102,241,0.4)] transition-all duration-300">
             <lord-icon
               src="https://cdn.lordicon.com/pithnlch.json"
               trigger="hover"
               colors="primary:#818cf8,secondary:#ffffff"
-              style={{ width: "120px", height: "120px" }}
+              style={{ width: "110px", height: "110px" }}
             ></lord-icon>
             <h3 className="text-2xl font-semibold mt-4 mb-2 text-indigo-300">
               3. Download or Share

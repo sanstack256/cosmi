@@ -62,10 +62,17 @@ export default function InvoiceForm({
 }: Props) {
   const router = useRouter();
 
+  const handlePrint = () => {
+    if (typeof window !== "undefined") {
+      window.print();
+    }
+  };
+
   return (
     <>
       {!loadingCompany && !hasCompanyProfile && (
-        <div className="mb-4 rounded-2xl p-4 bg-violet-500/10 border border-violet-500/30 text-sm text-violet-200">
+        <div className="mb-4 rounded-2xl p-4 bg-violet-500/10 border border-violet-500/30 text-sm text-violet-200 no-print
+">
           <div className="font-semibold mb-1">
             Set up your company profile
           </div>
@@ -83,8 +90,10 @@ export default function InvoiceForm({
         </div>
       )}
 
-      <div className="rounded-2xl bg-gradient-to-br from-[#0e0e14] to-[#06060a] p-4 ring-1 ring-violet-600/10">
-        <div className="flex justify-between mb-3">
+      <div className="print-container rounded-2xl bg-gradient-to-br from-[#0e0e14] to-[#06060a] p-4 ring-1 ring-violet-600/10 print:bg-white print:ring-0">
+
+        {/* Top Bar */}
+        <div className="flex justify-between mb-3 no-print">
           <button
             onClick={() => router.push("/dashboard")}
             className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/40 text-slate-300"
@@ -106,7 +115,7 @@ export default function InvoiceForm({
         <input
           value={client}
           onChange={(e) => setClient(e.target.value)}
-          className="w-full rounded-xl bg-black/60 border border-white/10 px-3 py-2 mt-1 mb-3"
+          className="w-full rounded-xl bg-black/60 border border-white/10 px-3 py-2 mt-1 mb-3 print:bg-transparent print:border-none print:px-0"
         />
 
         {/* Date */}
@@ -115,7 +124,7 @@ export default function InvoiceForm({
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
-          className="w-full rounded-xl bg-black/60 border border-white/10 px-3 py-2 mt-1 mb-3"
+          className="w-full rounded-xl bg-black/60 border border-white/10 px-3 py-2 mt-1 mb-3 print:bg-transparent print:border-none print:px-0"
         />
 
         {/* Status */}
@@ -125,7 +134,7 @@ export default function InvoiceForm({
           onChange={(e) =>
             setStatus(e.target.value as Invoice["status"])
           }
-          className="w-full rounded-xl bg-black/60 border border-white/10 px-3 py-2 mt-1 mb-3"
+          className="w-full rounded-xl bg-black/60 border border-white/10 px-3 py-2 mt-1 mb-3 print:bg-transparent print:border-none print:px-0"
         >
           <option value="Pending">Pending</option>
           <option value="Paid">Paid</option>
@@ -145,7 +154,7 @@ export default function InvoiceForm({
                 onChange={(e) =>
                   updateLine(idx, { desc: e.target.value })
                 }
-                className="col-span-6 rounded-xl bg-black/60 border border-white/10 px-2 py-1"
+                className="col-span-6 rounded-xl bg-black/60 border border-white/10 px-2 py-1 print:bg-transparent print:border-none print:px-0"
               />
               <input
                 type="number"
@@ -153,7 +162,7 @@ export default function InvoiceForm({
                 onChange={(e) =>
                   updateLine(idx, { qty: Number(e.target.value) })
                 }
-                className="col-span-2 rounded-xl bg-black/60 border border-white/10 px-2 py-1"
+                className="col-span-2 rounded-xl bg-black/60 border border-white/10 px-2 py-1 print:bg-transparent print:border-none print:px-0"
               />
               <input
                 type="number"
@@ -161,11 +170,11 @@ export default function InvoiceForm({
                 onChange={(e) =>
                   updateLine(idx, { rate: Number(e.target.value) })
                 }
-                className="col-span-3 rounded-xl bg-black/60 border border-white/10 px-2 py-1"
+                className="col-span-3 rounded-xl bg-black/60 border border-white/10 px-2 py-1 print:bg-transparent print:border-none print:px-0"
               />
               <button
                 onClick={() => removeLine(idx)}
-                className="col-span-1 text-rose-400 text-sm"
+                className="col-span-1 text-rose-400 text-sm no-print"
               >
                 ✕
               </button>
@@ -175,7 +184,8 @@ export default function InvoiceForm({
 
         <button
           onClick={addLine}
-          className="mt-3 px-3 py-1.5 rounded-xl bg-violet-500 text-black"
+          className="mt-3 px-3 py-1.5 rounded-xl bg-violet-500 text-black no-print
+"
         >
           + Add line
         </button>
@@ -186,23 +196,33 @@ export default function InvoiceForm({
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={3}
-          className="w-full rounded-xl bg-black/60 border border-white/10 px-3 py-2 mt-1"
+          className="w-full rounded-xl bg-black/60 border border-white/10 px-3 py-2 mt-1 print:bg-transparent print:border-none print:px-0"
         />
 
         {/* Footer */}
-        <div className="mt-4 flex justify-between items-center">
+        <div className="mt-4 flex justify-between items-center no-print
+">
           <div>
             <div className="text-xs text-slate-400">Subtotal</div>
             <div className="font-semibold">{subtotalFormatted}</div>
           </div>
 
-          <button
-            onClick={onSave}
-            disabled={saving}
-            className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-black font-semibold disabled:opacity-50"
-          >
-            {saving ? "Saving…" : "Save Invoice"}
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handlePrint}
+              className="px-4 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-semibold"
+            >
+              Print
+            </button>
+
+            <button
+              onClick={onSave}
+              disabled={saving}
+              className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-black font-semibold disabled:opacity-50"
+            >
+              {saving ? "Saving…" : "Save Invoice"}
+            </button>
+          </div>
         </div>
       </div>
     </>

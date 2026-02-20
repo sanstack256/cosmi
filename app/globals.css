@@ -208,3 +208,27 @@ box-shadow: inset 0 0 10px rgb(255, 255, 255);
 .animate-cosmi-fade {
   animation: cosmi-fade 0.35s ease-out;
 }
+
+@media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  body {
+    margin: 0;
+    background: white;
+  }
+
+  .print-wrapper {
+    background: white;
+  }
+
+  .invoice-paper {
+    width: 210mm;
+    min-height: 297mm;
+    padding: 20mm;
+    margin: 0 auto;
+    background: white;
+  }
+}

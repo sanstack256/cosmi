@@ -7,10 +7,17 @@ import { useRouter } from "next/navigation";
 export default function UserMenu() {
   const { user, signOut } = useAuth();
   const router = useRouter();
+
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
-  // close when clicking outside
+  // Safely compute display letter
+  const displayLetter =
+    user?.displayName?.charAt(0)?.toUpperCase() ||
+    user?.email?.charAt(0)?.toUpperCase() ||
+    "?";
+
+  // Close dropdown when clicking outside
   useEffect(() => {
     function onClick(e: MouseEvent) {
       if (!menuRef.current) return;
@@ -18,6 +25,7 @@ export default function UserMenu() {
         setOpen(false);
       }
     }
+
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
@@ -29,65 +37,67 @@ export default function UserMenu() {
 
   return (
     <div className="relative" ref={menuRef}>
-      {/* Avatar / User Button */}
-      {/* Avatar Button (photoURL or initials) */}
-<button
+      {/* Avatar Button */}
+      <button
   onClick={() => setOpen(!open)}
   className="
     relative h-9 w-9 rounded-xl overflow-hidden
     flex items-center justify-center select-none
     transition-all duration-200
     hover:scale-105
-    hover:shadow-[0_0_16px_rgba(168,120,255,0.5)]
+    hover:shadow-[0_0_18px_rgba(99,102,241,0.6)]
+    text-white font-semibold text-sm
   "
-  style={{
-    background:
-      user?.photoURL
-        ? "transparent"
-        : "linear-gradient(140deg, rgba(139,92,246,0.9), rgba(236,72,153,0.85))",
-  }}
+  style={
+    user?.photoURL
+      ? undefined
+      : {
+          background: "linear-gradient(135deg, #2563eb 0%, #7c3aed 100%)",
+        }
+  }
 >
-  {/* If user has a photo URL */}
   {user?.photoURL ? (
     <img
       src={user.photoURL}
-      alt="avatar"
-      className="w-full h-full object-cover rounded-xl"
+      alt="profile"
+      className="h-full w-full object-cover"
     />
   ) : (
-    <span className="text-xs font-semibold text-white">
-      {user?.email
-        ?.split("@")[0]
-        ?.slice(0, 2)
-        ?.toUpperCase() ?? "U"}
-    </span>
+    <span className="relative z-10">{displayLetter}</span>
   )}
 
-  {/* Glow Ring */}
-  <span
-    className="
-      absolute inset-0 rounded-xl pointer-events-none
-      transition opacity-40
-      hover:opacity-100
-    "
-    style={{
-      boxShadow: "0 0 22px rgba(170,128,255,0.65)",
-      mixBlendMode: "screen",
-    }}
-  />
+  {/* Soft Glow Overlay */}
+  {!user?.photoURL && (
+    <span
+      className="absolute inset-0 rounded-xl pointer-events-none"
+      style={{
+        boxShadow: "0 0 22px rgba(99,102,241,0.55)",
+        mixBlendMode: "screen",
+      }}
+    />
+  )}
 </button>
+
+
 
       {/* Dropdown */}
       <div
         className={`
-          absolute right-0 mt-2 w-52 rounded-xl bg-[#0f0f15] border border-white/10 shadow-lg backdrop-blur-xl z-50 p-2
-          transition-all duration-200
-          ${open ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-2 scale-95 pointer-events-none"}
+          absolute right-0 mt-2 w-52 rounded-xl bg-[#0f0f15] 
+          border border-white/10 shadow-lg backdrop-blur-xl 
+          z-50 p-2 transition-all duration-200
+          ${
+            open
+              ? "opacity-100 translate-y-0 scale-100"
+              : "opacity-0 translate-y-2 scale-95 pointer-events-none"
+          }
         `}
       >
         <div className="px-3 py-2 text-xs text-slate-400">
           Signed in as:
-          <div className="text-white mt-1">{user?.email ?? "Unknown"}</div>
+          <div className="text-white mt-1 truncate">
+            {user?.email ?? "Unknown"}
+          </div>
         </div>
 
         <div className="h-px bg-white/10 my-2" />

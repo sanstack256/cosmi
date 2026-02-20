@@ -13,6 +13,13 @@ import { useAuth } from "../providers/AuthProvider";
 import { Building2 } from "lucide-react";
 
 
+const cardBase =
+  "rounded-3xl bg-[#0b0b18]/80 backdrop-blur-xl border border-white/5 shadow-[0_0_40px_rgba(124,58,237,0.08)] transition-all duration-300";
+
+const cardHover =
+  "hover:-translate-y-1 hover:shadow-[0_0_60px_rgba(124,58,237,0.15)]";
+
+
 
 const SignOutButton = dynamic(() => import("../components/SignOutButton"), { ssr: false }); // <- added
 
@@ -242,16 +249,23 @@ export default function DashboardPage() {
   /* UI */
   return (
     <RequireAuth>
-      <div className="min-h-screen bg-[#050509] text-slate-100 flex">
+      <div className="relative min-h-screen bg-[#040407] text-slate-100 flex overflow-hidden">
+        {/* global ambient glow */}
+        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-violet-600/10 blur-[200px] pointer-events-none" />
+        <div className="absolute top-1/3 -right-40 w-[500px] h-[500px] bg-fuchsia-600/10 blur-[200px] pointer-events-none" />
+
         {/* SIDEBAR */}
         <aside
-          className={`hidden md:flex flex-col relative bg-gradient-to-b from-white/5 via-black to-black/90 transition-all duration-300 ${sidebarCollapsed ? "w-20" : "w-64"
-            }`}
+          className={`hidden md:flex flex-col relative backdrop-blur-xl
+bg-gradient-to-b from-[#0b0b18] via-[#0d0d1f] to-black
+border-r border-violet-500/10
+transition-all duration-300 ${sidebarCollapsed ? "w-20" : "w-64"}`}
+
         >
           <div
             className="absolute right-0 top-0 h-full w-[2px]
           bg-gradient-to-b from-violet-500/40 via-violet-300/20 to-transparent
-          shadow-[0_0_15px_rgba(139,92,246,0.45)]"
+          shadow-[0_0_15px_rgba(139,92,246,0.45)] z-50"
           />
 
           <div className="px-4 pt-4 pb-3">
@@ -267,7 +281,8 @@ export default function DashboardPage() {
             ) : (
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-2xl bg-violet-500/80 flex items-center justify-center text-xl font-black">
+                  <div className={`${cardBase} p-6`}
+                  >
                     C
                   </div>
                   <div>
@@ -342,7 +357,10 @@ export default function DashboardPage() {
         {/* MAIN */}
         <main className="flex-1 flex flex-col">
           {/* TOP BAR */}
-          <header className="relative px-4 md:px-8 py-4 flex items-center gap-4 bg-gradient-to-r from-white/5 via-black to-black/90 backdrop-blur-sm">
+          <header className="relative px-6 md:px-10 py-5 flex items-center gap-4
+bg-gradient-to-r from-[#0b0b18] via-[#0d0d1f] to-black
+border-b border-violet-500/10
+backdrop-blur-xl relative z-50">
             <div
               className="absolute bottom-0 left-0 w-full h-[2px]
           bg-gradient-to-r from-violet-500/30 via-fuchsia-500/30 to-transparent"
@@ -383,52 +401,100 @@ export default function DashboardPage() {
           </header>
 
           {/* CONTENT */}
-          <section className="flex-1 px-4 md:px-8 py-6 space-y-6">
+          <section className="flex-1 px-6 md:px-10 py-8 space-y-8">
+
             {/* Top row */}
-            <div className="grid gap-4 lg:grid-cols-[1.4fr,2.6fr]">
-              <div className="rounded-2xl border border-violet-500/20 bg-gradient-to-br from-violet-500/10 via-slate-950 to-black p-4">
-                <p className="text-xs font-medium text-violet-200">Quick Actions</p>
-                <h2 className="mt-1 text-sm font-semibold">Create and send invoices in seconds</h2>
+            <div className="grid gap-4 lg:grid-cols-12 items-stretch">
 
-                <div className="mt-4 flex gap-2">
-                  <button
-                    onClick={() => router.push("/invoice-editor")}
-                    className="inline-flex items-center gap-1.5 rounded-2xl bg-violet-500 text-xs font-medium px-3 py-1.5"
-                  >
-                    <Plus className="h-3 w-3" />
-                    New AI Invoice
-                  </button>
+              {/* Quick Actions Card */}
+              <div className="lg:col-span-5 flex">
+                <div className="flex-1 relative overflow-hidden rounded-3xl p-5 bg-gradient-to-br from-[#0f0f25] via-[#141432] to-[#1b1b40] border border-violet-500/25 transition-all duration-300">
 
-                  <button type="button" onClick={() => alert("Template coming soon")} className="text-[11px] px-3 py-1.5 rounded-2xl border border-white/10 bg-black/40">
-                    Import template
-                  </button>
+                  {/* Subtle background glow */}
+                  <div className="absolute -top-20 -right-20 w-72 h-72 bg-violet-500/20 blur-[120px] pointer-events-none" />
+
+                  <div className="relative z-10 flex flex-col gap-4">
+
+                    {/* LEFT CONTENT */}
+                    <div>
+                      <p className="text-xs font-medium tracking-wide text-violet-300 uppercase min-h-[32px]">
+                        Quick Actions
+                      </p>
+
+                      <h2 className="mt-2 text-xl font-semibold tracking-tight text-white">
+                        Create and send invoices in seconds
+                      </h2>
+
+                      <p className="mt-2 text-sm text-slate-400">
+                        Generate professional invoices instantly using AI or import an existing template.
+                      </p>
+                    </div>
+
+                    {/* BUTTONS */}
+                    <div className="flex flex-wrap gap-3">
+                      <button
+                        onClick={() => router.push("/invoice-editor")}
+                        className="flex items-center gap-2 px-6 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-sm font-semibold shadow-[0_0_30px_rgba(124,58,237,0.6)] transition-all duration-200 hover:scale-105"
+                      >
+                        <Plus className="h-4 w-4" />
+                        New AI Invoice
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => alert("Template coming soon")}
+                        className="px-6 py-3 rounded-xl border border-white/10 text-sm text-slate-300 hover:bg-white/5 transition-all duration-200"
+                      >
+                        Import Template
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-                <StatCard
-                  label="Total Revenue"
-                  value={formatCurrencyINR(stats.totalRevenue)}
-                  subLabel="From all invoices"
-                  trend="+ Live"
-                />
-                <StatCard
-                  label="Pending Invoices"
-                  value={String(stats.pendingCount)}
-                  subLabel={
-                    stats.pendingAmount ? `${formatCurrencyINR(stats.pendingAmount)} pending` : "No pending amount"
-                  }
-                  trend="Updated"
-                />
-                <StatCard label="Paid Invoices" value={String(stats.paidCount)} subLabel="Marked as paid" trend="Accurate" />
-                <StatCard label="Active Clients" value={String(stats.activeClients)} subLabel="Unique billed" trend="Growing" />
+              {/* Stats */}
+              <div className="lg:col-span-7 flex">
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 flex-1">
+
+                  <StatCard
+                    label="Total Revenue"
+                    value={formatCurrencyINR(stats.totalRevenue)}
+                    subLabel="From all invoices"
+                    trend="+ Live"
+                  />
+                  <StatCard
+                    label="Pending Invoices"
+                    value={String(stats.pendingCount)}
+                    subLabel={
+                      stats.pendingAmount
+                        ? `${formatCurrencyINR(stats.pendingAmount)} pending`
+                        : "No pending amount"
+                    }
+                    trend="Updated"
+                  />
+                  <StatCard
+                    label="Paid Invoices"
+                    value={String(stats.paidCount)}
+                    subLabel="Marked as paid"
+                    trend="Accurate"
+                  />
+                  <StatCard
+                    label="Active Clients"
+                    value={String(stats.activeClients)}
+                    subLabel="Unique billed"
+                    trend="Growing"
+                  />
+                </div>
               </div>
+
             </div>
+
 
             {/* Bottom row */}
             <div className="grid gap-4 lg:grid-cols-[1.6fr,2fr]">
               {/* Chart */}
-              <div className="rounded-2xl bg-gradient-to-br from-[#12121a] via-[#0c0c14] to-[#08080f] p-4 ring-1 ring-violet-600/15">
+              <div className={`${cardBase} ${cardHover} p-6`}
+              >
                 <div className="flex items-center justify-between mb-3">
                   <div>
                     <p className="text-xs text-slate-400">Revenue</p>
@@ -453,7 +519,7 @@ export default function DashboardPage() {
               </div>
 
               {/* Recent invoices */}
-              <div className="rounded-2xl bg-gradient-to-br from-[#12121a] via-[#0c0c14] to-[#08080f] p-4 ring-1 ring-violet-600/15 overflow-hidden">
+              <div className={`${cardBase} ${cardHover} p-6`}>
                 <div className="flex items-center justify-between mb-3">
                   <div>
                     <p className="text-xs text-slate-400">Recent invoices</p>
@@ -565,23 +631,66 @@ function SidebarItem({
   }
 
   return (
-    <Link href={href} className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs ${active ? "bg-violet-500/18 text-violet-100 border border-violet-500/40" : "text-slate-300 hover:bg-white/5"}`}>
+    <Link href={href} className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs ${active
+      ? "bg-gradient-to-r from-violet-600/20 to-fuchsia-600/20 text-white border border-violet-500/40 shadow-[0_0_20px_rgba(124,58,237,0.3)]"
+      : "text-slate-300 hover:bg-white/5"}`}>
       {icon}
       <span>{children}</span>
     </Link>
   );
 }
 
-function StatCard({ label, value, subLabel, trend }: { label: string; value: string; subLabel: string; trend: string; }) {
+function StatCard({
+  label,
+  value,
+  subLabel,
+  trend,
+}: {
+  label: string;
+  value: string;
+  subLabel: string;
+  trend: string;
+}) {
   return (
-    <div className="rounded-2xl bg-gradient-to-br from-[#12121a] via-[#0c0c14] to-[#08080f] p-4 ring-1 ring-violet-600/15 shadow">
-      <p className="text-[11px] text-slate-400">{label}</p>
-      <p className="mt-1 text-xl font-semibold">{value}</p>
-      <p className="mt-1 text-[11px] text-slate-500">{subLabel}</p>
-      <p className="mt-2 text-[11px] text-emerald-400">{trend}</p>
+    <div
+      className="
+      relative overflow-hidden rounded-2xl py-8 px-6
+      bg-gradient-to-br from-[#0c0c18] to-[#151530]
+      border border-violet-500/20
+      shadow-[0_0_40px_rgba(124,58,237,0.15)]
+      hover:shadow-[0_0_60px_rgba(124,58,237,0.25)]
+      transition-all duration-300 hover:-translate-y-1
+    "
+    >
+      {/* subtle glow */}
+      <div className="absolute -top-10 -right-10 w-40 h-40 bg-violet-500/10 blur-[90px]" />
+
+      <div className="relative z-10">
+        <p className="text-[11px] uppercase tracking-wide text-slate-400 whitespace-nowrap">
+          {label}
+        </p>
+
+        <p className="mt-3 text-2xl font-bold tracking-tight text-white">
+          {value}
+        </p>
+
+        <p className="mt-1 text-[11px] text-slate-500">
+          {subLabel}
+        </p>
+
+        <div className="mt-4 inline-flex items-center text-[11px] font-medium text-emerald-400">
+          {trend}
+        </div>
+      </div>
     </div>
+
+
+
+
+
   );
 }
+
 
 /* ----------------------------------------
    Printable HTML builder for PDF export
