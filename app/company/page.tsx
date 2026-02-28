@@ -119,10 +119,6 @@ export default function CompanyPage() {
         <div className="min-h-screen bg-[#050509] text-slate-100 px-6 py-8 relative overflow-hidden">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#7c3aed33,transparent_60%)] pointer-events-none" />
 
-            <p className="text-xs text-red-400">
-                LOGO URL: {company.logoURL || "none"}
-            </p>
-
             <button
                 onClick={() => router.push("/dashboard")}
                 className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-xl 

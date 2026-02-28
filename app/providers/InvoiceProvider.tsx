@@ -5,7 +5,6 @@ import { db } from "@/lib/firebase";
 import { useAuth } from "./AuthProvider";
 import {
   collection,
-  addDoc,
   onSnapshot,
   deleteDoc,
   doc,
@@ -16,6 +15,7 @@ import {
   getCountFromServer,
   serverTimestamp,
   Timestamp,
+  runTransaction,
 } from "firebase/firestore";
 
 /* ------------------------------
@@ -23,6 +23,7 @@ import {
 ------------------------------- */
 export type Invoice = {
   id: string;
+  invoiceNumber?: string;
   client: string;
   amount: string;
   status: "Paid" | "Pending" | "Overdue";
@@ -41,7 +42,6 @@ export type Invoice = {
     lineItems?: Array<{ desc: string; qty: number; rate: number }>;
   };
 };
-
 
 /* ------------------------------
    Context Setup
@@ -101,11 +101,11 @@ export function InvoiceProvider({ children }: { children: React.ReactNode }) {
     return () => unsub();
   }, [user]);
 
-  /* ➕ Add invoice with FREE limit enforcement */
+  /* ➕ Add invoice with SAFE sequential number */
   async function addInvoice(invoice: Omit<Invoice, "id" | "createdAt">) {
     if (!user) throw new Error("Not authenticated");
 
-    // 🔒 Enforce FREE plan limit
+    // 🔒 FREE plan limit enforcement
     if (plan === "free") {
       const { start, end } = getMonthRange();
 
@@ -123,13 +123,41 @@ export function InvoiceProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    const ref = collection(db, "users", user.uid, "invoices");
+    const invoicesRef = collection(db, "users", user.uid, "invoices");
+    const counterRef = doc(db, "users", user.uid, "meta", "counters");
+    const userRef = doc(db, "users", user.uid);
 
-    await addDoc(ref, {
-      ...invoice,
-      createdAt: serverTimestamp(),
+    const year = new Date().getFullYear();
+
+    await runTransaction(db, async (transaction) => {
+      const counterDoc = await transaction.get(counterRef);
+      const userDoc = await transaction.get(userRef);
+
+      const prefix = userDoc.exists()
+        ? userDoc.data()?.invoicePrefix || "INV"
+        : "INV";
+
+      let current = 0;
+
+      if (!counterDoc.exists()) {
+        current = 1;
+        transaction.set(counterRef, { invoiceCounter: current });
+      } else {
+        current = (counterDoc.data()?.invoiceCounter || 0) + 1;
+        transaction.update(counterRef, { invoiceCounter: current });
+      }
+
+      const padded = String(current).padStart(4, "0");
+      const invoiceNumber = `${prefix}-${year}-${padded}`;
+
+      const newInvoiceRef = doc(invoicesRef);
+
+      transaction.set(newInvoiceRef, {
+        ...invoice,
+        invoiceNumber,
+        createdAt: serverTimestamp(),
+      });
     });
-
   }
 
   /* ✏️ Update invoice */

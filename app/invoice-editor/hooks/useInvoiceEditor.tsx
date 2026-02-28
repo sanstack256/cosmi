@@ -7,6 +7,9 @@ import { db } from "@/lib/firebase";
 
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useInvoices, Invoice } from "@/app/providers/InvoiceProvider";
+import { runTransaction } from "firebase/firestore";
+
+
 
 /* ------------------------------------------
    Types
@@ -24,7 +27,7 @@ export type Company = {
 export type LineItem = {
   desc: string;
   qty: number;
-  rate: number;
+  rate: string; // ✅ changed to string
 };
 
 /* ------------------------------------------
@@ -39,15 +42,41 @@ export function formatCurrencyINR(value: number) {
   }).format(value);
 }
 
-function generateId() {
-  return `INV-${Math.floor(Math.random() * 9000 + 1000)}`;
-}
+
 
 /* ------------------------------------------
    Hook
 ------------------------------------------- */
 
 export function useInvoiceEditor() {
+  async function generateInvoiceId() {
+    const counterRef = doc(db, "meta", "counters");
+
+    const newId = await runTransaction(db, async (transaction) => {
+      const counterDoc = await transaction.get(counterRef);
+
+      if (!counterDoc.exists()) {
+        throw new Error("Counter document does not exist!");
+      }
+
+      const data = counterDoc.data();
+      const currentYear = new Date().getFullYear();
+
+      const currentNumber = data.invoiceCounter || 0;
+      const nextNumber = currentNumber + 1;
+
+      transaction.update(counterRef, {
+        invoiceCounter: nextNumber,
+      });
+
+      const padded = String(nextNumber).padStart(4, "0");
+
+      return `INV-${currentYear}-${padded}`;
+    });
+
+    return newId;
+  }
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const editId = searchParams?.get("id") ?? null;
@@ -74,12 +103,16 @@ export function useInvoiceEditor() {
     new Date().toISOString().slice(0, 10)
   );
   const [notes, setNotes] = useState("");
+
+  // ✅ Default rate as string
   const [lineItems, setLineItems] = useState<LineItem[]>([
-    { desc: "Design work", qty: 1, rate: 12500 },
+    { desc: "", qty: 1, rate: "" },
   ]);
 
-  const [previewId] = useState(() => generateId());
-  const idToUse = editingInvoice ? editingInvoice.id : previewId;
+
+  
+const idToUse = editingInvoice ? editingInvoice.id : "Generating...";
+
 
   /* ------------------------------------------
      Load invoice when editing
@@ -96,7 +129,7 @@ export function useInvoiceEditor() {
       if (!isNaN(parsed.getTime())) {
         setDate(parsed.toISOString().slice(0, 10));
       }
-    } catch {}
+    } catch { }
 
     setNotes(editingInvoice.meta?.notes ?? "");
 
@@ -105,7 +138,7 @@ export function useInvoiceEditor() {
         editingInvoice.meta.lineItems.map((li) => ({
           desc: li.desc,
           qty: li.qty,
-          rate: li.rate,
+          rate: String(li.rate ?? ""), // ✅ convert number → string
         }))
       );
     }
@@ -149,7 +182,12 @@ export function useInvoiceEditor() {
   ------------------------------------------- */
 
   const subtotal = useMemo(
-    () => lineItems.reduce((sum, it) => sum + it.qty * it.rate, 0),
+    () =>
+      lineItems.reduce(
+        (sum, it) =>
+          sum + it.qty * Number(it.rate || 0), // ✅ safe conversion
+        0
+      ),
     [lineItems]
   );
 
@@ -169,7 +207,7 @@ export function useInvoiceEditor() {
   function addLine() {
     setLineItems((prev) => [
       ...prev,
-      { desc: "New item", qty: 1, rate: 0 },
+      { desc: "New item", qty: 1, rate: "0" }, // ✅ string
     ]);
   }
 
@@ -199,14 +237,24 @@ export function useInvoiceEditor() {
   }, [invoices]);
 
   async function saveInvoice(showToast: (msg: string) => void) {
+  try {
+    // 🔒 Free plan limit
     if (!editingInvoice && plan === "free" && invoiceCountThisMonth >= 5) {
       showToast("Free plan allows only 5 invoices per month");
       return;
     }
 
+    // 🔒 Validation
     if (!client.trim()) {
       showToast("Client name is required");
       return;
+    }
+
+    // 🔑 Generate proper ID for new invoice
+    let finalId = idToUse;
+
+    if (!editingInvoice) {
+      finalId = await generateInvoiceId();
     }
 
     const formattedDate = new Date(date).toLocaleDateString("en-IN", {
@@ -216,45 +264,49 @@ export function useInvoiceEditor() {
     });
 
     const invoice: Invoice & { createdAt?: any; company?: Company } = {
-      id: idToUse,
+      id: finalId, // ✅ correct
       client,
       amount: formatCurrencyINR(total),
       status,
       date: formattedDate,
-      meta: { lineItems, notes },
+      meta: {
+        lineItems: lineItems.map((li) => ({
+          ...li,
+          rate: Number(li.rate || 0),
+        })),
+        notes,
+      },
       company,
       createdAt: editingInvoice
         ? (editingInvoice as any).createdAt
         : new Date(),
     };
 
-    try {
-      if (editingInvoice) {
-        await updateInvoice(idToUse, invoice);
-        showToast("Invoice updated");
-      } else {
-        await addInvoice(invoice);
-        showToast("Invoice saved");
-      }
-
-      setTimeout(() => router.push("/dashboard"), 900);
-    } catch (err) {
-      console.error(err);
-      showToast("Failed to save invoice");
+    if (editingInvoice) {
+      await updateInvoice(idToUse, invoice);
+      showToast("Invoice updated");
+    } else {
+      await addInvoice(invoice);
+      showToast("Invoice saved");
     }
+
+    setTimeout(() => router.push("/dashboard"), 900);
+  } catch (err) {
+    console.error(err);
+    showToast("Failed to save invoice");
   }
+}
+
 
   /* ------------------------------------------
      Public API
   ------------------------------------------- */
 
   return {
-    // flags
     loadingCompany,
     hasCompanyProfile,
     editingInvoice,
 
-    // invoice
     client,
     setClient,
     status,
@@ -265,21 +317,17 @@ export function useInvoiceEditor() {
     setNotes,
     lineItems,
 
-    // company
     company,
 
-    // totals
     subtotal,
     taxAmount,
     total,
 
-    // helpers
     updateLine,
     addLine,
     removeLine,
     saveInvoice,
 
-    // ids
     idToUse,
   };
 }

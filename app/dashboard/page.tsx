@@ -13,6 +13,7 @@ import { useAuth } from "../providers/AuthProvider";
 import { Building2 } from "lucide-react";
 
 
+
 const cardBase =
   "rounded-3xl bg-[#0b0b18]/80 backdrop-blur-xl border border-white/5 shadow-[0_0_40px_rgba(124,58,237,0.08)] transition-all duration-300";
 
@@ -25,6 +26,7 @@ const SignOutButton = dynamic(() => import("../components/SignOutButton"), { ssr
 
 
 
+
 import {
   Bell,
   Plus,
@@ -33,6 +35,17 @@ import {
   Users,
   LayoutDashboard,
 } from "lucide-react";
+
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  CartesianGrid,
+  Tooltip,
+} from "recharts";
+
+
 
 /* ----------------------------------------
    Helpers / small constants
@@ -247,7 +260,87 @@ export default function DashboardPage() {
   }
 
   /* UI */
+
+
+  const revenueChartData = React.useMemo(() => {
+    const now = new Date();
+    let monthsToShow = 6;
+
+    if (revenueRange === "12m") monthsToShow = 12;
+    if (revenueRange === "1m") monthsToShow = 1;
+
+    const buckets: {
+      month: number;
+      year: number;
+      value: number;
+    }[] = [];
+
+    // Generate months first
+    for (let i = monthsToShow - 1; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      buckets.push({
+        month: d.getMonth() + 1,
+        year: d.getFullYear(),
+        value: 0,
+      });
+    }
+
+    // Add invoice values
+    invoices.forEach((inv) => {
+      const date = new Date(inv.date);
+      if (isNaN(date.getTime())) return;
+
+      const month = date.getMonth() + 1;
+      const year = date.getFullYear();
+
+      const bucket = buckets.find(
+        (b) => b.month === month && b.year === year
+      );
+
+      if (bucket) {
+        const numericAmount = Number(
+          inv.amount.replace(/[^0-9.-]+/g, "")
+        );
+        bucket.value += numericAmount;
+      }
+    });
+
+    // Format labels
+    return buckets.map((b) => ({
+      label:
+        revenueRange === "12m"
+          ? new Date(b.year, b.month - 1).toLocaleString("en-IN", {
+            month: "short",
+          })
+          : new Date(b.year, b.month - 1).toLocaleString("en-IN", {
+            month: "short",
+            year: "numeric",
+          }),
+
+      value: b.value,
+    }));
+  }, [invoices, revenueRange]);
+
+
+
+
+  const calculateGrowthPercentage = (data: any[]) => {
+    if (data.length < 2) return 0;
+
+    const last = data[data.length - 1].value;
+    const prev = data[data.length - 2].value;
+
+    if (!prev) return 0;
+
+    return (((last - prev) / prev) * 100).toFixed(1);
+  };
+
+  const growth = calculateGrowthPercentage(revenueChartData);
+
+
+
   return (
+
     <RequireAuth>
       <div className="relative min-h-screen bg-[#040407] text-slate-100 flex overflow-hidden">
         {/* global ambient glow */}
@@ -316,7 +409,7 @@ transition-all duration-300 ${sidebarCollapsed ? "w-20" : "w-64"}`}
             </SidebarItem>
 
             <SidebarItem
-              href="/invoices"
+              href="/dashboard/invoices"
               icon={<FileText className="h-4 w-4" />}
               active={pathname?.startsWith("/invoices")}
               collapsed={sidebarCollapsed}
@@ -491,32 +584,101 @@ backdrop-blur-xl relative z-50">
 
 
             {/* Bottom row */}
-            <div className="grid gap-4 lg:grid-cols-[1.6fr,2fr]">
+            <div className="grid gap-6 lg:grid-cols-2 items-stretch">
+
               {/* Chart */}
-              <div className={`${cardBase} ${cardHover} p-6`}
-              >
-                <div className="flex items-center justify-between mb-3">
+              <div className="relative rounded-3xl p-8 bg-gradient-to-br from-[#0b0b18] to-[#14142f] border border-violet-500/20 shadow-[0_0_50px_rgba(124,58,237,0.15)] overflow-hidden">
+
+                <div className="flex items-center justify-between mb-4">
                   <div>
                     <p className="text-xs text-slate-400">Revenue</p>
-                    <h2 className="text-sm font-semibold">{revenueRange === "6m" ? "Last 6 months" : revenueRange === "12m" ? "Last 12 months" : "This month"}</h2>
+                    <h2 className="text-sm font-semibold">
+                      {revenueRange === "6m"
+                        ? "Last 6 months"
+                        : revenueRange === "12m"
+                          ? "Last 12 months"
+                          : "This month"}
+                    </h2>
+
+                    <p className={`text-xs mt-1 ${Number(growth) >= 0 ? "text-emerald-400" : "text-rose-400"
+                      }`}>
+                      {Number(growth) >= 0 ? "+" : ""}
+                      {growth}% vs previous period
+                    </p>
                   </div>
 
-                  <select value={revenueRange} onChange={(e) => setRevenueRange(e.target.value as any)} className="bg-black/50 border border-white/12 text-[11px] rounded-xl px-2 py-1">
+
+                  <select
+                    value={revenueRange}
+                    onChange={(e) => setRevenueRange(e.target.value as any)}
+                    className="bg-black/50 border border-white/12 text-[11px] rounded-xl px-2 py-1"
+                  >
                     <option value="6m">Last 6 months</option>
                     <option value="12m">Last 12 months</option>
                     <option value="1m">This month</option>
                   </select>
                 </div>
 
-                <div className="flex items-end gap-2 h-40 mt-3">
-                  {revenueDataByRange[revenueRange].map((v, i) => (
-                    <div key={i} className="flex-1 flex flex-col items-center">
-                      <div className="w-full rounded-t-xl bg-violet-500/80" style={{ height: `${v}%` }} />
-                      <span className="text-[10px] text-slate-500">{revenueRange === "1m" ? `W${i + 1}` : `M${i + 1}`}</span>
-                    </div>
-                  ))}
+                <div className="h-64 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart
+                      data={revenueChartData}
+                      margin={{ top: 10, right: 20, left: 20, bottom: 20 }}
+                    >
+                      <defs>
+                        <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.8} />
+                          <stop offset="100%" stopColor="#6366f1" stopOpacity={0.05} />
+                        </linearGradient>
+                      </defs>
+
+                      <CartesianGrid
+                        stroke="rgba(255,255,255,0.05)"
+                        vertical={false}
+                      />
+
+                      <XAxis
+                        dataKey="label"
+                        stroke="#94a3b8"
+                        fontSize={11}
+                        tickLine={false}
+                        axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
+                        interval={0}
+                        padding={{ left: 10, right: 10 }}
+                        minTickGap={20}
+                      />
+
+
+
+                      <Tooltip
+                        cursor={{ stroke: "#8b5cf6", strokeWidth: 1 }}
+                        contentStyle={{
+                          backgroundColor: "#0f0f1a",
+                          border: "1px solid rgba(124,58,237,0.4)",
+                          borderRadius: "14px",
+                          fontSize: "12px",
+                        }}
+                        formatter={(value: any) =>
+                          `₹${Number(value).toLocaleString("en-IN")}`
+                        }
+                      />
+
+                      <Area
+                        type="monotone"
+                        dataKey="value"
+                        stroke="#8b5cf6"
+                        strokeWidth={3}
+                        fill="url(#areaGradient)"
+                        dot={false}
+                        activeDot={{ r: 6 }}
+                        animationDuration={900}
+                      />
+                    </AreaChart>
+
+                  </ResponsiveContainer>
                 </div>
               </div>
+
 
               {/* Recent invoices */}
               <div className={`${cardBase} ${cardHover} p-6`}>
@@ -539,16 +701,17 @@ backdrop-blur-xl relative z-50">
                 </div>
 
                 {/* TABLE */}
-                <div className="overflow-x-auto">
-                  <table className="min-w-full text-xs">
+                <div className="w-full">
+                  <table className="w-full text-xs">
                     <thead>
                       <tr className="text-slate-400 border-b border-white/12">
-                        <th className="text-left py-2 pr-4">Invoice</th>
-                        <th className="text-left py-2 pr-4">Client</th>
-                        <th className="text-left py-2 pr-4">Amount</th>
-                        <th className="text-left py-2 pr-4">Status</th>
-                        <th className="text-left py-2 pr-4">Date</th>
-                        <th className="text-left py-2">Actions</th>
+                        <th className="py-2 pr-4 w-[110px]">Invoice</th>
+                        <th className="py-2 pr-4 w-[180px]">Client</th>
+                        <th className="py-2 pr-4 w-[100px]">Amount</th>
+                        <th className="py-2 pr-4 w-[110px]">Status</th>
+                        <th className="py-2 pr-4 w-[110px]">Date</th>
+                        <th className="py-2 pr-4 text-right w-[170px]">Actions</th>
+
                       </tr>
                     </thead>
 
@@ -561,8 +724,23 @@ backdrop-blur-xl relative z-50">
 
                       {filteredInvoices.map((inv) => (
                         <tr key={inv.id} className="border-b border-white/12 last:border-0 hover:bg-white/5">
-                          <td className="py-2 pr-4 font-mono text-[11px]">{inv.id}</td>
-                          <td className="py-2 pr-4">{inv.client}</td>
+                          <td className="py-2 pr-4 w-[120px]">
+
+                            <span className="inline-block max-w-[110px] truncate px-2 py-1 rounded-md bg-violet-500/10 border border-violet-500/20 text-violet-300 text-[10px] font-medium">
+                              {inv.invoiceNumber
+                                ? `#${inv.invoiceNumber.split("-").pop()}`
+
+                                : inv.id.slice(0, 6)}
+
+                            </span>
+
+                          </td>
+
+
+                          <td className="py-2 pr-4 truncate max-w-[180px]">
+                            {inv.client}
+                          </td>
+
                           <td className="py-2 pr-4">{inv.amount}</td>
                           <td className="py-2 pr-4">
                             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] ${statusColors[inv.status]}`}>
@@ -571,21 +749,25 @@ backdrop-blur-xl relative z-50">
                           </td>
                           <td className="py-2 text-slate-400 text-[11px]">{inv.date}</td>
 
-                          <td className="py-2 pr-4">
-                            <div className="flex gap-2">
-                              <Link href={`/invoice-editor?id=${inv.id}`} className="text-[11px] px-2 py-1 rounded-md border border-white/6 hover:bg-white/10">Edit</Link>
+                          <td className="py-2 pr-4 text-right">
+                            <div className="flex gap-2 items-center justify-end">
+
+
+
+                              <Link href={`/invoice-editor?id=${inv.id}`} className="text-[10px] px-2 py-1 rounded-md border border-white/10 hover:bg-white/10 whitespace-nowrap"
+                              >Edit</Link>
 
                               <button
                                 onClick={() => exportInvoiceAsPDF(inv)}
-                                className="text-[11px] px-2 py-1 rounded-md border border-white/6 hover:bg-white/10"
+                                className="text-[10px] px-2 py-1 rounded-md border border-white/10 hover:bg-white/10 whitespace-nowrap"
                                 title="Open print dialog (choose 'Save as PDF')"
                               >
-                                Download PDF
+                                PDF
                               </button>
 
                               <button
                                 onClick={() => shareInvoice(inv)}
-                                className="text-[11px] px-2 py-1 rounded-md border border-white/6 hover:bg-white/10"
+                                className="text-[10px] px-2 py-1 rounded-md border border-white/10 hover:bg-white/10 whitespace-nowrap"
                               >
                                 Share
                               </button>
@@ -740,6 +922,10 @@ function buildPrintableHTML({
     .join("");
 
   const notesHtml = notes ? `<div class="notes-box">${escapeHtml(notes)}</div>` : "";
+
+
+
+
 
   return `<!doctype html>
 <html>

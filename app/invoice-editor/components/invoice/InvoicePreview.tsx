@@ -17,7 +17,7 @@ type Company = {
 type LineItem = {
   desc: string;
   qty: number;
-  rate: number;
+  rate: string | number; // ✅ support string from editor
 };
 
 /* ------------------------------------------
@@ -55,6 +55,7 @@ type Props = {
   total: number;
   notes: string;
   company?: Company;
+  plan?: string;
 };
 
 export default function InvoicePreview({
@@ -67,18 +68,30 @@ export default function InvoicePreview({
   total,
   notes,
   company,
+  plan,
 }: Props) {
+
+
   return (
-    <div className="print-wrapper">
-      <div className="invoice-paper">
-        {/* HEADER */}
+  <div className="w-full  flex items-center justify-center py-10">
+
+    {/* SCALE WRAPPER */}
+<div className="origin-top scale-[0.78] xl:scale-[0.85] 2xl:scale-[0.9]">
+
+
+      {/* A4 PAPER */}
+<div className="bg-white w-[794px] min-h-[1123px] rounded-xl shadow-[0_30px_80px_rgba(0,0,0,0.4)] p-12 flex flex-col">
+
+        {/* ===== HEADER ===== */}
         <header className="flex justify-between items-start">
           <div>
-            <h1 className="text-2xl font-bold">INVOICE</h1>
+            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
+              INVOICE
+            </h1>
 
             {company?.name && (
-              <div className="mt-3 text-sm text-slate-600">
-                <div className="font-semibold text-slate-800">
+              <div className="mt-4 text-sm text-slate-800">
+                <div className="font-semibold text-slate-900">
                   {company.name}
                 </div>
                 {company.address && <div>{company.address}</div>}
@@ -86,92 +99,117 @@ export default function InvoicePreview({
               </div>
             )}
 
-            <div className="mt-4 text-sm text-slate-700">
-              <div className="font-semibold">Bill To:</div>
-              <div>{client || "Client Name"}</div>
+            <div className="mt-8 text-sm text-slate-900">
+              <div className="font-semibold">Bill To</div>
+              <div className="mt-1">{client || "Client Name"}</div>
             </div>
           </div>
 
-          <div className="text-right text-sm">
+          <div className="text-right text-sm text-slate-700">
             {company?.logoURL && (
               <img
                 src={company.logoURL}
                 alt="Company Logo"
-                className="h-12 mb-3 ml-auto object-contain"
+                className="h-16 mb-4 ml-auto object-contain"
               />
             )}
 
             <div>
-              <span className="text-slate-600">Invoice # </span>
+              <span className="text-slate-500">Invoice # </span>
               <strong>{id}</strong>
             </div>
 
-            <div className="text-slate-600">
+            <div className="mt-1 text-slate-500">
               {safeFormatDate(date)}
             </div>
           </div>
         </header>
 
-        {/* TABLE */}
-        <table className="w-full mt-10 text-sm border-collapse">
+        {/* ===== TABLE ===== */}
+        <table className="w-full mt-12 text-sm border-collapse">
           <thead>
-            <tr className="border-b border-slate-300 text-slate-600">
-              <th className="text-left pb-3">Description</th>
-              <th className="text-left pb-3">Qty</th>
-              <th className="text-left pb-3">Rate</th>
-              <th className="text-right pb-3">Amount</th>
+            <tr className="border-b border-slate-300 text-xs uppercase tracking-wide text-slate-500">
+              <th className="text-left pb-4">Description</th>
+              <th className="text-left pb-4">Qty</th>
+              <th className="text-left pb-4">Rate</th>
+              <th className="text-right pb-4">Amount</th>
             </tr>
           </thead>
 
           <tbody>
-            {lineItems.map((li, i) => (
-              <tr key={i} className="border-b border-slate-200">
-                <td className="py-4">{li.desc}</td>
-                <td>{li.qty}</td>
-                <td>{formatCurrencyINR(li.rate)}</td>
-                <td className="text-right">
-                  {formatCurrencyINR(li.qty * li.rate)}
-                </td>
-              </tr>
-            ))}
+            {lineItems.map((li, i) => {
+              const rateNumber = Number(li.rate || 0);
+              const amount = li.qty * rateNumber;
+
+              return (
+                <tr key={i} className="border-b border-slate-200">
+  <td className="py-4 text-slate-900">
+    {li.desc || "—"}
+  </td>
+
+  <td className="text-slate-900">
+    {li.qty}
+  </td>
+
+  <td className="text-slate-900">
+    {formatCurrencyINR(rateNumber)}
+  </td>
+
+  <td className="text-right font-medium text-slate-900">
+    {formatCurrencyINR(amount)}
+  </td>
+</tr>
+
+              );
+            })}
           </tbody>
         </table>
 
-        {/* TOTALS */}
-        <div className="mt-8 flex justify-end">
-          <div className="w-64 text-sm">
-            <div className="flex justify-between py-1">
-              <span className="text-slate-600">Subtotal</span>
-              <span>{formatCurrencyINR(subtotal)}</span>
-            </div>
+        {/* Push totals to bottom */}
+        <div className="mt-auto">
 
-            <div className="flex justify-between py-1">
-              <span className="text-slate-600">Tax</span>
-              <span>{formatCurrencyINR(taxAmount)}</span>
-            </div>
+          {/* ===== TOTALS ===== */}
+          <div className="flex justify-end mt-12">
+            <div className="w-80 text-sm">
+              <div className="flex justify-between py-2 text-slate-800">
+                <span>Subtotal</span>
+                <span>{formatCurrencyINR(subtotal)}</span>
+              </div>
 
-            <div className="flex justify-between py-3 border-t border-slate-300 text-lg font-bold">
-              <span>Total</span>
-              <span>{formatCurrencyINR(total)}</span>
+              <div className="flex justify-between py-2 text-slate-800">
+                <span>Tax</span>
+                <span>{formatCurrencyINR(taxAmount)}</span>
+              </div>
+
+              <div className="flex justify-between py-4 border-t border-slate-400 text-xl font-semibold text-slate-900">
+                <span>Total</span>
+                <span>{formatCurrencyINR(total)}</span>
+              </div>
             </div>
           </div>
+
+          {/* ===== NOTES ===== */}
+          {notes && (
+            <div className="mt-12 text-sm">
+              <div className="font-semibold mb-2">Notes</div>
+              <div className="border border-slate-300 rounded-md p-4">
+                {notes}
+              </div>
+            </div>
+          )}
+
+          {/* ===== FOOTER ===== */}
+          {plan === "free" && (
+            <footer className="mt-16 text-xs text-slate-400 text-center">
+              Generated by Cosmi
+            </footer>
+          )}
+
         </div>
 
-        {/* NOTES */}
-        {notes && (
-          <div className="mt-10 text-sm text-slate-700">
-            <div className="font-semibold mb-2">Notes</div>
-            <div className="bg-slate-100 p-4 rounded">
-              {notes}
-            </div>
-          </div>
-        )}
-
-        {/* FOOTER */}
-        <footer className="mt-16 text-xs text-slate-400 text-center">
-          Generated by Cosmi
-        </footer>
       </div>
     </div>
-  );
+  </div>
+);
+
 }
