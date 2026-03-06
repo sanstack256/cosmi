@@ -7,9 +7,6 @@ import { db } from "@/lib/firebase";
 
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useInvoices, Invoice } from "@/app/providers/InvoiceProvider";
-import { runTransaction } from "firebase/firestore";
-
-
 
 /* ------------------------------------------
    Types
@@ -27,7 +24,7 @@ export type Company = {
 export type LineItem = {
   desc: string;
   qty: number;
-  rate: string; // ✅ changed to string
+  rate: string;
 };
 
 /* ------------------------------------------
@@ -42,41 +39,11 @@ export function formatCurrencyINR(value: number) {
   }).format(value);
 }
 
-
-
 /* ------------------------------------------
    Hook
 ------------------------------------------- */
 
 export function useInvoiceEditor() {
-  async function generateInvoiceId() {
-    const counterRef = doc(db, "meta", "counters");
-
-    const newId = await runTransaction(db, async (transaction) => {
-      const counterDoc = await transaction.get(counterRef);
-
-      if (!counterDoc.exists()) {
-        throw new Error("Counter document does not exist!");
-      }
-
-      const data = counterDoc.data();
-      const currentYear = new Date().getFullYear();
-
-      const currentNumber = data.invoiceCounter || 0;
-      const nextNumber = currentNumber + 1;
-
-      transaction.update(counterRef, {
-        invoiceCounter: nextNumber,
-      });
-
-      const padded = String(nextNumber).padStart(4, "0");
-
-      return `INV-${currentYear}-${padded}`;
-    });
-
-    return newId;
-  }
-
   const router = useRouter();
   const searchParams = useSearchParams();
   const editId = searchParams?.get("id") ?? null;
@@ -98,21 +65,18 @@ export function useInvoiceEditor() {
   );
 
   const [client, setClient] = useState("");
-  const [status, setStatus] = useState<Invoice["status"]>("Pending");
+  const [paymentStatus, setPaymentStatus] =
+    useState<Invoice["paymentStatus"]>("unpaid");
+
   const [date, setDate] = useState(
     new Date().toISOString().slice(0, 10)
   );
+
   const [notes, setNotes] = useState("");
 
-  // ✅ Default rate as string
   const [lineItems, setLineItems] = useState<LineItem[]>([
     { desc: "", qty: 1, rate: "" },
   ]);
-
-
-  
-const idToUse = editingInvoice ? editingInvoice.id : "Generating...";
-
 
   /* ------------------------------------------
      Load invoice when editing
@@ -122,23 +86,23 @@ const idToUse = editingInvoice ? editingInvoice.id : "Generating...";
     if (!editingInvoice) return;
 
     setClient(editingInvoice.client);
-    setStatus(editingInvoice.status);
+    setPaymentStatus(editingInvoice.paymentStatus || "unpaid");
 
     try {
-      const parsed = new Date(editingInvoice.date);
+      const parsed = new Date(editingInvoice.dueDate);
       if (!isNaN(parsed.getTime())) {
         setDate(parsed.toISOString().slice(0, 10));
       }
-    } catch { }
+    } catch {}
 
     setNotes(editingInvoice.meta?.notes ?? "");
 
     if (editingInvoice.meta?.lineItems?.length) {
       setLineItems(
-        editingInvoice.meta.lineItems.map((li) => ({
+        editingInvoice.meta.lineItems.map((li: any) => ({
           desc: li.desc,
           qty: li.qty,
-          rate: String(li.rate ?? ""), // ✅ convert number → string
+          rate: String(li.rate ?? ""),
         }))
       );
     }
@@ -154,11 +118,9 @@ const idToUse = editingInvoice ? editingInvoice.id : "Generating...";
       return;
     }
 
-    const uid = user.uid;
-
     async function loadCompany() {
       try {
-        const ref = doc(db, "users", uid);
+        const ref = doc(db, "users", user!.uid);
         const snap = await getDoc(ref);
 
         if (snap.exists() && snap.data().company) {
@@ -184,8 +146,7 @@ const idToUse = editingInvoice ? editingInvoice.id : "Generating...";
   const subtotal = useMemo(
     () =>
       lineItems.reduce(
-        (sum, it) =>
-          sum + it.qty * Number(it.rate || 0), // ✅ safe conversion
+        (sum, it) => sum + it.qty * Number(it.rate || 0),
         0
       ),
     [lineItems]
@@ -195,7 +156,7 @@ const idToUse = editingInvoice ? editingInvoice.id : "Generating...";
   const total = subtotal + taxAmount;
 
   /* ------------------------------------------
-     Line items helpers
+     Line item helpers
   ------------------------------------------- */
 
   function updateLine(index: number, patch: Partial<LineItem>) {
@@ -207,7 +168,7 @@ const idToUse = editingInvoice ? editingInvoice.id : "Generating...";
   function addLine() {
     setLineItems((prev) => [
       ...prev,
-      { desc: "New item", qty: 1, rate: "0" }, // ✅ string
+      { desc: "New item", qty: 1, rate: "0" },
     ]);
   }
 
@@ -237,66 +198,53 @@ const idToUse = editingInvoice ? editingInvoice.id : "Generating...";
   }, [invoices]);
 
   async function saveInvoice(showToast: (msg: string) => void) {
-  try {
-    // 🔒 Free plan limit
-    if (!editingInvoice && plan === "free" && invoiceCountThisMonth >= 5) {
-      showToast("Free plan allows only 5 invoices per month");
-      return;
+    try {
+      if (!editingInvoice && plan === "free" && invoiceCountThisMonth >= 5) {
+        showToast("Free plan allows only 5 invoices per month");
+        return;
+      }
+
+      if (!client.trim()) {
+        showToast("Client name is required");
+        return;
+      }
+
+      const formattedDate = new Date(date).toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
+
+      const invoiceData: any = {
+        client,
+        amount: formatCurrencyINR(total),
+        paymentStatus,
+        date: formattedDate,
+        dueDate: date,
+        meta: {
+          lineItems: lineItems.map((li) => ({
+            ...li,
+            rate: Number(li.rate || 0),
+          })),
+          notes,
+        },
+        company,
+      };
+
+      if (editingInvoice) {
+        await updateInvoice(editingInvoice.id, invoiceData);
+        showToast("Invoice updated");
+      } else {
+        await addInvoice(invoiceData);
+        showToast("Invoice saved");
+      }
+
+      setTimeout(() => router.push("/dashboard"), 900);
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to save invoice");
     }
-
-    // 🔒 Validation
-    if (!client.trim()) {
-      showToast("Client name is required");
-      return;
-    }
-
-    // 🔑 Generate proper ID for new invoice
-    let finalId = idToUse;
-
-    if (!editingInvoice) {
-      finalId = await generateInvoiceId();
-    }
-
-    const formattedDate = new Date(date).toLocaleDateString("en-IN", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-
-    const invoice: Invoice & { createdAt?: any; company?: Company } = {
-      id: finalId, // ✅ correct
-      client,
-      amount: formatCurrencyINR(total),
-      status,
-      date: formattedDate,
-      meta: {
-        lineItems: lineItems.map((li) => ({
-          ...li,
-          rate: Number(li.rate || 0),
-        })),
-        notes,
-      },
-      company,
-      createdAt: editingInvoice
-        ? (editingInvoice as any).createdAt
-        : new Date(),
-    };
-
-    if (editingInvoice) {
-      await updateInvoice(idToUse, invoice);
-      showToast("Invoice updated");
-    } else {
-      await addInvoice(invoice);
-      showToast("Invoice saved");
-    }
-
-    setTimeout(() => router.push("/dashboard"), 900);
-  } catch (err) {
-    console.error(err);
-    showToast("Failed to save invoice");
   }
-}
-
 
   /* ------------------------------------------
      Public API
@@ -309,8 +257,8 @@ const idToUse = editingInvoice ? editingInvoice.id : "Generating...";
 
     client,
     setClient,
-    status,
-    setStatus,
+    paymentStatus,
+    setPaymentStatus,
     date,
     setDate,
     notes,
@@ -327,7 +275,5 @@ const idToUse = editingInvoice ? editingInvoice.id : "Generating...";
     addLine,
     removeLine,
     saveInvoice,
-
-    idToUse,
   };
 }

@@ -13,8 +13,8 @@ type Props = {
   client: string;
   setClient: (v: string) => void;
 
-  status: Invoice["status"];
-  setStatus: (v: Invoice["status"]) => void;
+  status: Invoice["paymentStatus"];
+  setStatus: (v: Invoice["paymentStatus"]) => void;
 
   date: string;
   setDate: (v: string) => void;
@@ -136,12 +136,15 @@ export default function InvoiceForm({
             <label className="text-xs text-slate-400">Status</label>
             <select
               value={status}
-              onChange={(e) => setStatus(e.target.value as Invoice["status"])}
+              onChange={(e) =>
+                setStatus(e.target.value as Invoice["paymentStatus"])
+              }
               className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50 transition"
             >
-              <option value="Pending">Pending</option>
-              <option value="Paid">Paid</option>
-              <option value="Overdue">Overdue</option>
+              <option value="unpaid">Unpaid</option>
+              <option value="paid">Paid</option>
+              <option value="partial">Partial</option>
+              <option value="overdue">Overdue</option>
             </select>
           </div>
         </div>
@@ -162,7 +165,7 @@ export default function InvoiceForm({
                   value={li.desc}
                   onChange={(e) =>
                     updateLine(idx, { desc: e.target.value })
-                    
+
                   }
                   className="col-span-6 rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-violet-500/50 transition"
                 />
@@ -207,56 +210,56 @@ export default function InvoiceForm({
         >
           + Add Line
         </button>
-<div className="bg-[#0f0f18] border border-white/5 rounded-2xl p-5 space-y-4">
+        <div className="bg-[#0f0f18] border border-white/5 rounded-2xl p-5 space-y-4">
 
-        {/* NOTES */}
-        <div className="mt-6 space-y-1">
-          <label className="text-xs text-slate-400">Notes</label>
-          <textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            rows={3}
-            className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-violet-500/50 transition"
-          />
-        </div>
+          {/* NOTES */}
+          <div className="mt-6 space-y-1">
+            <label className="text-xs text-slate-400">Notes</label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={3}
+              className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-violet-500/50 transition"
+            />
+          </div>
 
-        {/* FOOTER */}
-        <div className="mt-8 flex justify-between items-center no-print">
-          <div>
-            <div className="text-xs text-slate-400">Subtotal</div>
-            <div className="text-lg font-semibold text-white">
-              {subtotalFormatted}
+          {/* FOOTER */}
+          <div className="mt-8 flex justify-between items-center no-print">
+            <div>
+              <div className="text-xs text-slate-400">Subtotal</div>
+              <div className="text-lg font-semibold text-white">
+                {subtotalFormatted}
+              </div>
             </div>
+
+            <div className="flex gap-2">
+
+              <button
+                onClick={() => window.print()}
+                className="px-4 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-semibold"
+              >
+                Print
+              </button>
+
+              <button
+                onClick={() => window.print()}
+                className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+              >
+                Download PDF
+              </button>
+
+              <button
+                onClick={onSave}
+                disabled={saving}
+                className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-black font-semibold disabled:opacity-50"
+              >
+                {saving ? "Saving…" : "Save Invoice"}
+              </button>
+
+            </div>
+
           </div>
-
-          <div className="flex gap-2">
-
-            <button
-              onClick={() => window.print()}
-              className="px-4 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-semibold"
-            >
-              Print
-            </button>
-
-            <button
-              onClick={() => window.print()}
-              className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold"
-            >
-              Download PDF
-            </button>
-
-            <button
-              onClick={onSave}
-              disabled={saving}
-              className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-black font-semibold disabled:opacity-50"
-            >
-              {saving ? "Saving…" : "Save Invoice"}
-            </button>
-
-          </div>
-
         </div>
-      </div>
       </div>
     </>
   );

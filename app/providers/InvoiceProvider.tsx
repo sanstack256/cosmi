@@ -15,19 +15,39 @@ import {
   getCountFromServer,
   serverTimestamp,
   Timestamp,
+  setDoc,
   runTransaction,
+  arrayUnion,
 } from "firebase/firestore";
 
 /* ------------------------------
    Invoice Type
 ------------------------------- */
+
+export type InvoiceLifecycle =
+  | "draft"
+  | "issued"
+  | "cancelled";
+
+export type PaymentStatus =
+  | "unpaid"
+  | "paid"
+  | "partial"
+  | "overdue";
+
 export type Invoice = {
   id: string;
   invoiceNumber?: string;
   client: string;
   amount: string;
-  status: "Paid" | "Pending" | "Overdue";
+  lifecycle: InvoiceLifecycle;
+  paymentStatus: PaymentStatus;
+  createdAt?: any;
+  updatedAt?: any;
+  issuedAt?: any;
+  cancelledAt?: any;
   date: string;
+  dueDate: string;
 
   company?: {
     name?: string;
@@ -41,16 +61,25 @@ export type Invoice = {
     notes?: string;
     lineItems?: Array<{ desc: string; qty: number; rate: number }>;
   };
+
+  activity?: {
+    type: string;
+    timestamp: any;
+  }[];
+
 };
 
 /* ------------------------------
    Context Setup
 ------------------------------- */
+
 type InvoiceContextType = {
   invoices: Invoice[];
   addInvoice: (invoice: Omit<Invoice, "id" | "createdAt">) => Promise<void>;
   updateInvoice: (id: string, invoice: Partial<Invoice>) => Promise<void>;
   removeInvoice: (id: string) => Promise<void>;
+  issueInvoice: (id: string) => Promise<void>;
+  cancelInvoice: (id: string) => Promise<void>;
 };
 
 const InvoiceContext = createContext<InvoiceContextType | undefined>(undefined);
@@ -64,6 +93,7 @@ export function useInvoices() {
 /* ------------------------------
    Helpers
 ------------------------------- */
+
 const FREE_LIMIT = 5;
 
 function getMonthRange() {
@@ -73,14 +103,20 @@ function getMonthRange() {
   return { start, end };
 }
 
+function pad(num: number) {
+  return String(num).padStart(4, "0");
+}
+
 /* ------------------------------
    Provider Component
 ------------------------------- */
+
 export function InvoiceProvider({ children }: { children: React.ReactNode }) {
   const { user, plan } = useAuth();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
 
   /* 🔄 Realtime invoices */
+
   useEffect(() => {
     if (!user) {
       setInvoices([]);
@@ -101,11 +137,11 @@ export function InvoiceProvider({ children }: { children: React.ReactNode }) {
     return () => unsub();
   }, [user]);
 
-  /* ➕ Add invoice with SAFE sequential number */
-  async function addInvoice(invoice: Omit<Invoice, "id" | "createdAt">) {
+  /* ➕ Create Draft */
+
+  async function addInvoice(invoice: Omit<Invoice, "id">) {
     if (!user) throw new Error("Not authenticated");
 
-    // 🔒 FREE plan limit enforcement
     if (plan === "free") {
       const { start, end } = getMonthRange();
 
@@ -124,55 +160,129 @@ export function InvoiceProvider({ children }: { children: React.ReactNode }) {
     }
 
     const invoicesRef = collection(db, "users", user.uid, "invoices");
-    const counterRef = doc(db, "users", user.uid, "meta", "counters");
-    const userRef = doc(db, "users", user.uid);
+    const newInvoiceRef = doc(invoicesRef);
 
-    const year = new Date().getFullYear();
+    await setDoc(newInvoiceRef, {
+      ...invoice,
+
+      lifecycle: "draft",
+      paymentStatus: "unpaid",
+      invoiceNumber: null,
+
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      issuedAt: null,
+      cancelledAt: null,
+
+      activity: [
+        {
+          type: "draft_created",
+          timestamp: new Date(),
+        },
+      ],
+    });
+  }
+
+  /* ✏️ Update Draft */
+
+  async function updateInvoice(id: string, invoice: Partial<Invoice>) {
+    if (!user) throw new Error("Not authenticated");
+
+    const ref = doc(db, "users", user.uid, "invoices", id);
+    await updateDoc(ref, {
+      ...invoice,
+      updatedAt: serverTimestamp(),
+    } as any);
+  }
+
+  /* ❌ Delete Draft */
+
+  async function removeInvoice(id: string) {
+    if (!user) throw new Error("Not authenticated");
+
+    const ref = doc(db, "users", user.uid, "invoices", id);
+    await deleteDoc(ref);
+  }
+
+
+
+  async function issueInvoice(id: string) {
+    if (!user) throw new Error("Not authenticated");
+
+    const counterRef = doc(db, "users", user.uid, "meta", "counters");
+    const invoiceRef = doc(db, "users", user.uid, "invoices", id);
 
     await runTransaction(db, async (transaction) => {
+
       const counterDoc = await transaction.get(counterRef);
-      const userDoc = await transaction.get(userRef);
+      const invoiceDoc = await transaction.get(invoiceRef);
 
-      const prefix = userDoc.exists()
-        ? userDoc.data()?.invoicePrefix || "INV"
-        : "INV";
-
-      let current = 0;
-
-      if (!counterDoc.exists()) {
-        current = 1;
-        transaction.set(counterRef, { invoiceCounter: current });
-      } else {
-        current = (counterDoc.data()?.invoiceCounter || 0) + 1;
-        transaction.update(counterRef, { invoiceCounter: current });
+      if (!invoiceDoc.exists()) {
+        throw new Error("Invoice not found");
       }
 
-      const padded = String(current).padStart(4, "0");
-      const invoiceNumber = `${prefix}-${year}-${padded}`;
+      const invoiceData = invoiceDoc.data();
 
-      const newInvoiceRef = doc(invoicesRef);
+      if (invoiceData.lifecycle !== "draft") {
+        throw new Error("Only drafts can be issued");
+      }
 
-      transaction.set(newInvoiceRef, {
-        ...invoice,
+      let counter = 1;
+
+      if (counterDoc.exists()) {
+        counter = (counterDoc.data().invoiceCounter || 0) + 1;
+      }
+
+      transaction.set(counterRef, { invoiceCounter: counter }, { merge: true });
+
+      const year = new Date().getFullYear();
+      const padded = String(counter).padStart(4, "0");
+
+      const invoiceNumber = `INV-${year}-${padded}`;
+
+      transaction.update(invoiceRef, {
         invoiceNumber,
-        createdAt: serverTimestamp(),
+        lifecycle: "issued",
+        issuedAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+
+        activity: arrayUnion({
+          type: "issued",
+          timestamp: new Date(),
+        }),
+
       });
     });
   }
 
-  /* ✏️ Update invoice */
-  async function updateInvoice(id: string, invoice: Partial<Invoice>) {
+  async function cancelInvoice(id: string) {
     if (!user) throw new Error("Not authenticated");
+
+    const invoice = invoices.find((i) => i.id === id);
+    if (!invoice) throw new Error("Invoice not found");
+
+    // 🚫 Prevent cancelling paid invoices
+    if (invoice.paymentStatus === "paid") {
+      throw new Error("PAID_INVOICE_CANNOT_BE_CANCELLED");
+    }
+
     const ref = doc(db, "users", user.uid, "invoices", id);
-    await updateDoc(ref, invoice as any);
+
+    await updateDoc(ref, {
+      lifecycle: "cancelled",
+      cancelledAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+
+      activity: arrayUnion({
+        type: "cancelled",
+        timestamp: new Date(),
+
+        
+      }),
+    });
   }
 
-  /* ❌ Delete invoice */
-  async function removeInvoice(id: string) {
-    if (!user) throw new Error("Not authenticated");
-    const ref = doc(db, "users", user.uid, "invoices", id);
-    await deleteDoc(ref);
-  }
+
 
   return (
     <InvoiceContext.Provider
@@ -181,9 +291,15 @@ export function InvoiceProvider({ children }: { children: React.ReactNode }) {
         addInvoice,
         updateInvoice,
         removeInvoice,
+        issueInvoice,
+        cancelInvoice,
+        
       }}
     >
       {children}
     </InvoiceContext.Provider>
+
+    
   );
 }
+

@@ -1,16 +1,13 @@
 "use client";
 
-import UserMenu from "@/app/components/UserMenu";
 import RequireAuth from "@/app/components/RequireAuth";
 import React, { useMemo, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useInvoices, Invoice } from "../providers/InvoiceProvider";
 import dynamic from "next/dynamic"; // <- added
 import { useAuth } from "../providers/AuthProvider";
-import { Building2 } from "lucide-react";
+type InvoiceStatus = "Paid" | "Pending" | "Overdue" | "Draft";
 
 
 
@@ -51,15 +48,21 @@ import {
    Helpers / small constants
 ----------------------------------------- */
 
-type InvoiceStatus = "Paid" | "Pending" | "Overdue";
+function getInvoiceStatus(inv: Invoice): InvoiceStatus {
+  if (inv.lifecycle === "draft") return "Draft";
+
+  if (inv.paymentStatus === "paid") return "Paid";
+
+  if (inv.paymentStatus === "overdue") return "Overdue";
+
+  return "Pending";
+}
 
 const statusColors: Record<InvoiceStatus, string> = {
-  Paid:
-    "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shadow-[0_6px_18px_rgba(16,185,129,0.08)]",
-  Pending:
-    "bg-amber-500/10 text-amber-300 border border-amber-500/30 shadow-[0_6px_18px_rgba(251,191,36,0.07)]",
-  Overdue:
-    "bg-rose-500/10 text-rose-400 border border-rose-500/30 shadow-[0_6px_18px_rgba(244,63,94,0.08)]",
+  Paid: "bg-green-500/10 text-green-400",
+  Pending: "bg-yellow-500/10 text-yellow-400",
+  Overdue: "bg-red-500/10 text-red-400",
+  Draft: "bg-gray-500/10 text-gray-400",
 };
 
 const revenueDataByRange: Record<"6m" | "12m" | "1m", number[]> = {
@@ -99,9 +102,8 @@ function isThisMonth(date?: any) {
 ----------------------------------------- */
 
 export default function DashboardPage() {
-  const pathname = usePathname();
   const router = useRouter();
-  const { invoices } = useInvoices();
+  const { invoices, issueInvoice } = useInvoices();
   const { plan } = useAuth();
 
   const invoiceCountThisMonth = useMemo(() => {
@@ -127,7 +129,7 @@ export default function DashboardPage() {
     "6m"
   );
 
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
 
   /* Compute stats */
   const stats = useMemo(() => {
@@ -142,10 +144,11 @@ export default function DashboardPage() {
       totalRevenue += amt;
       clientSet.add(inv.client);
 
-      if (inv.status === "Pending") {
+      if (getInvoiceStatus(inv) === "Pending") {
         pendingCount++;
         pendingAmount += amt;
-      } else if (inv.status === "Paid") {
+      }
+      else if (getInvoiceStatus(inv) === "Paid") {
         paidCount++;
       }
     });
@@ -169,8 +172,9 @@ export default function DashboardPage() {
         inv.client.toLowerCase().includes(q);
 
       const matchesStatus =
-        statusFilter === "All" ? true : inv.status === statusFilter;
-
+        statusFilter === "All"
+          ? true
+          : getInvoiceStatus(inv) === statusFilter;
       return matchesSearch && matchesStatus;
     });
   }, [invoices, search, statusFilter]);
@@ -287,7 +291,9 @@ export default function DashboardPage() {
 
     // Add invoice values
     invoices.forEach((inv) => {
-      const date = new Date(inv.date);
+      const date = inv.createdAt?.toDate
+        ? inv.createdAt.toDate()
+        : new Date(inv.createdAt);
       if (isNaN(date.getTime())) return;
 
       const month = date.getMonth() + 1;
@@ -347,154 +353,14 @@ export default function DashboardPage() {
         <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-violet-600/10 blur-[200px] pointer-events-none" />
         <div className="absolute top-1/3 -right-40 w-[500px] h-[500px] bg-fuchsia-600/10 blur-[200px] pointer-events-none" />
 
-        {/* SIDEBAR */}
-        <aside
-          className={`hidden md:flex flex-col relative backdrop-blur-xl
-bg-gradient-to-b from-[#0b0b18] via-[#0d0d1f] to-black
-border-r border-violet-500/10
-transition-all duration-300 ${sidebarCollapsed ? "w-20" : "w-64"}`}
 
-        >
-          <div
-            className="absolute right-0 top-0 h-full w-[2px]
-          bg-gradient-to-b from-violet-500/40 via-violet-300/20 to-transparent
-          shadow-[0_0_15px_rgba(139,92,246,0.45)] z-50"
-          />
-
-          <div className="px-4 pt-4 pb-3">
-            {sidebarCollapsed ? (
-              <div className="flex items-center justify-center">
-                <button
-                  onClick={() => setSidebarCollapsed(false)}
-                  className="h-10 w-10 rounded-full bg-black/40 border border-violet-500/18 flex items-center justify-center text-violet-300 hover:bg-black/60"
-                >
-                  <ChevronRight className="h-5 w-5" />
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className={`${cardBase} p-6`}
-                  >
-                    C
-                  </div>
-                  <div>
-                    <div className="text-sm font-semibold">Cosmi</div>
-                    <div className="text-xs text-slate-400">AI Invoice Dashboard</div>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setSidebarCollapsed(true)}
-                  className="h-10 w-10 rounded-full bg-black/40 border border-violet-500/18 
-             flex items-center justify-center text-violet-300 hover:bg-black/60"
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                </button>
-
-              </div>
-            )}
-
-            <div className="mt-3 w-full h-[2px] bg-gradient-to-r from-violet-500/40 via-violet-300/20 to-transparent" />
-          </div>
-
-          <nav className="flex-1 px-2 py-4 space-y-1">
-            <SidebarItem
-              href="/dashboard"
-              icon={<LayoutDashboard className="h-4 w-4" />}
-              active={pathname === "/dashboard"}
-              collapsed={sidebarCollapsed}
-            >
-              Overview
-            </SidebarItem>
-
-            <SidebarItem
-              href="/dashboard/invoices"
-              icon={<FileText className="h-4 w-4" />}
-              active={pathname?.startsWith("/invoices")}
-              collapsed={sidebarCollapsed}
-            >
-              Invoices
-            </SidebarItem>
-
-            <SidebarItem
-              href="/clients"
-              icon={<Users className="h-4 w-4" />}
-              active={pathname?.startsWith("/clients")}
-              collapsed={sidebarCollapsed}
-            >
-              Clients
-            </SidebarItem>
-
-            <SidebarItem
-              href="/settings"
-              icon={<Settings className="h-4 w-4" />}
-              active={pathname?.startsWith("/settings")}
-              collapsed={sidebarCollapsed}
-            >
-              Settings
-            </SidebarItem>
-
-            <SidebarItem
-              href="/company"
-              icon={<Building2 className="h-4 w-4" />}
-              active={pathname?.startsWith("/company")}
-              collapsed={sidebarCollapsed}
-            >
-              Company
-            </SidebarItem>
-
-          </nav>
-        </aside>
 
         {/* MAIN */}
         <main className="flex-1 flex flex-col">
-          {/* TOP BAR */}
-          <header className="relative px-6 md:px-10 py-5 flex items-center gap-4
-bg-gradient-to-r from-[#0b0b18] via-[#0d0d1f] to-black
-border-b border-violet-500/10
-backdrop-blur-xl relative z-50">
-            <div
-              className="absolute bottom-0 left-0 w-full h-[2px]
-          bg-gradient-to-r from-violet-500/30 via-fuchsia-500/30 to-transparent"
-            />
 
-            <div>
-              <h1 className="text-lg md:text-xl font-semibold">Dashboard</h1>
-              <p className="text-xs md:text-sm text-slate-400">
-                {plan === "free"
-                  ? `${invoiceCountThisMonth}/5 invoices used this month`
-                  : "Unlimited invoices"}
-              </p>
-
-            </div>
-
-            <div className="flex-1" />
-
-            <div className="hidden sm:flex items-center gap-3">
-              <div className="relative">
-                <Search className="h-4 w-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  placeholder="Search invoices..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="bg-slate-950/80 border border-white/12 rounded-xl pl-9 pr-3 py-1.5 text-xs outline-none"
-                />
-              </div>
-
-              <button className="relative rounded-xl p-2 bg-slate-950/80 border border-white/12">
-                <Bell className="h-4 w-4" />
-                <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-rose-500 text-[10px] flex items-center justify-center">
-                  3
-                </span>
-              </button>
-
-              <UserMenu />
-            </div>
-          </header>
 
           {/* CONTENT */}
-          <section className="flex-1 px-6 md:px-10 py-8 space-y-8">
+          <div className="space-y-8">
 
             {/* Top row */}
             <div className="grid gap-4 lg:grid-cols-12 items-stretch">
@@ -687,7 +553,7 @@ backdrop-blur-xl relative z-50">
                     <p className="text-xs text-slate-400">Recent invoices</p>
                     <h2 className="text-sm font-semibold">Last activity</h2>
                   </div>
-                  <Link href="/invoices" className="text-[11px] text-violet-300 hover:text-violet-200">View all</Link>
+                  <Link href="/dashboard/invoices" className="text-[11px] text-violet-300 hover:text-violet-200">View all</Link>
                 </div>
 
                 {/* Filters */}
@@ -728,7 +594,7 @@ backdrop-blur-xl relative z-50">
 
                             <span className="inline-block max-w-[110px] truncate px-2 py-1 rounded-md bg-violet-500/10 border border-violet-500/20 text-violet-300 text-[10px] font-medium">
                               {inv.invoiceNumber
-                                ? `#${inv.invoiceNumber.split("-").pop()}`
+                                ? inv.invoiceNumber
 
                                 : inv.id.slice(0, 6)}
 
@@ -743,8 +609,8 @@ backdrop-blur-xl relative z-50">
 
                           <td className="py-2 pr-4">{inv.amount}</td>
                           <td className="py-2 pr-4">
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] ${statusColors[inv.status]}`}>
-                              {inv.status}
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] ${statusColors[getInvoiceStatus(inv)]}`}>
+                              {getInvoiceStatus(inv)}
                             </span>
                           </td>
                           <td className="py-2 text-slate-400 text-[11px]">{inv.date}</td>
@@ -752,7 +618,14 @@ backdrop-blur-xl relative z-50">
                           <td className="py-2 pr-4 text-right">
                             <div className="flex gap-2 items-center justify-end">
 
-
+                              {inv.lifecycle === "draft" && (
+                                <button
+                                  onClick={() => issueInvoice(inv.id)}
+                                  className="text-[10px] px-2 py-1 rounded-md border border-violet-500/30 text-violet-300 hover:bg-violet-500/10 whitespace-nowrap"
+                                >
+                                  Issue
+                                </button>
+                              )}
 
                               <Link href={`/invoice-editor?id=${inv.id}`} className="text-[10px] px-2 py-1 rounded-md border border-white/10 hover:bg-white/10 whitespace-nowrap"
                               >Edit</Link>
@@ -780,7 +653,7 @@ backdrop-blur-xl relative z-50">
                 </div>
               </div>
             </div>
-          </section>
+          </div>
         </main>
       </div>
     </RequireAuth>
@@ -791,36 +664,7 @@ backdrop-blur-xl relative z-50">
    Subcomponents
 ----------------------------------------- */
 
-function SidebarItem({
-  children,
-  icon,
-  href,
-  active,
-  collapsed,
-}: {
-  children: React.ReactNode;
-  icon: React.ReactNode;
-  href: string;
-  active?: boolean;
-  collapsed?: boolean;
-}) {
-  if (collapsed) {
-    return (
-      <Link href={href} title={typeof children === "string" ? children : undefined} className={`w-full flex items-center justify-center py-3 rounded-xl text-xs ${active ? "bg-violet-500/14 text-violet-100" : "text-slate-300 hover:bg-white/5"}`}>
-        {icon}
-      </Link>
-    );
-  }
 
-  return (
-    <Link href={href} className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs ${active
-      ? "bg-gradient-to-r from-violet-600/20 to-fuchsia-600/20 text-white border border-violet-500/40 shadow-[0_0_20px_rgba(124,58,237,0.3)]"
-      : "text-slate-300 hover:bg-white/5"}`}>
-      {icon}
-      <span>{children}</span>
-    </Link>
-  );
-}
 
 function StatCard({
   label,
