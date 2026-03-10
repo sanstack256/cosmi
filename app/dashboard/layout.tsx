@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+
 import {
   ChevronLeft,
   ChevronRight,
@@ -40,9 +41,8 @@ export default function DashboardLayout({
           className={`hidden md:flex flex-col relative backdrop-blur-xl
           bg-gradient-to-b from-[#0b0b18] via-[#0d0d1f] to-black
           border-r border-violet-500/10
-          transition-all duration-300 ${
-            sidebarCollapsed ? "w-20" : "w-64"
-          }`}
+          transition-all duration-300 ${sidebarCollapsed ? "w-20" : "w-64"
+            }`}
         >
           {/* Collapse line glow */}
           <div
@@ -164,10 +164,14 @@ export default function DashboardLayout({
             <div className="hidden sm:flex items-center gap-3">
               <div className="relative">
                 <Search className="h-4 w-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  placeholder="Search..."
-                  className="bg-slate-950/80 border border-white/12 rounded-xl pl-9 pr-3 py-1.5 text-xs outline-none"
-                />
+
+                {!pathname.startsWith("/dashboard/invoices") && (
+
+                  <input
+                    placeholder="Search..."
+                    className="bg-slate-950/80 border border-white/12 rounded-xl pl-9 pr-3 py-1.5 text-xs outline-none"
+                  />
+                )}
               </div>
 
               <button className="relative rounded-xl p-2 bg-slate-950/80 border border-white/12">
@@ -207,11 +211,10 @@ function SidebarItem({
     return (
       <Link
         href={href}
-        className={`w-full flex items-center justify-center py-3 rounded-xl text-xs ${
-          active
+        className={`w-full flex items-center justify-center py-3 rounded-xl text-xs ${active
             ? "bg-violet-500/14 text-violet-100"
             : "text-slate-300 hover:bg-white/5"
-        }`}
+          }`}
       >
         {icon}
       </Link>
@@ -221,11 +224,10 @@ function SidebarItem({
   return (
     <Link
       href={href}
-      className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs ${
-        active
+      className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs ${active
           ? "bg-gradient-to-r from-violet-600/20 to-fuchsia-600/20 text-white border border-violet-500/40 shadow-[0_0_20px_rgba(124,58,237,0.3)]"
           : "text-slate-300 hover:bg-white/5"
-      }`}
+        }`}
     >
       {icon}
       <span>{children}</span>

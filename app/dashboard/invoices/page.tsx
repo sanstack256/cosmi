@@ -18,6 +18,7 @@ export default function InvoicesPage() {
   const { invoices, cancelInvoice, updateInvoice } = useInvoices();
   const searchParams = useSearchParams();
 
+
   const statusParam = searchParams.get("status");
   const sortParam = searchParams.get("sort");
   const orderParam = searchParams.get("order");
@@ -49,6 +50,7 @@ export default function InvoicesPage() {
     useState<"asc" | "desc">(initialOrder);
 
   const [selected, setSelected] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [cancelTarget, setCancelTarget] = useState<string | null>(null);
 
@@ -78,29 +80,31 @@ export default function InvoicesPage() {
       if (
         inv.lifecycle === "issued" &&
         inv.paymentStatus !== "paid" &&
+        inv.paymentStatus !== "partial" &&
         inv.paymentStatus !== "overdue" &&
         inv.dueDate &&
         new Date(inv.dueDate) < new Date()
       ) {
         updateInvoice(inv.id, { paymentStatus: "overdue" });
       }
+
     });
   }, [invoices]);
 
 
   useEffect(() => {
-  const handleEsc = (e: KeyboardEvent) => {
-    if (e.key === "Escape") {
-      setCancelTarget(null);
-    }
-  };
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setCancelTarget(null);
+      }
+    };
 
-  window.addEventListener("keydown", handleEsc);
+    window.addEventListener("keydown", handleEsc);
 
-  return () => {
-    window.removeEventListener("keydown", handleEsc);
-  };
-}, []);
+    return () => {
+      window.removeEventListener("keydown", handleEsc);
+    };
+  }, []);
 
   /* ---------- Stats ---------- */
 
@@ -139,12 +143,31 @@ export default function InvoicesPage() {
     {}
   );
 
-  const filteredInvoices =
+  let filteredInvoices =
     statusFilter === "All"
       ? [...invoices]
       : invoices.filter(
         (inv) => inv.paymentStatus === statusFilter
       );
+
+  /* 🔎 Search Filter */
+
+  if (searchQuery.trim() !== "") {
+    const q = searchQuery.toLowerCase();
+
+    filteredInvoices = filteredInvoices.filter((inv) => {
+
+      const client = inv.client?.toLowerCase() || "";
+      const number = inv.invoiceNumber?.toLowerCase() || "";
+      const amount = String(inv.amount);
+
+      return (
+        client.includes(q) ||
+        number.includes(q) ||
+        amount.includes(q)
+      );
+    });
+  }
 
   filteredInvoices.sort((a, b) => {
     let valA: any = a[sortKey];
@@ -178,13 +201,28 @@ export default function InvoicesPage() {
     <div className="text-white">
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
+
         <h1 className="text-3xl font-semibold">Invoices</h1>
-        <button
-          onClick={() => router.push("/invoice-editor")}
-          className="bg-[#7c3aed] hover:bg-[#6d28d9] px-5 py-2 rounded-xl font-medium transition"
-        >
-          + Create Invoice
-        </button>
+
+        <div className="flex items-center gap-3">
+
+          {/* Search */}
+          <input
+            type="text"
+            placeholder="Search invoices..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="bg-[#0f1020] border border-white/10 rounded-xl px-4 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-violet-500"
+          />
+
+          <button
+            onClick={() => router.push("/invoice-editor")}
+            className="bg-[#7c3aed] hover:bg-[#6d28d9] px-5 py-2 rounded-xl font-medium transition"
+          >
+            + Create Invoice
+          </button>
+
+        </div>
       </div>
 
       {/* KPI Row */}
@@ -280,6 +318,7 @@ export default function InvoicesPage() {
                       )}`}
                     >
                       <option value="unpaid">Unpaid</option>
+                      <option value="partial">Partial</option>
                       <option value="paid">Paid</option>
                       <option value="overdue">Overdue</option>
                     </select>
@@ -290,7 +329,7 @@ export default function InvoicesPage() {
                   className="px-6 py-4"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  {invoice.lifecycle === "issued" && invoice.paymentStatus !== "paid" &&(
+                  {invoice.lifecycle === "issued" && invoice.paymentStatus !== "paid" && (
                     <button
                       onClick={() => setCancelTarget(invoice.id)}
                       className="text-xs px-3 py-1 rounded-md border border-rose-500/30 text-rose-300 hover:bg-rose-500/10"
