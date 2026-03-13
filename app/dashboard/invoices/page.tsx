@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useInvoices } from "@/app/providers/InvoiceProvider";
+import { Invoice, useInvoices } from "@/app/providers/InvoiceProvider";
 import { useState, useEffect } from "react";
 
 type PaymentStatus = "unpaid" | "paid" | "overdue";
@@ -15,7 +15,7 @@ function parseAmount(value: any): number {
 
 export default function InvoicesPage() {
   const router = useRouter();
-  const { invoices, cancelInvoice, updateInvoice } = useInvoices();
+  const { invoices, cancelInvoice, updateInvoice, removeInvoice } = useInvoices();
   const searchParams = useSearchParams();
 
 
@@ -53,6 +53,7 @@ export default function InvoicesPage() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const [cancelTarget, setCancelTarget] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Invoice | null>(null)
 
   function updateQuery(params: {
     status?: string;
@@ -336,6 +337,18 @@ export default function InvoicesPage() {
                     >
                       Cancel
                     </button>
+
+                  )}
+                  {invoice.lifecycle === "draft" && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setDeleteTarget(invoice)
+                      }}
+                      className="px-3 py-1 rounded-lg border border-rose-500/30 text-rose-400 hover:bg-rose-500/10 transition text-sm"
+                    >
+                      Delete
+                    </button>
                   )}
                 </td>
 
@@ -386,9 +399,52 @@ export default function InvoicesPage() {
                 Cancel this invoice?
               </button>
 
+
+
+
             </div>
 
           </div>
+        </div>
+      )}
+
+      {deleteTarget && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+
+          <div className="w-[420px] rounded-2xl border border-rose-500/30 bg-[#0f1020] p-6 shadow-[0_0_40px_rgba(244,63,94,0.25)]">
+
+            <h2 className="text-lg font-semibold text-rose-400 mb-2">
+              Delete Draft
+            </h2>
+
+            <p className="text-sm text-slate-300 mb-6">
+              Are you sure you want to delete this draft invoice?
+              This action cannot be undone.
+            </p>
+
+            <div className="flex justify-end gap-3">
+
+              <button
+                onClick={() => setDeleteTarget(null)}
+                className="px-4 py-2 rounded-lg border border-white/10 text-sm hover:bg-white/5"
+              >
+                Go Back
+              </button>
+
+              <button
+                onClick={() => {
+                  removeInvoice(deleteTarget.id)
+                  setDeleteTarget(null)
+                }}
+                className="px-4 py-2 rounded-lg bg-rose-500 hover:bg-rose-600 text-black text-sm font-semibold"
+              >
+                Delete Draft
+              </button>
+
+            </div>
+
+          </div>
+
         </div>
       )}
 

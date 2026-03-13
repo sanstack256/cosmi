@@ -49,7 +49,7 @@ export function useInvoiceEditor() {
   const editId = searchParams?.get("id") ?? null;
 
   const { user, plan } = useAuth();
-  const { invoices, addInvoice, updateInvoice } = useInvoices();
+  const { invoices, clients, addInvoice, updateInvoice, addClient } = useInvoices();
 
   /* ---------- Company ---------- */
 
@@ -65,6 +65,7 @@ export function useInvoiceEditor() {
   );
 
   const [client, setClient] = useState("");
+  const [clientEmail, setClientEmail] = useState("");
   const [paymentStatus, setPaymentStatus] =
     useState<Invoice["paymentStatus"]>("unpaid");
 
@@ -86,6 +87,7 @@ export function useInvoiceEditor() {
     if (!editingInvoice) return;
 
     setClient(editingInvoice.client);
+    setClientEmail((editingInvoice as any).clientEmail || "");
     setPaymentStatus(editingInvoice.paymentStatus || "unpaid");
 
     try {
@@ -93,7 +95,7 @@ export function useInvoiceEditor() {
       if (!isNaN(parsed.getTime())) {
         setDate(parsed.toISOString().slice(0, 10));
       }
-    } catch {}
+    } catch { }
 
     setNotes(editingInvoice.meta?.notes ?? "");
 
@@ -215,12 +217,38 @@ export function useInvoiceEditor() {
         year: "numeric",
       });
 
+      console.log("CLIENT EMAIL STATE:", clientEmail);
+
+
+      const existingClient = clients.find(
+        (c) => c.name.toLowerCase() === client.toLowerCase()
+      );
+
+      if (!existingClient) {
+        await addClient({
+          name: client,
+          email: clientEmail || "",
+        });
+      }
+
+
+
       const invoiceData: any = {
         client,
+        clientEmail: clientEmail?.trim() || null,
         amount: formatCurrencyINR(total),
         paymentStatus,
         date: formattedDate,
         dueDate: date,
+
+        remindersSent: {
+          d7: false,
+          d3: false,
+          d1: false,
+          due: false,
+          overdue: false,
+        },
+
         meta: {
           lineItems: lineItems.map((li) => ({
             ...li,
@@ -228,6 +256,7 @@ export function useInvoiceEditor() {
           })),
           notes,
         },
+
         company,
       };
 
@@ -250,6 +279,8 @@ export function useInvoiceEditor() {
      Public API
   ------------------------------------------- */
 
+  const idToUse = editingInvoice?.invoiceNumber || "Draft";
+
   return {
     loadingCompany,
     hasCompanyProfile,
@@ -257,13 +288,16 @@ export function useInvoiceEditor() {
 
     client,
     setClient,
-    paymentStatus,
-    setPaymentStatus,
+    clientEmail,
+    setClientEmail,
+    status: paymentStatus,
+    setStatus: setPaymentStatus,
     date,
     setDate,
     notes,
     setNotes,
     lineItems,
+
 
     company,
 
@@ -275,5 +309,6 @@ export function useInvoiceEditor() {
     addLine,
     removeLine,
     saveInvoice,
+    idToUse,
   };
 }

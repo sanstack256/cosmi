@@ -58,11 +58,19 @@ export type Invoice = {
   dueDate: string;
 
   payments?: {
-  amount: number
-  date: any
-  method?: string
-  note?: string
-}[]
+    amount: number
+    date: any
+    method?: string
+    note?: string
+  }[]
+
+  remindersSent?: {
+    d7: boolean
+    d3: boolean
+    d1: boolean
+    due: boolean
+    overdue: boolean
+  }
 
   company?: {
     name?: string;
@@ -221,30 +229,87 @@ export function InvoiceProvider({ children }: { children: React.ReactNode }) {
     const invoicesRef = collection(db, "users", user.uid, "invoices");
     const newInvoiceRef = doc(invoicesRef);
 
-    await setDoc(newInvoiceRef, {
+
+    console.log("Creating invoice with reminders:", {
       ...invoice,
-
-      lifecycle: "draft",
-      paymentStatus: "unpaid",
-      payments: [],
-      invoiceNumber: null,
-
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-      issuedAt: null,
-      cancelledAt: null,
-
-      activity: [
-        {
-          type: "draft_created",
-          timestamp: new Date(),
-        },
-      ],
+      remindersSent: {
+        d7: false,
+        d3: false,
+        d1: false,
+        due: false,
+        overdue: false,
+      }
     });
+
+ const payload = {
+  ...invoice,
+
+  lifecycle: "draft",
+  paymentStatus: invoice.paymentStatus ?? "unpaid",
+  payments: [],
+  invoiceNumber: null,
+
+  remindersSent: {
+    d7: false,
+    d3: false,
+    d1: false,
+    due: false,
+    overdue: false,
+  },
+
+  createdAt: serverTimestamp(),
+  updatedAt: serverTimestamp(),
+  issuedAt: null,
+  cancelledAt: null,
+
+  activity: [
+    {
+      type: "draft_created",
+      timestamp: new Date(),
+    },
+  ],
+};
+
+await setDoc(newInvoiceRef, payload);
+
+console.log("FIRESTORE PAYLOAD:", JSON.stringify(payload, null, 2));
+
+await setDoc(newInvoiceRef, payload);
+
+    await setDoc(newInvoiceRef, {
+  ...invoice,
+
+  lifecycle: "draft",
+  paymentStatus: invoice.paymentStatus ?? "unpaid",
+  payments: [],
+  invoiceNumber: null,
+
+  remindersSent: {
+    d7: false,
+    d3: false,
+    d1: false,
+    due: false,
+    overdue: false,
+  },
+
+  createdAt: serverTimestamp(),
+  updatedAt: serverTimestamp(),
+  issuedAt: null,
+  cancelledAt: null,
+
+  activity: [
+    {
+      type: "draft_created",
+      timestamp: new Date(),
+    },
+  ],
+});
   }
 
   async function addClient(client: Omit<Client, "id">) {
     if (!user) throw new Error("Not authenticated");
+
+    console.log("CLIENT OBJECT RECEIVED:", client);
 
     const ref = collection(db, "users", user.uid, "clients");
     const newClientRef = doc(ref);
@@ -284,156 +349,156 @@ export function InvoiceProvider({ children }: { children: React.ReactNode }) {
     amount: number,
     method: string,
     note?: string
-  ){
-  if (!user) throw new Error("Not authenticated");
+  ) {
+    if (!user) throw new Error("Not authenticated");
 
-  const ref = doc(db, "users", user.uid, "invoices", invoiceId);
+    const ref = doc(db, "users", user.uid, "invoices", invoiceId);
 
-  const invoice = invoices.find((i) => i.id === invoiceId);
-  if (!invoice) return;
+    const invoice = invoices.find((i) => i.id === invoiceId);
+    if (!invoice) return;
 
-  const existingPayments = invoice.payments || [];
+    const existingPayments = invoice.payments || [];
 
-  const newPayments = [
-    ...existingPayments,
-    {
-      amount,
-      date: new Date(),
-      method,
-      note
+    const newPayments = [
+      ...existingPayments,
+      {
+        amount,
+        date: new Date(),
+        method,
+        note
+      }
+    ];
+
+    const totalPaid = newPayments.reduce(
+      (sum, p) => sum + p.amount,
+      0
+    );
+
+    const invoiceAmount = parseAmount(invoice.amount);
+
+    let status: PaymentStatus = "unpaid";
+
+    if (totalPaid >= invoiceAmount) {
+      status = "paid";
+    } else if (totalPaid > 0) {
+      status = "partial";
     }
-  ];
 
-  const totalPaid = newPayments.reduce(
-    (sum, p) => sum + p.amount,
-    0
-  );
-
-  const invoiceAmount = parseAmount(invoice.amount);
-
-  let status: PaymentStatus = "unpaid";
-
-  if (totalPaid >= invoiceAmount) {
-    status = "paid";
-  } else if (totalPaid > 0) {
-    status = "partial";
+    await updateDoc(ref, {
+      payments: newPayments,
+      paymentStatus: status
+    });
   }
 
-  await updateDoc(ref, {
-    payments: newPayments,
-    paymentStatus: status
-  });
-}
 
+  /* ❌ Delete Draft */
 
-/* ❌ Delete Draft */
+  async function removeInvoice(id: string) {
+    if (!user) throw new Error("Not authenticated");
 
-async function removeInvoice(id: string) {
-  if (!user) throw new Error("Not authenticated");
-
-  const ref = doc(db, "users", user.uid, "invoices", id);
-  await deleteDoc(ref);
-}
+    const ref = doc(db, "users", user.uid, "invoices", id);
+    await deleteDoc(ref);
+  }
 
 
 
-async function issueInvoice(id: string) {
-  if (!user) throw new Error("Not authenticated");
+  async function issueInvoice(id: string) {
+    if (!user) throw new Error("Not authenticated");
 
-  const counterRef = doc(db, "users", user.uid, "meta", "counters");
-  const invoiceRef = doc(db, "users", user.uid, "invoices", id);
+    const counterRef = doc(db, "users", user.uid, "meta", "counters");
+    const invoiceRef = doc(db, "users", user.uid, "invoices", id);
 
-  await runTransaction(db, async (transaction) => {
+    await runTransaction(db, async (transaction) => {
 
-    const counterDoc = await transaction.get(counterRef);
-    const invoiceDoc = await transaction.get(invoiceRef);
+      const counterDoc = await transaction.get(counterRef);
+      const invoiceDoc = await transaction.get(invoiceRef);
 
-    if (!invoiceDoc.exists()) {
-      throw new Error("Invoice not found");
+      if (!invoiceDoc.exists()) {
+        throw new Error("Invoice not found");
+      }
+
+      const invoiceData = invoiceDoc.data();
+
+      if (invoiceData.lifecycle !== "draft") {
+        throw new Error("Only drafts can be issued");
+      }
+
+      let counter = 1;
+
+      if (counterDoc.exists()) {
+        counter = (counterDoc.data().invoiceCounter || 0) + 1;
+      }
+
+      transaction.set(counterRef, { invoiceCounter: counter }, { merge: true });
+
+      const year = new Date().getFullYear();
+      const padded = String(counter).padStart(4, "0");
+
+      const invoiceNumber = `INV-${year}-${padded}`;
+
+      transaction.update(invoiceRef, {
+        invoiceNumber,
+        lifecycle: "issued",
+        issuedAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+
+        activity: arrayUnion({
+          type: "issued",
+          timestamp: new Date(),
+        }),
+
+      });
+    });
+  }
+
+  async function cancelInvoice(id: string) {
+    if (!user) throw new Error("Not authenticated");
+
+    const invoice = invoices.find((i) => i.id === id);
+    if (!invoice) throw new Error("Invoice not found");
+
+    // 🚫 Prevent cancelling paid invoices
+    if (invoice.paymentStatus === "paid") {
+      throw new Error("PAID_INVOICE_CANNOT_BE_CANCELLED");
     }
 
-    const invoiceData = invoiceDoc.data();
+    const ref = doc(db, "users", user.uid, "invoices", id);
 
-    if (invoiceData.lifecycle !== "draft") {
-      throw new Error("Only drafts can be issued");
-    }
-
-    let counter = 1;
-
-    if (counterDoc.exists()) {
-      counter = (counterDoc.data().invoiceCounter || 0) + 1;
-    }
-
-    transaction.set(counterRef, { invoiceCounter: counter }, { merge: true });
-
-    const year = new Date().getFullYear();
-    const padded = String(counter).padStart(4, "0");
-
-    const invoiceNumber = `INV-${year}-${padded}`;
-
-    transaction.update(invoiceRef, {
-      invoiceNumber,
-      lifecycle: "issued",
-      issuedAt: serverTimestamp(),
+    await updateDoc(ref, {
+      lifecycle: "cancelled",
+      cancelledAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
 
       activity: arrayUnion({
-        type: "issued",
+        type: "cancelled",
         timestamp: new Date(),
+
+
       }),
-
     });
-  });
-}
-
-async function cancelInvoice(id: string) {
-  if (!user) throw new Error("Not authenticated");
-
-  const invoice = invoices.find((i) => i.id === id);
-  if (!invoice) throw new Error("Invoice not found");
-
-  // 🚫 Prevent cancelling paid invoices
-  if (invoice.paymentStatus === "paid") {
-    throw new Error("PAID_INVOICE_CANNOT_BE_CANCELLED");
   }
 
-  const ref = doc(db, "users", user.uid, "invoices", id);
-
-  await updateDoc(ref, {
-    lifecycle: "cancelled",
-    cancelledAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-
-    activity: arrayUnion({
-      type: "cancelled",
-      timestamp: new Date(),
 
 
-    }),
-  });
-}
+  return (
+    <InvoiceContext.Provider
+      value={{
+        invoices,
+        clients,
+        addClient,
+        addInvoice,
+        recordPayment,
+        updateInvoice,
+        removeInvoice,
+        issueInvoice,
+        cancelInvoice,
+
+      }}
+    >
+      {children}
+    </InvoiceContext.Provider>
 
 
-
-return (
-  <InvoiceContext.Provider
-    value={{
-      invoices,
-      clients,
-      addClient,
-      addInvoice,
-      recordPayment,
-      updateInvoice,
-      removeInvoice,
-      issueInvoice,
-      cancelInvoice,
-
-    }}
-  >
-    {children}
-  </InvoiceContext.Provider>
-
-
-);
+  );
 }
 

@@ -22,6 +22,10 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 
 import { auth, db } from "@/lib/firebase";
 
+import { ToastProvider } from "./ToastProvider"
+
+
+
 /* ----------------------------------------
    Types
 ----------------------------------------- */
@@ -68,22 +72,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     async function loadPlan() {
-  if (!user) return; // ✅ tell TS user is not null
+      if (!user) return; // ✅ tell TS user is not null
 
-  try {
-    const ref = doc(db, "users", user.uid);
-    const snap = await getDoc(ref);
+      try {
+        const ref = doc(db, "users", user.uid);
+        const snap = await getDoc(ref);
 
-    if (snap.exists()) {
-      setPlan(snap.data().plan || "free");
-    } else {
-      setPlan("free");
+        if (snap.exists()) {
+          setPlan(snap.data().plan || "free");
+        } else {
+          setPlan("free");
+        }
+      } catch (err) {
+        console.error("Plan load failed:", err);
+        setPlan("free");
+      }
     }
-  } catch (err) {
-    console.error("Plan load failed:", err);
-    setPlan("free");
-  }
-}
 
 
     loadPlan();
@@ -142,10 +146,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   return (
+  <ToastProvider>
     <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
-  );
+  </ToastProvider>
+);
 }
 
 /* ----------------------------------------

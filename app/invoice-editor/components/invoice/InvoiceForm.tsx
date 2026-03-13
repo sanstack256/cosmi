@@ -17,6 +17,9 @@ type Props = {
   client: string;
   setClient: (v: string) => void;
 
+  clientEmail: string;
+  setClientEmail: (v: string) => void;
+
   status: Invoice["paymentStatus"];
   setStatus: (v: Invoice["paymentStatus"]) => void;
 
@@ -46,6 +49,8 @@ export default function InvoiceForm({
 
   client,
   setClient,
+  clientEmail,
+  setClientEmail,
   status,
   setStatus,
   date,
@@ -69,6 +74,7 @@ export default function InvoiceForm({
 
   const [search, setSearch] = useState("");
   const [showResults, setShowResults] = useState(false);
+
 
 
   const filteredClients = clients.filter((c) =>
@@ -98,19 +104,19 @@ export default function InvoiceForm({
 
 
   useEffect(() => {
-  function handleSaveShortcut(e: KeyboardEvent) {
-    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
-      e.preventDefault();
-      onSave();
+    function handleSaveShortcut(e: KeyboardEvent) {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        onSave();
+      }
     }
-  }
 
-  window.addEventListener("keydown", handleSaveShortcut);
+    window.addEventListener("keydown", handleSaveShortcut);
 
-  return () => {
-    window.removeEventListener("keydown", handleSaveShortcut);
-  };
-}, [onSave]);
+    return () => {
+      window.removeEventListener("keydown", handleSaveShortcut);
+    };
+  }, [onSave]);
 
 
   return (
@@ -171,19 +177,8 @@ export default function InvoiceForm({
               }}
               onFocus={() => setShowResults(true)}
 
-              onBlur={async () => {
-                if (!client.trim()) return;
 
-                const exists = clients.some(
-                  c => c.name.toLowerCase() === client.toLowerCase()
-                );
-
-                if (!exists) {
-                  await addClient({ name: client });
-                }
-
-                setShowResults(false);
-              }}
+              onBlur={() => setShowResults(false)}
 
               onKeyDown={async (e) => {
                 if (e.key === "Enter") {
@@ -196,7 +191,6 @@ export default function InvoiceForm({
                   if (existing) {
                     setClient(existing.name);
                   } else if (search.trim()) {
-                    await addClient({ name: search });
                     setClient(search);
                   }
 
@@ -220,6 +214,7 @@ export default function InvoiceForm({
                     key={c.id}
                     onClick={() => {
                       setClient(c.name);
+                      setClientEmail(c.email || "");
                       setSearch("");
                       setShowResults(false);
                     }}
@@ -232,7 +227,6 @@ export default function InvoiceForm({
                 {search && !clients.some(c => c.name.toLowerCase() === search.toLowerCase()) && (
                   <div
                     onClick={async () => {
-                      await addClient({ name: search });
                       setClient(search);
                       setSearch("");
                       setShowResults(false);
@@ -245,6 +239,19 @@ export default function InvoiceForm({
 
               </div>
             )}
+          </div>
+
+          {/* CLIENT EMAIL */}
+          <div className="space-y-1 mb-5">
+            <label className="text-xs text-slate-400">Client Email</label>
+
+            <input
+              type="email"
+              value={clientEmail}
+              onChange={(e) => setClientEmail(e.target.value)}
+              placeholder="client@email.com"
+              className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50 transition"
+            />
           </div>
 
           {/* DATE */}

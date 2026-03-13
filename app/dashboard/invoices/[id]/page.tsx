@@ -5,6 +5,7 @@ import { useInvoices } from "@/app/providers/InvoiceProvider";
 import { ArrowLeft } from "lucide-react";
 import { Invoice } from "@/app/providers/InvoiceProvider";
 import { useState } from "react";
+import { useToast } from "@/app/providers/ToastProvider";
 
 
 /* ----------------------------------
@@ -55,6 +56,19 @@ function getDotColor(type: string) {
 
 function getStatusBadge(invoice: Invoice) {
 
+  const isOverdue =
+    invoice &&
+    invoice.lifecycle !== "cancelled" &&
+    invoice.paymentStatus !== "paid" &&
+    new Date(invoice.dueDate) < new Date();
+
+  if (isOverdue) {
+    return {
+      label: "OVERDUE",
+      style: "bg-rose-500/10 text-rose-400 border border-rose-500/30",
+    };
+  }
+
   if (invoice.lifecycle === "draft") {
     return {
       label: "DRAFT",
@@ -97,6 +111,7 @@ function getStatusBadge(invoice: Invoice) {
 }
 
 export default function InvoicePreviewPage() {
+  const { showToast } = useToast();
   const { id } = useParams();
   const [showPaymentModal, setShowPaymentModal] = useState(false)
   const [paymentAmount, setPaymentAmount] = useState("")
@@ -153,6 +168,7 @@ export default function InvoicePreviewPage() {
     setPaymentNote("");
     setPaymentMethod("bank");
 
+    showToast("Payment recorded successfully", "success");
   }
 
   if (!invoice) {
@@ -162,6 +178,18 @@ export default function InvoicePreviewPage() {
       </div>
     );
   }
+
+  const isOverdue =
+    invoice.lifecycle !== "cancelled" &&
+    invoice.paymentStatus !== "paid" &&
+    new Date(invoice.dueDate) < new Date();
+
+  const daysOverdue = isOverdue
+    ? Math.floor(
+      (Date.now() - new Date(invoice.dueDate).getTime()) /
+      (1000 * 60 * 60 * 24)
+    )
+    : 0;
 
   return (
     <div className="min-h-full flex flex-col items-center">
@@ -183,20 +211,30 @@ export default function InvoicePreviewPage() {
           >
             Edit
           </button>
+          <div className="relative group">
+            <button
+              disabled={outstanding === 0 || invoice.lifecycle === "cancelled"}
+              onClick={() => {
+                setError("")
+                setShowPaymentModal(true)
+              }}
+              className={`px-4 py-2 rounded-xl text-sm font-medium
+              ${outstanding === 0 || invoice.lifecycle === "cancelled"
+                  ? "bg-slate-700 text-slate-400 cursor-not-allowed"
+                  : "bg-emerald-500 hover:bg-emerald-600 text-black"
+                }`}          >
+              Record Payment
+            </button>
+            {invoice.lifecycle === "cancelled" && (
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition pointer-events-none">
+                <div className="bg-[#0f1020] text-xs text-slate-300 px-3 py-2 rounded-lg shadow-lg whitespace-nowrap border border-white/10">
+                  Payments disabled for cancelled invoices
+                </div>
+              </div>
+            )}
 
-          <button
-            disabled={outstanding === 0}
-            onClick={() => {
-              setError("")
-              setShowPaymentModal(true)
-            }}
-            className={`px-4 py-2 rounded-xl text-sm font-medium
-${outstanding === 0
-                ? "bg-slate-700 text-slate-400 cursor-not-allowed"
-                : "bg-emerald-500 hover:bg-emerald-600 text-black"
-              }`}          >
-            Record Payment
-          </button>
+
+          </div>
 
           <button
             onClick={() => window.print()}
@@ -249,8 +287,15 @@ ${outstanding === 0
           </div>
 
           <div>
-            <p className="text-xs uppercase text-gray-400 mb-2">Due Date</p>
-            <p>{invoice.dueDate}</p>
+            <p className={`${isOverdue ? "text-rose-500 font-semibold" : ""}`}>
+              {invoice.dueDate}
+            </p>
+
+            {isOverdue && (
+              <p className="text-xs text-rose-500 mt-1">
+                ⚠ {daysOverdue} day{daysOverdue > 1 ? "s" : ""} overdue
+              </p>
+            )}
           </div>
         </div>
 
@@ -526,6 +571,7 @@ ${outstanding === 0
           </div>
         )
       }
+
     </div>
   );
 }

@@ -11,33 +11,36 @@ import { useAuth } from "@/app/providers/AuthProvider";
 
 export default function InvoiceEditorPage() {
   const {
-    loadingCompany,
-    hasCompanyProfile,
-    editingInvoice,
+  loadingCompany,
+  hasCompanyProfile,
+  editingInvoice,
 
-    client,
-    setClient,
-    status,
-    setStatus,
-    date,
-    setDate,
-    notes,
-    setNotes,
-    lineItems,
+  client,
+  setClient,
+  clientEmail,
+  setClientEmail,
 
-    company,
+  status,
+  setStatus,
+  date,
+  setDate,
+  notes,
+  setNotes,
+  lineItems,
 
-    subtotal,
-    taxAmount,
-    total,
+  company,
 
-    updateLine,
-    addLine,
-    removeLine,
-    saveInvoice,
+  subtotal,
+  taxAmount,
+  total,
 
-    idToUse,
-  } = useInvoiceEditor();
+  updateLine,
+  addLine,
+  removeLine,
+  saveInvoice,
+
+  idToUse,
+} = useInvoiceEditor();
 
   const [toast, setToast] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -95,52 +98,54 @@ export default function InvoiceEditorPage() {
   ------------------------------------------- */
 
   return (
-  <div className="min-h-screen bg-[#050509] text-slate-100 flex">
+    <div className="min-h-screen bg-[#050509] text-slate-100 flex">
 
-    {/* LEFT PANEL */}
-    <div className="w-[600px] xl:w-[700px] 2xl:w-[750px] border-r border-white/5 p-6">
+      {/* LEFT PANEL */}
+      <div className="w-[600px] xl:w-[700px] 2xl:w-[750px] border-r border-white/5 p-6">
 
-      <InvoiceForm
-        loadingCompany={loadingCompany}
-        hasCompanyProfile={hasCompanyProfile}
-        editingInvoice={editingInvoice}
-        idToUse={idToUse}
-        client={client}
-        setClient={setClient}
-        status={status}
-        setStatus={setStatus}
-        date={date}
-        setDate={setDate}
-        notes={notes}
-        setNotes={setNotes}
-        lineItems={lineItems}
-        updateLine={updateLine}
-        addLine={addLine}
-        removeLine={removeLine}
-        subtotalFormatted={formatCurrencyINR(subtotal)}
-        onSave={handleSave}
-        saving={saving}
-      />
+        <InvoiceForm
+          loadingCompany={loadingCompany}
+          hasCompanyProfile={hasCompanyProfile}
+          editingInvoice={editingInvoice}
+          idToUse={idToUse}
+          client={client}
+          setClient={setClient}
+          clientEmail={clientEmail}
+          setClientEmail={setClientEmail}
+          status={status}
+          setStatus={setStatus}
+          date={date}
+          setDate={setDate}
+          notes={notes}
+          setNotes={setNotes}
+          lineItems={lineItems}
+          updateLine={updateLine}
+          addLine={addLine}
+          removeLine={removeLine}
+          subtotalFormatted={formatCurrencyINR(subtotal)}
+          onSave={handleSave}
+          saving={saving}
+        />
+      </div>
+
+      {/* RIGHT PANEL */}
+      <div className="flex-1 flex justify-center py-6 px-4">
+        <InvoicePreview
+          id={idToUse}
+          client={client}
+          date={date}
+          lineItems={lineItems}
+          subtotal={subtotal}
+          taxAmount={taxAmount}
+          total={total}
+          notes={notes}
+          company={company}
+          plan={plan}
+        />
+      </div>
+
     </div>
-
-    {/* RIGHT PANEL */}
-    <div className="flex-1 flex justify-center py-6 px-4">
-      <InvoicePreview
-        id={idToUse}
-        client={client}
-        date={date}
-        lineItems={lineItems}
-        subtotal={subtotal}
-        taxAmount={taxAmount}
-        total={total}
-        notes={notes}
-        company={company}
-        plan={plan}
-      />
-    </div>
-
-  </div>
-);
+  );
 
 
 
