@@ -100,44 +100,44 @@ export default function EditCompanyModal({
 
         {/* BASIC DETAILS */}
         <Section title="Basic Details">
-          <Input label="Company Name" value={formState.companyName} onChange={(v) => updateField("companyName", v)} />
-          <Input label="Business Email" value={formState.businessEmail} onChange={(v) => updateField("businessEmail", v)} />
-          <Input label="Phone" value={formState.phone} onChange={(v) => updateField("phone", v)} />
-          <Input label="Website" value={formState.website} onChange={(v) => updateField("website", v)} />
+          <Input label="Company Name" value={formState.companyName} onChange={(v: string) => updateField("companyName", v)} />
+          <Input label="Business Email" value={formState.businessEmail} onChange={(v: string) => updateField("businessEmail", v)} />
+          <Input label="Phone" value={formState.phone} onChange={(v: string) => updateField("phone", v)} />
+          <Input label="Website" value={formState.website} onChange={(v: string) => updateField("website", v)} />
         </Section>
 
         {/* ADDRESS */}
         <Section title="Address">
-          <Input label="Address Line 1" value={formState.address1} onChange={(v) => updateField("address1", v)} />
-          <Input label="Address Line 2" value={formState.address2} onChange={(v) => updateField("address2", v)} />
-          <Input label="City" value={formState.city} onChange={(v) => updateField("city", v)} />
-          <Input label="State" value={formState.state} onChange={(v) => updateField("state", v)} />
-          <Input label="Country" value={formState.country} onChange={(v) => updateField("country", v)} />
-          <Input label="Postal Code" value={formState.postalCode} onChange={(v) => updateField("postalCode", v)} />
+          <Input label="Address Line 1" value={formState.address1} onChange={(v: string) => updateField("address1", v)} />
+          <Input label="Address Line 2" value={formState.address2} onChange={(v: string) => updateField("address2", v)} />
+          <Input label="City" value={formState.city} onChange={(v: string) => updateField("city", v)} />
+          <Input label="State" value={formState.state} onChange={(v: string) => updateField("state", v)} />
+          <Input label="Country" value={formState.country} onChange={(v: string) => updateField("country", v)} />
+          <Input label="Postal Code" value={formState.postalCode} onChange={(v: string) => updateField("postalCode", v)} />
         </Section>
 
         {/* TAX */}
         <Section title="Tax Information">
-          <Input label="GST" value={formState.gst} onChange={(v) => updateField("gst", v)} />
-          <Input label="PAN" value={formState.pan} onChange={(v) => updateField("pan", v)} />
-          <Input label="Tax ID" value={formState.taxId} onChange={(v) => updateField("taxId", v)} />
+          <Input label="GST" value={formState.gst} onChange={(v: string) => updateField("gst", v)} />
+          <Input label="PAN" value={formState.pan} onChange={(v: string) => updateField("pan", v)} />
+          <Input label="Tax ID" value={formState.taxId} onChange={(v: string) => updateField("taxId", v)} />
         </Section>
 
         {/* INVOICE DEFAULTS */}
         <Section title="Invoice Defaults">
-          <Input label="Default Currency" value={formState.defaultCurrency} onChange={(v) => updateField("defaultCurrency", v)} />
-          <Input label="Payment Terms" value={formState.paymentTerms} onChange={(v) => updateField("paymentTerms", v)} />
-          <Input label="Footer Note" value={formState.footerNote} onChange={(v) => updateField("footerNote", v)} />
+          <Input label="Default Currency" value={formState.defaultCurrency} onChange={(v: string) => updateField("defaultCurrency", v)} />
+          <Input label="Payment Terms" value={formState.paymentTerms} onChange={(v: string) => updateField("paymentTerms", v)} />
+          <Input label="Footer Note" value={formState.footerNote} onChange={(v: string) => updateField("footerNote", v)} />
         </Section>
 
         {/* BANK DETAILS */}
         <Section title="Bank Details">
-          <Input label="Account Holder" value={formState.bankHolder} onChange={(v) => updateField("bankHolder", v)} />
-          <Input label="Bank Name" value={formState.bankName} onChange={(v) => updateField("bankName", v)} />
-          <Input label="Account Number" value={formState.bankAccount} onChange={(v) => updateField("bankAccount", v)} />
-          <Input label="IFSC" value={formState.bankIFSC} onChange={(v) => updateField("bankIFSC", v)} />
-          <Input label="SWIFT" value={formState.bankSwift} onChange={(v) => updateField("bankSwift", v)} />
-          <Input label="UPI ID" value={formState.upiId} onChange={(v) => updateField("upiId", v)} />
+          <Input label="Account Holder" value={formState.bankHolder} onChange={(v: string) => updateField("bankHolder", v)} />
+          <Input label="Bank Name" value={formState.bankName} onChange={(v: string) => updateField("bankName", v)} />
+          <Input label="Account Number" value={formState.bankAccount} onChange={(v: string) => updateField("bankAccount", v)} />
+          <Input label="IFSC" value={formState.bankIFSC} onChange={(v: string) => updateField("bankIFSC", v)} />
+          <Input label="SWIFT" value={formState.bankSwift} onChange={(v: string) => updateField("bankSwift", v)} />
+          <Input label="UPI ID" value={formState.upiId} onChange={(v: string) => updateField("upiId", v)} />
         </Section>
 
         {/* BUTTONS */}
