@@ -14,7 +14,7 @@ const firebaseConfig = {
 };
 
 // ✅ Singleton app
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+export const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
 // ✅ IMPORTANT: use getAuth ONLY
 export const auth = getAuth(app);

@@ -2,12 +2,11 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { getFirebaseAuth } from "@/lib/firebase";
+import { auth } from "@/lib/firebase";
 
 export default function TestFirebase() {
   useEffect(() => {
     try {
-      const auth = getFirebaseAuth();
       console.log("Firebase auth loaded:", !!auth);
     } catch (error) {
       console.error("Firebase init error:", error);
