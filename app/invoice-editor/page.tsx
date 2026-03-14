@@ -48,7 +48,12 @@ export default function InvoiceEditorPage() {
   const { plan } = useAuth();
 
   async function handleSendEmail() {
+    if (!clientEmail) {
+      showToast("Client email is required to send invoice");
+      return;
+    }
     try {
+      console.log("Sending invoice email to:", clientEmail);
       const response = await fetch("/api/send-reminder", {
         method: "POST",
         headers: {
