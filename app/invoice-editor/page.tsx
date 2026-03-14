@@ -55,32 +55,32 @@ export default function InvoiceEditorPage() {
     try {
       console.log("Sending invoice email to:", clientEmail);
       const response = await fetch("/api/send-reminder", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          to: clientEmail,
-          subject: `Invoice ${idToUse} from ${company?.name || "Cosmi"}`,
-          html: `
-          <h2>Invoice ${idToUse}</h2>
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    to: clientEmail,
+    subject: `Invoice ${idToUse} from ${company?.name || "Cosmi"}`,
+    html: `
+      <h2>Invoice ${idToUse}</h2>
 
-<p>Hello ${client},</p>
+      <p>Hello ${client},</p>
 
-<p>Your invoice has been generated.</p>
+      <p>Your invoice has been generated.</p>
 
-<p><strong>Total:</strong> ${formatCurrencyINR(total)}</p>
+      <p><strong>Total:</strong> ${formatCurrencyINR(total)}</p>
 
-<p>
-<a href="https://cosmi.vercel.app/invoice/${idToUse}">
-View Invoice
-</a>
-</p>
+      <p>
+        <a href="https://cosmi.vercel.app/invoice/${idToUse}">
+          View Invoice
+        </a>
+      </p>
 
-<p>Thank you,<br/>${company?.name || "Cosmi"}</p>
-        `,
-        }),
-      });
+      <p>Thank you,<br/>${company?.name || "Cosmi"}</p>
+    `,
+  }),
+});
 
       const result = await response.json();
 
