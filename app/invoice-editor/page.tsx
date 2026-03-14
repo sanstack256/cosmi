@@ -11,41 +11,73 @@ import { useAuth } from "@/app/providers/AuthProvider";
 
 export default function InvoiceEditorPage() {
   const {
-  loadingCompany,
-  hasCompanyProfile,
-  editingInvoice,
+    loadingCompany,
+    hasCompanyProfile,
+    editingInvoice,
 
-  client,
-  setClient,
-  clientEmail,
-  setClientEmail,
+    client,
+    setClient,
+    clientEmail,
+    setClientEmail,
 
-  status,
-  setStatus,
-  date,
-  setDate,
-  notes,
-  setNotes,
-  lineItems,
+    status,
+    setStatus,
+    date,
+    setDate,
+    notes,
+    setNotes,
+    lineItems,
 
-  company,
+    company,
 
-  subtotal,
-  taxAmount,
-  total,
+    subtotal,
+    taxAmount,
+    total,
 
-  updateLine,
-  addLine,
-  removeLine,
-  saveInvoice,
+    updateLine,
+    addLine,
+    removeLine,
+    saveInvoice,
 
-  idToUse,
-} = useInvoiceEditor();
+    idToUse,
+  } = useInvoiceEditor();
 
   const [toast, setToast] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   const { plan } = useAuth();
+
+  async function handleSendEmail() {
+    try {
+      const response = await fetch("/api/send-reminder", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          to: clientEmail,
+          subject: `Invoice ${idToUse} from ${company?.name || "Cosmi"}`,
+          html: `
+          <h2>Invoice ${idToUse}</h2>
+          <p>Hello ${client},</p>
+          <p>Your invoice has been generated.</p>
+          <p><strong>Total:</strong> ${formatCurrencyINR(total)}</p>
+          <p>Please review your invoice.</p>
+        `,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.error) {
+        showToast("Failed to send email");
+      } else {
+        showToast("Invoice email sent!");
+      }
+    } catch (err) {
+      showToast("Error sending email");
+    }
+  }
 
 
   function showToast(msg: string) {
@@ -130,18 +162,27 @@ export default function InvoiceEditorPage() {
 
       {/* RIGHT PANEL */}
       <div className="flex-1 flex justify-center py-6 px-4">
-        <InvoicePreview
-          id={idToUse}
-          client={client}
-          date={date}
-          lineItems={lineItems}
-          subtotal={subtotal}
-          taxAmount={taxAmount}
-          total={total}
-          notes={notes}
-          company={company}
-          plan={plan}
-        />
+        <div className="flex flex-col items-center gap-4">
+          <button
+            onClick={handleSendEmail}
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-white text-sm"
+          >
+            Send Invoice Email
+          </button>
+
+          <InvoicePreview
+            id={idToUse}
+            client={client}
+            date={date}
+            lineItems={lineItems}
+            subtotal={subtotal}
+            taxAmount={taxAmount}
+            total={total}
+            notes={notes}
+            company={company}
+            plan={plan}
+          />
+        </div>
       </div>
 
     </div>
