@@ -6,20 +6,21 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    const { to, subject, html } = body;
+    const { subject, html } = body;
 
-    if (!to || !subject || !html) {
+    if (!subject || !html) {
       return Response.json(
         { error: "Missing required email fields" },
         { status: 400 }
       );
     }
 
-    console.log("EMAIL PAYLOAD:", { to, subject });
-
     const { data, error } = await resend.emails.send({
-      from: "Cosmi <onboarding@resend.dev>",
-      to: [String(to)],
+      from: "onboarding@resend.dev",
+
+      // 🔴 PUT YOUR EMAIL HERE
+      to: ["nssan2007@gmail.com"],
+
       subject: String(subject),
       html: String(html),
     });
@@ -29,7 +30,7 @@ export async function POST(req: Request) {
       return Response.json({ error }, { status: 500 });
     }
 
-    return Response.json({ data });
+    return Response.json({ success: true, data });
 
   } catch (err) {
     console.error("API error:", err);
