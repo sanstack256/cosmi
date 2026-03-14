@@ -17,7 +17,7 @@ export async function POST(req: Request) {
 
     const { data, error } = await resend.emails.send({
       from: "Cosmi <onboarding@resend.dev>",
-      to,
+      to: [to],
       subject,
       html,
     });
