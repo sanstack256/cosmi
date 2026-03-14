@@ -6,11 +6,11 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    const { to, subject, html, replyTo } = body;
+    const { to, subject, html } = body;
 
     if (!to || !subject || !html) {
       return Response.json(
-        { error: "Missing required fields: to, subject, html" },
+        { error: "Missing required email fields" },
         { status: 400 }
       );
     }
@@ -20,16 +20,17 @@ export async function POST(req: Request) {
       to,
       subject,
       html,
-      replyTo,
     });
 
     if (error) {
+      console.error("Resend error:", error);
       return Response.json({ error }, { status: 500 });
     }
 
     return Response.json({ data });
 
   } catch (err) {
+    console.error("API error:", err);
     return Response.json({ error: "Server error" }, { status: 500 });
   }
 }
