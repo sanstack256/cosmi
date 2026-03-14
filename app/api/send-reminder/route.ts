@@ -15,11 +15,13 @@ export async function POST(req: Request) {
       );
     }
 
+    console.log("EMAIL PAYLOAD:", { to, subject });
+
     const { data, error } = await resend.emails.send({
       from: "Cosmi <onboarding@resend.dev>",
-      to: [to],
-      subject,
-      html,
+      to: [String(to)],
+      subject: String(subject),
+      html: String(html),
     });
 
     if (error) {
