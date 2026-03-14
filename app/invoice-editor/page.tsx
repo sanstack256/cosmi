@@ -64,10 +64,20 @@ export default function InvoiceEditorPage() {
           subject: `Invoice ${idToUse} from ${company?.name || "Cosmi"}`,
           html: `
           <h2>Invoice ${idToUse}</h2>
-          <p>Hello ${client},</p>
-          <p>Your invoice has been generated.</p>
-          <p><strong>Total:</strong> ${formatCurrencyINR(total)}</p>
-          <p>Please review your invoice.</p>
+
+<p>Hello ${client},</p>
+
+<p>Your invoice has been generated.</p>
+
+<p><strong>Total:</strong> ${formatCurrencyINR(total)}</p>
+
+<p>
+<a href="https://cosmi.vercel.app/invoice/${idToUse}">
+View Invoice
+</a>
+</p>
+
+<p>Thank you,<br/>${company?.name || "Cosmi"}</p>
         `,
         }),
       });
