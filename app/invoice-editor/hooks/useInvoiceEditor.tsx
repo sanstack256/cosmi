@@ -79,6 +79,11 @@ export function useInvoiceEditor() {
     { desc: "", qty: 1, rate: "" },
   ]);
 
+  const [dueDate, setDueDate] = useState("");
+  const [clientAddress, setClientAddress] = useState("");
+  const [taxRate, setTaxRate] = useState(0);
+  const [discount, setDiscount] = useState(0);
+
   /* ------------------------------------------
      Load invoice when editing
   ------------------------------------------- */
@@ -240,6 +245,7 @@ export function useInvoiceEditor() {
         paymentStatus,
         date: formattedDate,
         dueDate: date,
+        currency: "INR",
 
         remindersSent: {
           d7: false,
@@ -294,6 +300,14 @@ export function useInvoiceEditor() {
     setStatus: setPaymentStatus,
     date,
     setDate,
+    dueDate,
+    setDueDate,
+    clientAddress,
+    setClientAddress,
+    taxRate,
+    setTaxRate,
+    discount,
+    setDiscount,
     notes,
     setNotes,
     lineItems,

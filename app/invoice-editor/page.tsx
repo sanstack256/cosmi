@@ -24,6 +24,16 @@ export default function InvoiceEditorPage() {
     setStatus,
     date,
     setDate,
+
+    dueDate,
+    setDueDate,
+    clientAddress,
+    setClientAddress,
+    taxRate,
+    setTaxRate,
+    discount,
+    setDiscount,
+
     notes,
     setNotes,
     lineItems,
@@ -55,14 +65,14 @@ export default function InvoiceEditorPage() {
     try {
       console.log("Sending invoice email to:", clientEmail);
       const response = await fetch("/api/send-reminder", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    to: clientEmail,
-    subject: `Invoice ${idToUse} from ${company?.name || "Cosmi"}`,
-    html: `
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          to: clientEmail,
+          subject: `Invoice ${idToUse} from ${company?.name || "Cosmi"}`,
+          html: `
       <h2>Invoice ${idToUse}</h2>
 
       <p>Hello ${client},</p>
@@ -72,15 +82,15 @@ export default function InvoiceEditorPage() {
       <p><strong>Total:</strong> ${formatCurrencyINR(total)}</p>
 
       <p>
-        <a href="https://cosmi.vercel.app/invoice/${idToUse}">
-          View Invoice
-        </a>
+        <a href="https://cosmi.vercel.app/invoice-editor">
+  View Invoice
+</a>
       </p>
 
       <p>Thank you,<br/>${company?.name || "Cosmi"}</p>
     `,
-  }),
-});
+        }),
+      });
 
       const result = await response.json();
 
@@ -163,6 +173,14 @@ export default function InvoiceEditorPage() {
           setStatus={setStatus}
           date={date}
           setDate={setDate}
+          dueDate={dueDate}
+          setDueDate={setDueDate}
+          clientAddress={clientAddress}
+          setClientAddress={setClientAddress}
+          taxRate={taxRate}
+          setTaxRate={setTaxRate}
+          discount={discount}
+          setDiscount={setDiscount}
           notes={notes}
           setNotes={setNotes}
           lineItems={lineItems}
@@ -189,6 +207,8 @@ export default function InvoiceEditorPage() {
             id={idToUse}
             client={client}
             date={date}
+            dueDate={dueDate}
+            clientAddress={clientAddress}
             lineItems={lineItems}
             subtotal={subtotal}
             taxAmount={taxAmount}
@@ -196,6 +216,7 @@ export default function InvoiceEditorPage() {
             notes={notes}
             company={company}
             plan={plan}
+            discount={discount}
           />
         </div>
       </div>

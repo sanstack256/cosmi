@@ -26,6 +26,18 @@ type Props = {
   date: string;
   setDate: (v: string) => void;
 
+  dueDate: string;
+  setDueDate: (v: string) => void;
+
+  clientAddress: string;
+  setClientAddress: (v: string) => void;
+
+  taxRate: number;
+  setTaxRate: (v: number) => void;
+
+  discount: number;
+  setDiscount: (v: number) => void;
+
   notes: string;
   setNotes: (v: string) => void;
 
@@ -55,6 +67,19 @@ export default function InvoiceForm({
   setStatus,
   date,
   setDate,
+
+  dueDate,
+  setDueDate,
+
+  clientAddress,
+  setClientAddress,
+
+  taxRate,
+  setTaxRate,
+
+  discount,
+  setDiscount,
+
   notes,
   setNotes,
 
@@ -254,6 +279,19 @@ export default function InvoiceForm({
             />
           </div>
 
+          {/* CLIENT ADDRESS */}
+          <div className="space-y-1 mb-5">
+            <label className="text-xs text-slate-400">Client Address</label>
+
+            <textarea
+              value={clientAddress}
+              onChange={(e) => setClientAddress(e.target.value)}
+              rows={2}
+              placeholder="Client address"
+              className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-violet-500/50 transition"
+            />
+          </div>
+
           {/* DATE */}
           <div className="space-y-1 mb-5">
             <label className="text-xs text-slate-400">Date</label>
@@ -268,6 +306,18 @@ export default function InvoiceForm({
                   statusRef.current?.focus();
                 }
               }}
+              className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50 transition"
+            />
+          </div>
+
+          {/* DUE DATE */}
+          <div className="space-y-1 mb-5">
+            <label className="text-xs text-slate-400">Due Date</label>
+
+            <input
+              type="date"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
               className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50 transition"
             />
           </div>
@@ -362,6 +412,35 @@ export default function InvoiceForm({
         + Add Line
       </button>
       <div className="bg-[#0f0f18] border border-white/5 rounded-2xl p-5 space-y-4">
+
+        {/* TAX & DISCOUNT */}
+        <div className="grid grid-cols-2 gap-4 mb-5">
+
+          <div className="space-y-1">
+            <label className="text-xs text-slate-400">Tax (%)</label>
+
+            <input
+              type="number"
+              value={taxRate || ""}
+              placeholder="0"
+              onChange={(e) => setTaxRate(Number(e.target.value))}
+              className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs text-slate-400">Discount</label>
+
+            <input
+              type="number"
+              value={discount || ""}
+              placeholder="0"
+              onChange={(e) => setDiscount(Number(e.target.value))}
+              className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white"
+            />
+          </div>
+
+        </div>
 
         {/* NOTES */}
         <div className="mt-6 space-y-1">
