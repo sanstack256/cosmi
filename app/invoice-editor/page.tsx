@@ -9,6 +9,7 @@ import { useInvoiceEditor } from "./hooks/useInvoiceEditor";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useInvoices } from "@/app/providers/InvoiceProvider";
 import { useRouter } from "next/navigation";
+import { getCurrencySymbol, formatCurrency } from "@/app/utils/currency";
 
 
 export default function InvoiceEditorPage() {
@@ -91,14 +92,10 @@ export default function InvoiceEditorPage() {
 
   const { plan } = useAuth();
 
-  const currencySymbol = currency === "USD" ? "$" : "₹";
+  const currencySymbol = getCurrencySymbol(currency);
 
-  function formatNumber(value: number) {
-    return value.toLocaleString(
-      currency === "USD" ? "en-US" : "en-IN"
-    );
-  }
-
+  const formatNumber = (value: number) =>
+    formatCurrency(value, currency);
   function handlePrint() {
     if (!printRef.current) return;
 

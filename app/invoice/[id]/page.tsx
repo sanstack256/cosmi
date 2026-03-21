@@ -6,6 +6,8 @@ import { collectionGroup, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { PayPalButtons } from "@paypal/react-paypal-js";
 import { toast } from "sonner";
+import { getCurrencySymbol, formatCurrency } from "@/app/utils/currency";
+
 
 type Props = {
     params: Promise<{ id: string }>;
@@ -94,13 +96,10 @@ export default function PublicInvoicePage({ params }: Props) {
     }
     const currency = invoice.currency || "INR";
 
-    function formatNumber(value: number) {
-        return value.toLocaleString(
-            currency === "USD" ? "en-US" : "en-IN"
-        );
-    }
+    const formatNumber = (value: number) =>
+        formatCurrency(value, currency);
 
-    const currencySymbol = currency === "USD" ? "$" : "₹";
+    const currencySymbol = getCurrencySymbol(currency);
 
     // CALCULATIONS
     const lineItems = invoice.meta?.lineItems || [];
@@ -210,39 +209,31 @@ export default function PublicInvoicePage({ params }: Props) {
             <div className="absolute top-[-200px] left-1/2 -translate-x-1/2 w-[900px] h-[900px] bg-indigo-600/20 blur-[140px] rounded-full" />
 
             <div className="relative z-10 px-6 py-16">
-                <div className="max-w-7xl mx-auto grid lg:grid-cols-[1fr_420px] gap-12 items-stretch">
+                <div className="max-w-7xl mx-auto grid lg:grid-cols-[1fr_420px] gap-12 items-start">
 
                     {/* LEFT */}
-                    <div className="relative">
+                    <div className="relative flex justify-center">
                         <div className="absolute inset-0 bg-white/5 blur-xl rounded-3xl opacity-60" />
 
-                        <div className="relative bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.25)]">
-
-                            {/* INNER FRAME */}
-                            <div className="p-1 flex items-center justify-center">
-
-                                {/* CONTENT WIDTH CONTROL */}
-                                <div className="w-full max-w-[720px]">
-                                    <InvoicePreview
-                                        id={id}
-                                        client={invoice.client}
-                                        date={invoice.date}
-                                        dueDate={invoice.dueDate}
-                                        clientAddress={invoice.clientAddress}
-                                        status={invoice.paymentStatus}
-                                        lineItems={lineItems}
-                                        subtotal={subtotal}
-                                        taxAmount={taxAmount}
-                                        total={total}
-                                        currency={invoice.currency}
-                                        notes={invoice.meta?.notes || ""}
-                                        company={invoice.company}
-                                    />
-                                </div>
-
-                            </div>
+                        <div className="relative w-full max-w-[720px]">
+                            <InvoicePreview
+                                id={id}
+                                client={invoice.client}
+                                date={invoice.date}
+                                dueDate={invoice.dueDate}
+                                clientAddress={invoice.clientAddress}
+                                status={invoice.paymentStatus}
+                                lineItems={lineItems}
+                                subtotal={subtotal}
+                                taxAmount={taxAmount}
+                                total={total}
+                                currency={invoice.currency}
+                                notes={invoice.meta?.notes || ""}
+                                company={invoice.company}
+                            />
                         </div>
                     </div>
+
 
                     {/* RIGHT */}
                     <div className="lg:sticky lg:top-16 self-start flex justify-center">
@@ -273,7 +264,7 @@ export default function PublicInvoicePage({ params }: Props) {
 
                                         <div className="relative">
                                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40">
-                                                ₹
+                                                {currencySymbol}
                                             </span>
 
                                             <input
@@ -547,7 +538,10 @@ ${processing || !isValidAmount
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
+
+
     )
 }

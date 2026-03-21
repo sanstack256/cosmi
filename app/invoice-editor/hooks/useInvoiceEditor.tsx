@@ -98,6 +98,10 @@ export function useInvoiceEditor() {
     setClientEmail((editingInvoice as any).clientEmail || "");
     setPaymentStatus(editingInvoice.paymentStatus || "unpaid");
 
+    if (editingInvoice.currency) {
+      setCurrency(editingInvoice.currency);
+    }
+
     try {
       const parsed = new Date(editingInvoice.dueDate);
       if (!isNaN(parsed.getTime())) {
@@ -115,7 +119,9 @@ export function useInvoiceEditor() {
           rate: String(li.rate ?? ""),
         }))
       );
+
     }
+    
   }, [editingInvoice]);
 
   /* ------------------------------------------

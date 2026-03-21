@@ -8,6 +8,7 @@ import { LineItem } from "@/app/invoice-editor/hooks/useInvoiceEditor";
 import { useInvoices } from "@/app/providers/InvoiceProvider";
 import { useRef, useEffect } from "react";
 import { Calendar } from "lucide-react";
+import { getCurrencySymbol, formatCurrency } from "@/app/utils/currency";
 
 
 type Props = {
@@ -167,7 +168,7 @@ export default function InvoiceForm({
     window.print();
   };
 
-  const currencySymbol = currency === "USD" ? "$" : "₹";
+const currencySymbol = getCurrencySymbol(currency);
 
 
   const isIssued = editingInvoice?.lifecycle === "issued";

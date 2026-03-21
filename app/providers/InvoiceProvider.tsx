@@ -90,6 +90,8 @@ export type Invoice = {
     timestamp: any;
   }[];
 
+  currency?: "INR" | "USD";
+
 };
 
 export type Client = {

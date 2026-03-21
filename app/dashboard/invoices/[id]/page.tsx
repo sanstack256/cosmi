@@ -121,7 +121,19 @@ export default function InvoicePreviewPage() {
   const router = useRouter();
   const { invoices, recordPayment } = useInvoices();
 
-  const invoice = invoices.find((i) => i.id === id) as Invoice | undefined;
+
+  const invoice = invoices.find((i) => i.id === id);
+
+  if (!invoice) {
+    return (
+      <div className="text-center text-slate-400 py-20">
+        Loading invoice...
+      </div>
+    );
+  }
+
+  const currency = invoice.currency;
+  const symbol = currency === "USD" ? "$" : "₹";
   const totalPaid =
     invoice?.payments?.reduce(
       (sum, p) => sum + p.amount,
@@ -191,6 +203,12 @@ export default function InvoicePreviewPage() {
     )
     : 0;
 
+  function formatMoney(value: number) {
+    return value.toLocaleString(
+      currency === "USD" ? "en-US" : "en-IN"
+    );
+  }
+
   return (
     <div className="min-h-full flex flex-col items-center">
 
@@ -215,8 +233,16 @@ export default function InvoicePreviewPage() {
             <button
               disabled={outstanding === 0 || invoice.lifecycle === "cancelled"}
               onClick={() => {
-                setError("")
-                setShowPaymentModal(true)
+                setError("");
+
+                // 🚀 Currency-based flow (safe fallback for now)
+                if (currency === "INR") {
+                  console.log("Razorpay flow");
+                  setShowPaymentModal(true);
+                } else if (currency === "USD") {
+                  console.log("PayPal flow");
+                  setShowPaymentModal(true);
+                }
               }}
               className={`px-4 py-2 rounded-xl text-sm font-medium
               ${outstanding === 0 || invoice.lifecycle === "cancelled"
@@ -322,27 +348,27 @@ export default function InvoicePreviewPage() {
 
             <div className="flex justify-between">
               <span>Subtotal</span>
-              <span>₹ {totalAmount.toLocaleString("en-IN")}</span>
+              <span>{symbol} {formatMoney(totalAmount)}</span>
             </div>
 
             <div className="flex justify-between">
               <span>Paid</span>
               <span className="text-emerald-600">
-                ₹ {totalPaid.toLocaleString("en-IN")}
+                {symbol} {formatMoney(totalPaid)}
               </span>
             </div>
 
             <div className="flex justify-between">
               <span>Outstanding</span>
               <span className="text-amber-600">
-                ₹ {outstanding.toLocaleString("en-IN")}
+                {symbol} {formatMoney(outstanding)}
               </span>
             </div>
 
 
             <div className="flex justify-between font-semibold text-lg pt-2 border-t">
               <span>Total</span>
-              <span>₹ {totalAmount.toLocaleString("en-IN")}</span>
+              <span>{symbol} {formatMoney(totalAmount)}</span>
             </div>
 
           </div>
@@ -391,7 +417,7 @@ export default function InvoicePreviewPage() {
                 {/* tooltip */}
                 <div className="absolute bottom-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition bg-[#0f1020] text-xs text-white px-3 py-2 rounded-lg shadow-lg whitespace-nowrap">
 
-                  ₹ {amount.toLocaleString("en-IN")}
+                  {symbol} {formatMoney(amount)}
 
                 </div>
 
@@ -448,7 +474,7 @@ export default function InvoicePreviewPage() {
 
                   <div className="text-right">
                     <div className="text-emerald-400">
-                      ₹ {p.amount.toLocaleString("en-IN")}
+                      {symbol} {formatMoney(p.amount)}
                     </div>
 
                     <div className="text-xs text-slate-500">
@@ -528,11 +554,12 @@ export default function InvoicePreviewPage() {
 
               <div className="relative">
                 <span className="absolute left-3 top-2 text-slate-400 text-sm">
-                  ₹
+                  {symbol}
                 </span>
 
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   placeholder="Amount"
                   value={paymentAmount}
                   onChange={(e) => {
