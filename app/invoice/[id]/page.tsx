@@ -16,6 +16,17 @@ export default function PublicInvoicePage({ params }: Props) {
     const [showAllPayments, setShowAllPayments] = React.useState(false);
     const [invoice, setInvoice] = React.useState<any>(null);
     const [method, setMethod] = React.useState<"razorpay" | "paypal">("razorpay");
+
+    React.useEffect(() => {
+        if (!invoice) return;
+
+        if (invoice.currency === "USD") {
+            setMethod("paypal");
+        } else {
+            setMethod("razorpay");
+        }
+    }, [invoice]);
+
     const [processing, setProcessing] = React.useState(false);
     const [payAmount, setPayAmount] = React.useState("");
 
@@ -81,6 +92,15 @@ export default function PublicInvoicePage({ params }: Props) {
             </div>
         );
     }
+    const currency = invoice.currency || "INR";
+
+    function formatNumber(value: number) {
+        return value.toLocaleString(
+            currency === "USD" ? "en-US" : "en-IN"
+        );
+    }
+
+    const currencySymbol = currency === "USD" ? "$" : "₹";
 
     // CALCULATIONS
     const lineItems = invoice.meta?.lineItems || [];
@@ -136,7 +156,7 @@ export default function PublicInvoicePage({ params }: Props) {
             const options = {
                 key: data.key,
                 amount: numericAmount * 100,
-                currency: "INR",
+                currency,
                 name: "Cosmi",
                 description: `Invoice ${id}`,
                 order_id: data.orderId,
@@ -214,6 +234,7 @@ export default function PublicInvoicePage({ params }: Props) {
                                         subtotal={subtotal}
                                         taxAmount={taxAmount}
                                         total={total}
+                                        currency={invoice.currency}
                                         notes={invoice.meta?.notes || ""}
                                         company={invoice.company}
                                     />
@@ -236,7 +257,7 @@ export default function PublicInvoicePage({ params }: Props) {
                                         </div>
 
                                         <div className="text-5xl lg:text-6xl font-bold mt-3 tracking-tight transition-all duration-300 ease-out">
-                                            ₹{remaining.toLocaleString("en-IN")}
+                                            {currencySymbol}{formatNumber(remaining)}
                                         </div>
 
                                         <div className="text-sm text-white/60 mt-3">
@@ -280,44 +301,55 @@ export default function PublicInvoicePage({ params }: Props) {
                                         )}
 
                                         <div className="text-xs text-white/40 mt-2">
-                                            Remaining: ₹{remaining.toLocaleString("en-IN")}
+                                            Remaining: {currencySymbol}{formatNumber(remaining)}
                                         </div>
 
                                         <div className="text-xs text-white/40 mt-1">
-                                            After payment: ₹{Math.max(remaining - numericAmount, 0).toLocaleString("en-IN")}
+                                            After payment: {currencySymbol}{formatNumber(Math.max(remaining - numericAmount, 0))}
                                         </div>
                                     </div>
 
                                     {/* METHODS */}
                                     <div className="mb-6">
                                         <div className="flex bg-white/5 rounded-xl p-1 relative">
+
                                             {/* Sliding background */}
                                             <div
-                                                className={`absolute top-1 bottom-1 w-1/2 rounded-lg bg-white transition-all duration-300 ease-out
-    ${method === "razorpay" ? "left-1" : "left-1/2"}
-    `}
+                                                className={`absolute top-1 bottom-1 rounded-lg bg-white transition-all duration-300 ease-out
+        ${invoice.currency === "USD"
+                                                        ? "w-1/2"
+                                                        : "w-full"
+                                                    }
+        ${invoice.currency === "USD"
+                                                        ? method === "razorpay"
+                                                            ? "left-1"
+                                                            : "left-1/2"
+                                                        : "left-1"
+                                                    }
+      `}
                                             />
 
                                             {/* Razorpay */}
                                             <button
                                                 onClick={() => !processing && setMethod("razorpay")}
                                                 className={`relative z-10 flex-1 py-2 text-sm font-medium transition-colors duration-300
-    ${method === "razorpay" ? "text-black" : "text-white/60"}
-    `}
+        ${method === "razorpay" ? "text-black" : "text-white/60"}
+      `}
                                             >
                                                 Card / UPI
                                             </button>
 
-                                            {/* PayPal */}
-                                            <button
-                                                onClick={() => !processing && setMethod("paypal")}
-                                                className={`relative z-10 flex-1 py-2 text-sm font-medium transition-colors duration-300
-    ${method === "paypal" ? "text-black" : "text-white/60"}
-    `}
-                                            >
-                                                PayPal
-                                            </button>
-
+                                            {/* PayPal (ONLY USD) */}
+                                            {invoice.currency === "USD" && (
+                                                <button
+                                                    onClick={() => !processing && setMethod("paypal")}
+                                                    className={`relative z-10 flex-1 py-2 text-sm font-medium transition-colors duration-300
+          ${method === "paypal" ? "text-black" : "text-white/60"}
+        `}
+                                                >
+                                                    PayPal
+                                                </button>
+                                            )}
 
                                         </div>
                                     </div>
@@ -325,7 +357,7 @@ export default function PublicInvoicePage({ params }: Props) {
                                     {/* CTA */}
 
                                     {/* Razorpay */}
-                                    {method === "razorpay" && (
+                                    {method === "razorpay" && currency === "INR" && (
                                         <button
                                             disabled={processing || !isValidAmount}
                                             onClick={startRazorpayPayment}
@@ -337,12 +369,13 @@ ${processing || !isValidAmount
                                         >
                                             {processing
                                                 ? "Processing..."
-                                                : `Pay ₹${numericAmount ? numericAmount.toLocaleString("en-IN") : "0"}`}
+                                                : `Pay ${currencySymbol}${numericAmount ? formatNumber(numericAmount) : "0"}`
+                                            }
                                         </button>
                                     )}
 
                                     {/* PayPal */}
-                                    {method === "paypal" && !processing && isValidAmount && (
+                                    {method === "paypal" && invoice.currency === "USD" && !processing && isValidAmount && (
                                         <div className="mt-6 animate-fade-in">
                                             <PayPalButtons
                                                 style={{ layout: "vertical" }}
@@ -359,6 +392,7 @@ ${processing || !isValidAmount
                                                         body: JSON.stringify({
                                                             amount: numericAmount,
                                                             invoiceId: id,
+                                                            currency: invoice.currency,
                                                         }),
                                                     });
 
@@ -392,7 +426,7 @@ ${processing || !isValidAmount
                                                     }
 
                                                     toast.success("Payment successful 🎉", {
-                                                        description: `₹${numericAmount.toLocaleString("en-IN")} received`,
+                                                        description: `${currencySymbol}${formatNumber(numericAmount)} received`,
                                                     });
 
                                                     setProcessing(false);
@@ -461,7 +495,7 @@ ${processing || !isValidAmount
                                                             >
                                                                 <div>
                                                                     <div className="text-sm font-medium">
-                                                                        ₹{Number(p.amount || 0).toLocaleString("en-IN")}
+                                                                        {currencySymbol}{formatNumber(Number(p.amount || 0))}
                                                                     </div>
 
                                                                     <div className="text-xs text-white/40">
@@ -500,7 +534,7 @@ ${processing || !isValidAmount
                                     </div>
 
                                     <div className="text-3xl font-semibold text-white animate-pulse">
-                                        ₹{total.toLocaleString("en-IN")}
+                                        {currencySymbol}{formatNumber(total)}
                                     </div>
 
                                     <div className="text-sm text-white/50 mt-2">

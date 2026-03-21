@@ -66,6 +66,7 @@ export function useInvoiceEditor() {
 
   const [client, setClient] = useState("");
   const [clientEmail, setClientEmail] = useState("");
+  const [currency, setCurrency] = useState<"INR" | "USD">("INR")
   const [paymentStatus, setPaymentStatus] =
     useState<Invoice["paymentStatus"]>("unpaid");
 
@@ -83,6 +84,8 @@ export function useInvoiceEditor() {
   const [clientAddress, setClientAddress] = useState("");
   const [taxRate, setTaxRate] = useState(0);
   const [discount, setDiscount] = useState(0);
+
+  const [createdInvoiceId, setCreatedInvoiceId] = useState<string | null>(null);
 
   /* ------------------------------------------
      Load invoice when editing
@@ -159,9 +162,13 @@ export function useInvoiceEditor() {
     [lineItems]
   );
 
-  const taxAmount = 0;
-  const total = subtotal + taxAmount;
+  const taxAmount = useMemo(() => {
+    return (subtotal * Number(taxRate || 0)) / 100;
+  }, [subtotal, taxRate]);
 
+  const total = useMemo(() => {
+    return subtotal + taxAmount - Number(discount || 0);
+  }, [subtotal, taxAmount, discount]);
   /* ------------------------------------------
      Line item helpers
   ------------------------------------------- */
@@ -204,17 +211,10 @@ export function useInvoiceEditor() {
     }).length;
   }, [invoices]);
 
-  async function saveInvoice(showToast: (msg: string) => void) {
+  async function saveInvoice(
+    showToast: (msg: string) => void
+  ): Promise<any | null> {
     try {
-      if (!editingInvoice && plan === "free" && invoiceCountThisMonth >= 5) {
-        showToast("Free plan allows only 5 invoices per month");
-        return;
-      }
-
-      if (!client.trim()) {
-        showToast("Client name is required");
-        return;
-      }
 
       const formattedDate = new Date(date).toLocaleDateString("en-IN", {
         day: "numeric",
@@ -229,7 +229,7 @@ export function useInvoiceEditor() {
         (c) => c.name.toLowerCase() === client.toLowerCase()
       );
 
-      if (!existingClient) {
+      if (client.trim() && !existingClient) {
         await addClient({
           name: client,
           email: clientEmail || "",
@@ -244,8 +244,8 @@ export function useInvoiceEditor() {
         amount: formatCurrencyINR(total),
         paymentStatus,
         date: formattedDate,
-        dueDate: date,
-        currency: "INR",
+        dueDate,
+        currency,
 
         remindersSent: {
           d7: false,
@@ -266,18 +266,35 @@ export function useInvoiceEditor() {
         company,
       };
 
+      // 1. If editing existing invoice
       if (editingInvoice) {
-        await updateInvoice(editingInvoice.id, invoiceData);
+        const updated = await updateInvoice(editingInvoice.id, invoiceData);
         showToast("Invoice updated");
-      } else {
-        await addInvoice(invoiceData);
-        showToast("Invoice saved");
+        return updated;
       }
 
-      setTimeout(() => router.push("/dashboard"), 900);
+      // 2. If already created once → update SAME draft
+      if (createdInvoiceId) {
+        const updated = await updateInvoice(createdInvoiceId, invoiceData);
+        showToast("Invoice updated");
+        return updated;
+      }
+
+      // 3. First time → create new draft
+      const created = await addInvoice(invoiceData) as any;
+
+
+
+      setCreatedInvoiceId(created.id);
+
+      showToast("Invoice saved");
+
+      return { ...created, id: created.id };
+
     } catch (err) {
-      console.error(err);
-      showToast("Failed to save invoice");
+      console.error("SAVE ERROR:", err);
+      showToast(String(err));
+      return null;
     }
   }
 
@@ -285,7 +302,9 @@ export function useInvoiceEditor() {
      Public API
   ------------------------------------------- */
 
-  const idToUse = editingInvoice?.invoiceNumber || "Draft";
+  const idToUse =
+    editingInvoice?.invoiceNumber ||
+    (createdInvoiceId ? "Generating..." : "Draft");
 
   return {
     loadingCompany,
@@ -311,7 +330,8 @@ export function useInvoiceEditor() {
     notes,
     setNotes,
     lineItems,
-
+    currency,
+    setCurrency,
 
     company,
 
@@ -324,5 +344,7 @@ export function useInvoiceEditor() {
     removeLine,
     saveInvoice,
     idToUse,
+
+    createdInvoiceId,
   };
 }

@@ -42,6 +42,13 @@ function safeFormatDate(date: string) {
   }
 }
 
+
+function formatNumber(value: number, currency?: string) {
+  return value.toLocaleString(
+    currency === "USD" ? "en-US" : "en-IN"
+  );
+}
+
 /* ------------------------------------------
    Component
 ------------------------------------------- */
@@ -88,17 +95,17 @@ export default function InvoicePreview({
   const safeTotal = Number(total || 0);
   const safeDiscount = Number(discount || 0);
 
-const currencySymbol = getCurrencySymbol(currency);
+  const currencySymbol = getCurrencySymbol(currency);
 
   return (
     <div className="w-full flex items-center justify-center">
 
       {/* SCALE WRAPPER */}
-      <div className="origin-center scale-[0.78] xl:scale-[0.85] 2xl:scale-[0.9]">
+      <div className="scale-container origin-center scale-[0.78] xl:scale-[0.85] 2xl:scale-[0.9]">
 
 
         {/* A4 PAPER */}
-        <div className="bg-white w-[794px] min-h-[1123px] rounded-xl shadow-[0_30px_80px_rgba(0,0,0,0.4)] p-12 flex flex-col">
+        <div className="invoice-paper bg-white w-[794px] min-h-[1123px] p-12 flex flex-col">
 
           {/* ===== HEADER ===== */}
           <header className="flex justify-between items-start">
@@ -213,11 +220,11 @@ const currencySymbol = getCurrencySymbol(currency);
                     </td>
 
                     <td className="text-right text-slate-900">
-                      {currencySymbol}{rateNumber.toLocaleString("en-IN")}
+                      {currencySymbol}{formatNumber(rateNumber, currency)}
                     </td>
 
                     <td className="text-right font-medium text-slate-900">
-{currencySymbol}{amount.toLocaleString("en-IN")}
+                      {currencySymbol}{formatNumber(amount, currency)}
                     </td>
                   </tr>
 
@@ -234,24 +241,24 @@ const currencySymbol = getCurrencySymbol(currency);
               <div className="w-80 text-sm border border-slate-300 rounded-lg p-4">
                 <div className="flex justify-between py-2 text-slate-800">
                   <span>Subtotal</span>
-                  <span>{currencySymbol}{safeSubtotal.toLocaleString("en-IN")}</span>
+                  <span>{currencySymbol}{formatNumber(safeSubtotal, currency)}</span>
                 </div>
 
                 <div className="flex justify-between py-2 text-slate-800">
                   <span>Tax</span>
-                  <span>{currencySymbol}{safeTaxAmount.toLocaleString("en-IN")}</span>
+                  <span>{currencySymbol}{formatNumber(safeTaxAmount, currency)}</span>
                 </div>
 
                 {discount ? (
                   <div className="flex justify-between py-2 text-slate-800">
                     <span>Discount</span>
-                    <span>-{currencySymbol}{safeDiscount.toLocaleString("en-IN")}</span>
+                    <span>-{currencySymbol}{formatNumber(safeDiscount, currency)}</span>
                   </div>
                 ) : null}
 
                 <div className="flex justify-between pt-4 mt-3 border-t border-slate-400 text-xl font-semibold text-slate-900">
                   <span>Total</span>
-                  <span>{currencySymbol}{safeTotal.toLocaleString("en-IN")}</span>
+                  <span>{currencySymbol}{formatNumber(safeTotal, currency)}</span>
                 </div>
               </div>
             </div>
@@ -259,10 +266,10 @@ const currencySymbol = getCurrencySymbol(currency);
             {/* ===== NOTES ===== */}
             {notes && (
               <div className="mt-12 text-sm">
-                <div className="font-semibold mb-2">Notes</div>
-                <div className="border border-slate-300 rounded-md p-4">
-                  {notes}
-                </div>
+                <div className="font-semibold mb-2 text-slate-800">Notes</div>
+                <div className="border border-slate-300 rounded-md p-4 text-slate-800 leading-relaxed">
+  {notes}
+</div>
               </div>
             )}
 

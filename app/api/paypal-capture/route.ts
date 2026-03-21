@@ -83,7 +83,7 @@ export async function POST(req: Request) {
     const currency = capture.amount?.currency_code;
     const value = capture.amount?.value;
 
-    const paymentAmount = Number(value);
+const paymentAmount = Math.round(Number(value) * 100) / 100;
 
     /* 🔥 STRONG SAFETY CHECK */
 
@@ -154,7 +154,7 @@ export async function POST(req: Request) {
 
     let status = "unpaid";
 
-    if (totalPaid >= totalAmount) {
+if (Math.round(totalPaid * 100) >= Math.round(totalAmount * 100)) {
       status = "paid";
     } else if (totalPaid > 0) {
       status = "partial";

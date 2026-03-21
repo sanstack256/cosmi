@@ -116,7 +116,7 @@ type InvoiceContextType = {
     method: string,
     note?: string
   ) => Promise<void>;
-  addInvoice: (invoice: Omit<Invoice, "id" | "createdAt">) => Promise<void>;
+  addInvoice: (invoice: Omit<Invoice, "id" | "createdAt">) => Promise<{ id: string }>;
   updateInvoice: (id: string, invoice: Partial<Invoice>) => Promise<void>;
   removeInvoice: (id: string) => Promise<void>;
   issueInvoice: (id: string) => Promise<void>;
@@ -241,69 +241,72 @@ export function InvoiceProvider({ children }: { children: React.ReactNode }) {
       }
     });
 
- const payload = {
-  ...invoice,
+    const payload = {
+      ...invoice,
 
-  lifecycle: "draft",
-  paymentStatus: invoice.paymentStatus ?? "unpaid",
-  payments: [],
-  invoiceNumber: null,
+      lifecycle: "draft",
+      paymentStatus: invoice.paymentStatus ?? "unpaid",
+      payments: [],
+      invoiceNumber: null,
 
-  remindersSent: {
-    d7: false,
-    d3: false,
-    d1: false,
-    due: false,
-    overdue: false,
-  },
+      remindersSent: {
+        d7: false,
+        d3: false,
+        d1: false,
+        due: false,
+        overdue: false,
+      },
 
-  createdAt: serverTimestamp(),
-  updatedAt: serverTimestamp(),
-  issuedAt: null,
-  cancelledAt: null,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      issuedAt: null,
+      cancelledAt: null,
 
-  activity: [
-    {
-      type: "draft_created",
-      timestamp: new Date(),
-    },
-  ],
-};
+      activity: [
+        {
+          type: "draft_created",
+          timestamp: new Date(),
+        },
+      ],
+    };
+    console.log("FIRESTORE PAYLOAD:", JSON.stringify(payload, null, 2));
 
-await setDoc(newInvoiceRef, payload);
+    await setDoc(newInvoiceRef, payload);
+    return { id: newInvoiceRef.id };
 
-console.log("FIRESTORE PAYLOAD:", JSON.stringify(payload, null, 2));
 
-await setDoc(newInvoiceRef, payload);
 
-    await setDoc(newInvoiceRef, {
-  ...invoice,
 
-  lifecycle: "draft",
-  paymentStatus: invoice.paymentStatus ?? "unpaid",
-  payments: [],
-  invoiceNumber: null,
+    // await setDoc(newInvoiceRef, {
+    //   ...invoice,
 
-  remindersSent: {
-    d7: false,
-    d3: false,
-    d1: false,
-    due: false,
-    overdue: false,
-  },
+    //   lifecycle: "draft",
+    //   paymentStatus: invoice.paymentStatus ?? "unpaid",
+    //   payments: [],
+    //   invoiceNumber: null,
 
-  createdAt: serverTimestamp(),
-  updatedAt: serverTimestamp(),
-  issuedAt: null,
-  cancelledAt: null,
+    //   remindersSent: {
+    //     d7: false,
+    //     d3: false,
+    //     d1: false,
+    //     due: false,
+    //     overdue: false,
+    //   },
 
-  activity: [
-    {
-      type: "draft_created",
-      timestamp: new Date(),
-    },
-  ],
-});
+    //   createdAt: serverTimestamp(),
+    //   updatedAt: serverTimestamp(),
+    //   issuedAt: null,
+    //   cancelledAt: null,
+
+    //   activity: [
+    //     {
+    //       type: "draft_created",
+    //       timestamp: new Date(),
+    //     },
+    //   ],
+    // });
+
+
   }
 
   async function addClient(client: Omit<Client, "id">) {

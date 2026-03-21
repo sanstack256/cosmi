@@ -4,6 +4,7 @@ export async function POST(req: Request) {
   try {
 
     const body = await req.json();
+    const currency = body.currency;
 
     const amount = Number(body.amount || 10);
     const invoiceId = body.invoiceId;
@@ -44,6 +45,7 @@ export async function POST(req: Request) {
     const tokenData = await tokenRes.json();
     const accessToken = tokenData.access_token;
 
+
     /* 2️⃣ Create PayPal order */
 
     const orderRes = await fetch(
@@ -58,10 +60,12 @@ export async function POST(req: Request) {
           intent: "CAPTURE",
 
           purchase_units: [
+
+            
             {
               amount: {
-                currency_code: "USD",
-                value: (amount / 83).toFixed(2),
+                currency_code: currency || "INR",
+                value: amount.toFixed(2),
               },
               reference_id: invoiceId
             },
@@ -71,6 +75,7 @@ export async function POST(req: Request) {
     );
 
     const orderData = await orderRes.json();
+        console.log("ORDER RESPONSE:", orderData);
 
     console.log("PAYPAL ORDER:", orderData);
 

@@ -1,15 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 
 import InvoiceForm from "@/app/invoice-editor/components/invoice/InvoiceForm";
 import InvoicePreview from "@/app/invoice-editor/components/invoice/InvoicePreview";
 import { formatCurrencyINR } from "@/app/invoice-editor/hooks/useInvoiceEditor";
 import { useInvoiceEditor } from "./hooks/useInvoiceEditor";
 import { useAuth } from "@/app/providers/AuthProvider";
+import { useInvoices } from "@/app/providers/InvoiceProvider";
+import { useRouter } from "next/navigation";
 
 
 export default function InvoiceEditorPage() {
+
+  const router = useRouter();
+
   const {
     loadingCompany,
     hasCompanyProfile,
@@ -44,18 +49,80 @@ export default function InvoiceEditorPage() {
     taxAmount,
     total,
 
+    currency,
+    setCurrency,
+
     updateLine,
     addLine,
     removeLine,
     saveInvoice,
 
     idToUse,
+    createdInvoiceId
   } = useInvoiceEditor();
 
   const [toast, setToast] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
+  const printRef = useRef<HTMLDivElement>(null);
+  const clientRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const dateRef = useRef<HTMLInputElement>(null);
+  const dueDateRef = useRef<HTMLInputElement>(null);
+  const lineItemsRef = useRef<HTMLDivElement>(null);
+  const isValidating = useRef(false);
+
+
+  const [highlightSection, setHighlightSection] = useState<string | null>(null);
+
+  const [errors, setErrors] = useState({
+    client: false,
+    clientEmail: false,
+    date: false,
+    dueDate: false,
+    lineItems: false,
+  });
+
+
+  const { invoices, issueInvoice } = useInvoices();
+
+  const currentInvoice = editingInvoice;
+
+
   const { plan } = useAuth();
+
+  const currencySymbol = currency === "USD" ? "$" : "₹";
+
+  function formatNumber(value: number) {
+    return value.toLocaleString(
+      currency === "USD" ? "en-US" : "en-IN"
+    );
+  }
+
+  function handlePrint() {
+    if (!printRef.current) return;
+
+    const printContents = printRef.current.innerHTML;
+    const win = window.open("", "", "width=900,height=650");
+
+    if (!win) return;
+
+    win.document.write(`
+    <html>
+      <head>
+        <title>Invoice</title>
+      </head>
+      <body>
+        ${printContents}
+      </body>
+    </html>
+  `);
+
+    win.document.close();
+    win.focus();
+    win.print();
+    win.close();
+  }
 
   async function handleSendEmail() {
     if (!clientEmail) {
@@ -79,10 +146,10 @@ export default function InvoiceEditorPage() {
 
       <p>Your invoice has been generated.</p>
 
-      <p><strong>Total:</strong> ${formatCurrencyINR(total)}</p>
+<p><strong>Total:</strong> ${currencySymbol}${formatNumber(total)}</p>
 
       <p>
-        <a href="https://cosmi.vercel.app/invoice-editor">
+        <a href="https://cosmi.vercel.app/invoice/${idToUse}">
   View Invoice
 </a>
       </p>
@@ -114,7 +181,141 @@ export default function InvoiceEditorPage() {
      Validation Before Save
   ------------------------------------------- */
 
+  function smoothScrollTo(targetY: number, duration = 500) {
+    const startY = window.scrollY;
+    const diff = targetY - startY;
+    let start: number | null = null;
+
+    function easeInOutCubic(t: number) {
+      return t < 0.5
+        ? 4 * t * t * t
+        : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+
+    function step(timestamp: number) {
+      if (!start) start = timestamp;
+      const progress = (timestamp - start) / duration;
+      const eased = easeInOutCubic(Math.min(progress, 1));
+
+      window.scrollTo(0, startY + diff * eased);
+
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      }
+    }
+
+    requestAnimationFrame(step);
+  }
+
+  async function handleIssue() {
+    if (saving) return;
+    console.log("ISSUE CLICKED");
+
+    // 1. Reset errors
+    // ✅ 1. Validate everything at once
+
+    let newErrors = {
+      client: false,
+      clientEmail: false,
+      date: false,
+      dueDate: false,
+      lineItems: false,
+    };
+
+    // Field checks
+    if (!client.trim()) newErrors.client = true;
+    if (!clientEmail.trim()) newErrors.clientEmail = true;
+    if (!date) newErrors.date = true;
+    if (!dueDate) newErrors.dueDate = true;
+
+    // Line items
+    if (!lineItems.length) {
+      newErrors.lineItems = true;
+    } else {
+      const hasInvalidItem = lineItems.some(
+        (item) =>
+          !item.desc.trim() ||
+          Number(item.qty) <= 0 ||
+          Number(item.rate || 0) <= 0
+      );
+
+      if (hasInvalidItem) newErrors.lineItems = true;
+    }
+
+    // ✅ 2. Apply errors
+    setErrors(newErrors);
+
+    // ❌ 3. Stop if any error
+    if (Object.values(newErrors).some(Boolean)) {
+      showToast("Please fill all required fields");
+
+      // Prevent client onBlur from interfering
+      isValidating.current = true;
+
+      // Wait for React to paint the error styles, then scroll + focus
+      setTimeout(() => {
+        let targetRef: React.RefObject<HTMLElement | null> | null = null;
+
+        if (newErrors.client) targetRef = clientRef;
+        else if (newErrors.clientEmail) targetRef = emailRef;
+        else if (newErrors.date) targetRef = dateRef;
+        else if (newErrors.dueDate) targetRef = dueDateRef;
+        else if (newErrors.lineItems) {
+          setHighlightSection("lineItems");
+          lineItemsRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+          setTimeout(() => setHighlightSection(null), 3000);
+          isValidating.current = false;
+          return;
+        }
+
+        if (targetRef?.current) {
+          targetRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+          // Focus after scroll animation settles
+          setTimeout(() => {
+            targetRef.current?.focus();
+          }, 300);
+        } else {
+          isValidating.current = false;
+        }
+      });
+
+      return;
+    }
+
+    // ✅ ONLY AFTER VALIDATION → SAVE
+
+    let invoiceId = editingInvoice?.id || createdInvoiceId;
+
+    if (!invoiceId) {
+      try {
+        setSaving(true);
+        const saved = await saveInvoice(showToast);
+        invoiceId = saved?.id;
+      } finally {
+        setSaving(false);
+      }
+    }
+
+    // Safety check
+    if (!invoiceId) {
+      showToast("Failed to save invoice");
+      return;
+    }
+
+    // ✅ Issue
+    await issueInvoice(invoiceId);
+
+    showToast("Invoice issued");
+
+    router.push("/dashboard");
+  }
+
   async function handleSave() {
+    if (saving) return;
+
     if (!client.trim()) {
       showToast("Client name is required");
       return;
@@ -125,10 +326,17 @@ export default function InvoiceEditorPage() {
       return;
     }
 
+    if (!dueDate) {
+      showToast("Due date is required");
+      return;
+    }
+
     if (!lineItems.length) {
       showToast("Add at least one line item");
       return;
     }
+
+
 
     const hasInvalidItem = lineItems.some(
       (item) =>
@@ -155,12 +363,21 @@ export default function InvoiceEditorPage() {
   ------------------------------------------- */
 
   return (
-    <div className="min-h-screen bg-[#050509] text-slate-100 flex">
+    <div className="min-h-screen bg-[#050509] text-slate-100 flex overflow-y-auto">
 
       {/* LEFT PANEL */}
-      <div className="w-[600px] xl:w-[700px] 2xl:w-[750px] border-r border-white/5 p-6">
+      <div
+        className="w-[600px] xl:w-[700px] 2xl:w-[750px] border-r border-white/5 p-6"
+      >
+
 
         <InvoiceForm
+
+          clientRef={clientRef}
+          dateRef={dateRef}
+          emailRef={emailRef}
+          dueDateRef={dueDateRef}
+          lineItemsRef={lineItemsRef}
           loadingCompany={loadingCompany}
           hasCompanyProfile={hasCompanyProfile}
           editingInvoice={editingInvoice}
@@ -190,18 +407,21 @@ export default function InvoiceEditorPage() {
           subtotalFormatted={formatCurrencyINR(subtotal)}
           onSave={handleSave}
           saving={saving}
+          currency={currency}
+          setCurrency={setCurrency}
+          onSendEmail={handleSendEmail}
+          onIssue={handleIssue}
+          highlightSection={highlightSection}
+          errors={errors}
+          setErrors={setErrors}
+          isValidating={isValidating}
         />
+
       </div>
 
       {/* RIGHT PANEL */}
       <div className="flex-1 flex justify-center py-6 px-4">
         <div className="flex flex-col items-center gap-4">
-          <button
-            onClick={handleSendEmail}
-            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-white text-sm"
-          >
-            Send Invoice Email
-          </button>
 
           <InvoicePreview
             id={idToUse}
@@ -215,13 +435,21 @@ export default function InvoiceEditorPage() {
             total={total}
             notes={notes}
             company={company}
+            currency={currency}
             plan={plan}
             discount={discount}
           />
         </div>
       </div>
 
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 px-4 py-2 rounded-lg bg-[#111118] border border-white/10 text-white shadow-lg">
+          {toast}
+        </div>
+      )}
     </div>
+
+
   );
 
 
