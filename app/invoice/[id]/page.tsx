@@ -2,22 +2,41 @@
 
 import React from "react";
 import InvoicePreview from "@/app/invoice-editor/components/invoice/InvoicePreview";
-import { collectionGroup, query, where, getDocs } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { PayPalButtons } from "@paypal/react-paypal-js";
 import { toast } from "sonner";
 import { getCurrencySymbol, formatCurrency } from "@/app/utils/currency";
+import { useParams, useSearchParams } from "next/navigation";
 
 
-type Props = {
-    params: Promise<{ id: string }>;
-};
 
-export default function PublicInvoicePage({ params }: Props) {
-    const { id } = React.use(params);
+
+export default function PublicInvoicePage() {
+    const params = useParams();
+    const searchParams = useSearchParams();
+
+    const publicId = params?.id as string;
+    const token = searchParams.get("t");
+
+    const rawId = params?.id;
+
+    const id =
+        typeof rawId === "string"
+            ? rawId
+            : Array.isArray(rawId)
+                ? rawId[0]
+                : "";
+
     const [showAllPayments, setShowAllPayments] = React.useState(false);
-    const [invoice, setInvoice] = React.useState<any>(null);
+    const [invoice, setInvoice] = React.useState<any>(undefined);
     const [method, setMethod] = React.useState<"razorpay" | "paypal">("razorpay");
+    const [processing, setProcessing] = React.useState(false);
+    const [payAmount, setPayAmount] = React.useState("");
+
+    const [authorized, setAuthorized] = React.useState(false);
+    const [emailInput, setEmailInput] = React.useState("");
+    const [authError, setAuthError] = React.useState("");
 
     React.useEffect(() => {
         if (!invoice) return;
@@ -29,27 +48,63 @@ export default function PublicInvoicePage({ params }: Props) {
         }
     }, [invoice]);
 
-    const [processing, setProcessing] = React.useState(false);
-    const [payAmount, setPayAmount] = React.useState("");
-
     // LOAD INVOICE
     React.useEffect(() => {
+        if (!id) return;
+
         async function loadInvoice() {
-            const normalizedId = id.trim().toUpperCase();
+            try {
+                console.log("ID:", id);
 
-            const q = query(
-                collectionGroup(db, "invoices"),
-                where("invoiceNumber", "==", normalizedId)
-            );
+                const pubSnap = await getDoc(doc(db, "publicInvoices", id));
+                console.log("PUB EXISTS:", pubSnap.exists(), "ID:", id);
 
-            const snap = await getDocs(q);
-            if (snap.empty) return;
+                if (!pubSnap.exists()) {
+                    console.error("❌ Public link not found:", id);
+                    setInvoice(null);
+                    return;
+                }
 
-            setInvoice(snap.docs[0].data());
+                const publicData = pubSnap.data();
+                console.log("PUBLIC DATA:", publicData);
+
+                // 🔐 TOKEN VALIDATION (CRITICAL)
+                if (!token || publicData.token !== token) {
+                    console.error("❌ Invalid token");
+
+                    setInvoice(null); // triggers "Invoice not found"
+                    return;
+                }
+
+                if (!publicData?.invoicePath) {
+                    console.error("❌ invoicePath missing");
+                    setInvoice(null);
+                    return;
+                }
+
+                console.log("PATH:", publicData.invoicePath);
+
+                const path = publicData.invoicePath.split("/") as [string, ...string[]];
+                const invoiceRef = doc(db, ...path);
+                const invoiceSnap = await getDoc(invoiceRef);
+
+                console.log("INVOICE EXISTS:", invoiceSnap.exists());
+
+                if (!invoiceSnap.exists()) {
+                    setInvoice(null);
+                    return;
+                }
+
+                setInvoice(invoiceSnap.data());
+
+            } catch (err) {
+                console.error("🔥 Firestore error:", err);
+                setInvoice(null);
+            }
         }
 
         loadInvoice();
-    }, [id]);
+    }, [id, token]);
 
     // LOAD RAZORPAY
     React.useEffect(() => {
@@ -59,7 +114,7 @@ export default function PublicInvoicePage({ params }: Props) {
         document.body.appendChild(script);
     }, []);
 
-    // 🔑 SAFE SYNC EFFECT (NO HOOK BUGS)
+    // 🔑 SAFE SYNC EFFECT
     React.useEffect(() => {
         if (!invoice) return;
 
@@ -82,8 +137,26 @@ export default function PublicInvoicePage({ params }: Props) {
         setPayAmount(remaining.toString());
     }, [invoice]);
 
+
+
+    function verifyAccess() {
+        const email = emailInput.trim().toLowerCase();
+
+        const clientEmail = (invoice?.clientEmail || "").toLowerCase();
+        const ownerEmail = (invoice?.company?.email || "").toLowerCase();
+
+        if (email === clientEmail || email === ownerEmail) {
+            setAuthorized(true);
+            setAuthError("");
+        } else {
+            setAuthError("You are not authorized to view this invoice");
+        }
+    }
+
+
+
     // LOADING STATE
-    if (!invoice) {
+    if (invoice === undefined) {
         return (
             <div className="min-h-screen bg-gradient-to-b from-[#050509] via-[#070712] to-[#050509] flex items-center justify-center">
                 <div className="animate-pulse space-y-4 w-[300px]">
@@ -94,6 +167,65 @@ export default function PublicInvoicePage({ params }: Props) {
             </div>
         );
     }
+
+    if (invoice === null) {
+        return (
+            <div className="min-h-screen flex items-center justify-center text-white">
+                Invoice not found
+            </div>
+        );
+    }
+
+
+if (!authorized && invoice) {
+    return (
+        <div className="min-h-screen bg-[#050509] flex items-center justify-center relative text-white">
+
+            {/* BACKGROUND GLOW */}
+            <div className="absolute w-[700px] h-[700px] bg-indigo-600/20 blur-[120px] rounded-full" />
+
+            {/* MODAL */}
+            <div className="relative z-10 w-full max-w-md bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-[0_30px_100px_rgba(0,0,0,0.9)]">
+
+                {/* TITLE */}
+                <div className="text-xl font-semibold mb-2">
+                    Secure Invoice Access
+                </div>
+
+                <div className="text-sm text-white/50 mb-6">
+                    Enter your email to view this invoice
+                </div>
+
+                {/* INPUT */}
+                <input
+                    type="email"
+                    placeholder="you@example.com"
+                    value={emailInput}
+                    onChange={(e) => setEmailInput(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                />
+
+                {/* ERROR */}
+                {authError && (
+                    <div className="text-red-400 text-sm mt-3">
+                        {authError}
+                    </div>
+                )}
+
+                {/* BUTTON */}
+                <button
+                    onClick={verifyAccess}
+                    className="w-full mt-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 transition-all font-medium"
+                >
+                    Continue
+                </button>
+
+            </div>
+        </div>
+    );
+}
+
+
     const currency = invoice.currency || "INR";
 
     const formatNumber = (value: number) =>

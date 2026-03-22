@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 import { useAuth } from "@/app/providers/AuthProvider";
@@ -121,7 +121,7 @@ export function useInvoiceEditor() {
       );
 
     }
-    
+
   }, [editingInvoice]);
 
   /* ------------------------------------------
@@ -217,6 +217,25 @@ export function useInvoiceEditor() {
     }).length;
   }, [invoices]);
 
+  async function ensurePublicLink(invoiceId: string) {
+    try {
+      const publicId = crypto.randomUUID().replace(/-/g, "").slice(0, 16);
+      const token = crypto.randomUUID().replace(/-/g, "").slice(0, 24);
+
+      await setDoc(doc(db, "publicInvoices", publicId), {
+        invoicePath: `users/${user?.uid}/invoices/${invoiceId}`,
+        token,
+        createdAt: serverTimestamp(),
+      });
+
+      console.log("✅ PUBLIC LINK READY:");
+      console.log(`https://cosmi-ten.vercel.app/invoice/${publicId}?t=${token}`);
+
+    } catch (err) {
+      console.error("Public link creation failed:", err);
+    }
+  }
+
   async function saveInvoice(
     showToast: (msg: string) => void
   ): Promise<any | null> {
@@ -282,6 +301,10 @@ export function useInvoiceEditor() {
       // 2. If already created once → update SAME draft
       if (createdInvoiceId) {
         const updated = await updateInvoice(createdInvoiceId, invoiceData);
+
+        // 🔥 ENSURE PUBLIC LINK EXISTS
+        await ensurePublicLink(createdInvoiceId);
+
         showToast("Invoice updated");
         return updated;
       }
@@ -289,13 +312,25 @@ export function useInvoiceEditor() {
       // 3. First time → create new draft
       const created = await addInvoice(invoiceData) as any;
 
+      const invoiceId = created?.id || created?.docId || created;
+
+      if (!invoiceId) {
+        console.error("Invoice ID missing:", created);
+        throw new Error("Invoice ID not returned");
+      }
+      console.log("CREATED INVOICE:", created);
 
 
-      setCreatedInvoiceId(created.id);
+      // 🔥 CREATE PUBLIC LINK HERE
+console.log("🚀 CALLING ensurePublicLink with:", invoiceId);
+      await ensurePublicLink(invoiceId);
+
+
+      setCreatedInvoiceId(invoiceId);
 
       showToast("Invoice saved");
 
-      return { ...created, id: created.id };
+      return { ...created, id: invoiceId };
 
     } catch (err) {
       console.error("SAVE ERROR:", err);
@@ -352,5 +387,6 @@ export function useInvoiceEditor() {
     idToUse,
 
     createdInvoiceId,
+    ensurePublicLink,
   };
 }

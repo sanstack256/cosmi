@@ -59,7 +59,8 @@ export default function InvoiceEditorPage() {
     saveInvoice,
 
     idToUse,
-    createdInvoiceId
+    createdInvoiceId,
+    ensurePublicLink,
   } = useInvoiceEditor();
 
   const [toast, setToast] = useState<string | null>(null);
@@ -284,16 +285,24 @@ export default function InvoiceEditorPage() {
 
     // ✅ ONLY AFTER VALIDATION → SAVE
 
-    let invoiceId = editingInvoice?.id || createdInvoiceId;
+    let invoiceId: string | null = null;
+
+    // 🔥 ALWAYS SAVE FIRST (single source of truth)
+    try {
+      setSaving(true);
+      const saved = await saveInvoice(showToast);
+
+      invoiceId = saved?.id;
+
+      console.log("🔥 FINAL INVOICE ID:", invoiceId);
+
+    } finally {
+      setSaving(false);
+    }
 
     if (!invoiceId) {
-      try {
-        setSaving(true);
-        const saved = await saveInvoice(showToast);
-        invoiceId = saved?.id;
-      } finally {
-        setSaving(false);
-      }
+      showToast("Failed to save invoice");
+      return;
     }
 
     // Safety check
@@ -304,6 +313,10 @@ export default function InvoiceEditorPage() {
 
     // ✅ Issue
     await issueInvoice(invoiceId);
+
+    // 🔥 REAL FIX
+    await ensurePublicLink(invoiceId);
+
 
     showToast("Invoice issued");
 
