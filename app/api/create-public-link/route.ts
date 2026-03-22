@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/firebase-admin"; // ⚠️ must be admin SDK
 import { randomUUID } from "crypto";
-import { useSearchParams } from "next/navigation";
+
 
 export async function POST(req: Request) {
     try {
@@ -13,8 +13,7 @@ export async function POST(req: Request) {
 
         const publicId = randomUUID().replace(/-/g, "").slice(0, 16);
 
-        const searchParams = useSearchParams();
-        const token = searchParams.get("t");
+        const token = randomUUID().replace(/-/g, "");
 
         await db.collection("publicInvoices").doc(publicId).set({
             invoicePath: `users/${userId}/invoices/${invoiceId}`,
