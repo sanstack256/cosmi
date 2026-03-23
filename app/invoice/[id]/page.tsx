@@ -191,7 +191,7 @@ export default function PublicInvoicePage() {
     React.useEffect(() => {
         if (!invoice) return;
 
-        const lineItems = (invoice.meta?.lineItems || []) as { qty: number; rate: number }[];
+        const lineItems = invoice.meta?.lineItems || [];
 
         const subtotal = lineItems.reduce(
             (sum: number, item: any) => sum + item.qty * Number(item.rate || 0),
@@ -207,7 +207,8 @@ export default function PublicInvoicePage() {
 
         const remaining = Math.max(subtotal - totalPaid, 0);
 
-        setPayAmount(remaining.toString());
+        // ✅ Only set if empty (first load)
+        setPayAmount("");
     }, [invoice]);
 
 
@@ -275,7 +276,7 @@ export default function PublicInvoicePage() {
                         placeholder="you@example.com"
                         value={emailInput}
                         onChange={(e) => setEmailInput(e.target.value)}
-                        className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                        className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white outline-none focus:border-indigo-500 focus:ring-2 focus:ring-2 focus:ring-indigo-500/30 focus:shadow-[0_0_20px_rgba(99,102,241,0.3)] transition-all"
                     />
 
                     {/* ERROR */}
@@ -416,7 +417,7 @@ export default function PublicInvoicePage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#050509] relative text-white">
+        <div className="min-h-screen bg-[#050509] relative text-white animate-fade-in">
             {/* BACKGROUND */}
             <div className="absolute top-[-200px] left-1/2 -translate-x-1/2 w-[900px] h-[900px] bg-indigo-600/20 blur-[140px] rounded-full" />
 
@@ -455,7 +456,7 @@ export default function PublicInvoicePage() {
 
                     {/* RIGHT */}
                     <div className="lg:sticky lg:top-16 self-start flex justify-center">
-                        <div className="w-full max-w-[420px] bg-white/5 backdrop-blur-xl text-white rounded-3xl border border-white/10 shadow-[0_30px_100px_rgba(0,0,0,0.9)] p-8 transition-all duration-300 ease-out">
+                        <div className="w-full max-w-[420px] bg-white/5 backdrop-blur-xl text-white rounded-3xl border border-white/10 shadow-[0_30px_100px_rgba(0,0,0,0.9)] p-8 transition-all duration-300 ease-in-out hover:scale-[1.01] hover:shadow-[0_40px_120px_rgba(0,0,0,1)]">
 
                             {!isFullyPaid ? (
                                 <>
@@ -465,7 +466,7 @@ export default function PublicInvoicePage() {
                                             Amount due
                                         </div>
 
-                                        <div className="text-5xl lg:text-6xl font-bold mt-3 tracking-tight transition-all duration-300 ease-out">
+                                        <div className="text-5xl lg:text-6xl font-bold mt-3 tracking-tight transition-all duration-300 ease-in-out">
                                             {currencySymbol}{formatNumber(remaining)}
                                         </div>
 
@@ -491,8 +492,13 @@ export default function PublicInvoicePage() {
                                                 placeholder="Enter amount"
                                                 value={payAmount}
                                                 disabled={processing}
-                                                onFocus={() => {
-                                                    if (payAmount === "0") setPayAmount("");
+                                                onFocus={(e) => {
+                                                    const val = payAmount;
+
+                                                    // Move cursor to end
+                                                    setTimeout(() => {
+                                                        e.target.setSelectionRange(val.length, val.length);
+                                                    }, 0);
                                                 }}
                                                 onChange={(e) => {
                                                     const val = e.target.value.replace(/\D/g, "");
@@ -500,6 +506,8 @@ export default function PublicInvoicePage() {
                                                 }}
                                                 className="w-full pl-7 pr-3 py-3 rounded-xl bg-white/5 border border-white/10 text-white outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
                                             />
+
+
                                         </div>
 
                                         {/* ERROR */}
@@ -524,7 +532,7 @@ export default function PublicInvoicePage() {
 
                                             {/* Sliding background */}
                                             <div
-                                                className={`absolute top-1 bottom-1 rounded-lg bg-white transition-all duration-300 ease-out
+                                                className={`absolute top-1 bottom-1 rounded-lg bg-white transition-all duration-300 ease-in-out
         ${invoice.currency === "USD"
                                                         ? "w-1/2"
                                                         : "w-full"
@@ -754,7 +762,7 @@ ${processing || !isValidAmount
                                             Payment Complete
                                         </div>
 
-                                        <div className="text-4xl font-semibold text-white">
+                                        <div className="text-4xl font-semibold text-white animate-fade-in">
                                             {currencySymbol}{formatNumber(total)}
                                         </div>
 
