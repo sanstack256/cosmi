@@ -129,10 +129,14 @@ export async function POST(req: Request) {
       if (!publicQuery.empty) {
         const pubDoc = publicQuery.docs[0].ref;
 
-        await pubDoc.update({
-          isActive: false,
-          closedAt: new Date(),
-        });
+        if (status === "paid") {
+          await pubDoc.update({
+            isActive: false,
+            closedAt: new Date(),
+          });
+
+          console.log("🔒 Public link auto-closed (fully paid)");
+        }
 
         console.log("🔒 Public link auto-closed");
       }

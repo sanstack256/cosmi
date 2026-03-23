@@ -403,11 +403,7 @@ export default function PublicInvoicePage() {
                         description: `₹${numericAmount.toLocaleString("en-IN")} received`,
 
                     });
-                    await fetch("/api/public-invoice/close", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ publicId: id }),
-                    });
+                    
 
 
                     setProcessing(false);
