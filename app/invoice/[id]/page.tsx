@@ -12,6 +12,41 @@ import { useParams, useSearchParams } from "next/navigation";
 
 
 
+type Invoice = {
+    id?: string;
+    userId?: string;
+
+    client?: string;
+    clientEmail?: string;
+    clientAddress?: string;
+
+    company?: {
+        name?: string;
+        email?: string;
+        address?: string;
+        logoURL?: string;
+    };
+
+    date?: string;
+    dueDate?: string;
+
+    paymentStatus?: string;
+
+    currency?: string;
+
+    meta?: {
+        lineItems?: { qty: number; rate: number }[];
+        notes?: string;
+    };
+
+    payments?: {
+        amount: number;
+        method?: string;
+        date?: any;
+    }[];
+};
+
+
 export default function PublicInvoicePage() {
     const params = useParams();
     const searchParams = useSearchParams();
@@ -29,10 +64,11 @@ export default function PublicInvoicePage() {
                 : "";
 
     const [showAllPayments, setShowAllPayments] = React.useState(false);
-    const [invoice, setInvoice] = React.useState<any>(undefined);
+    const [invoice, setInvoice] = React.useState<Invoice | null | undefined>(undefined);
     const [method, setMethod] = React.useState<"razorpay" | "paypal">("razorpay");
     const [processing, setProcessing] = React.useState(false);
     const [payAmount, setPayAmount] = React.useState("");
+
 
     const [authorized, setAuthorized] = React.useState(false);
     const [emailInput, setEmailInput] = React.useState("");
@@ -66,6 +102,14 @@ export default function PublicInvoicePage() {
                 }
 
                 const publicData = pubSnap.data();
+
+                // 🔒 Manual revoke
+                if (publicData.isActive === false) {
+                    setInvoice(null);
+                    return;
+                }
+
+
                 console.log("PUBLIC DATA:", publicData);
 
                 // 🔐 TOKEN VALIDATION (CRITICAL)
@@ -95,7 +139,37 @@ export default function PublicInvoicePage() {
                     return;
                 }
 
-                setInvoice(invoiceSnap.data());
+                const invoiceData = {
+                    id: invoiceSnap.id,
+                    userId: path[1],
+                    ...(invoiceSnap.data() as Invoice)
+                };
+
+                // 🔒 AUTO CLOSE CHECK (CORRECT LOCATION)
+
+                const subtotal = lineItems.reduce(
+                    (sum: number, item: any) => sum + item.qty * Number(item.rate || 0),
+                    0
+                );
+
+                const payments = invoiceData.payments || [];
+
+                const totalPaid = payments.reduce(
+                    (sum: number, p: any) => sum + p.amount,
+                    0
+                );
+
+                const remaining = Math.max(subtotal - totalPaid, 0);
+
+                // 🔐 AUTO CLOSE CONDITION
+                if (publicData.autoCloseOnFullPayment && remaining === 0) {
+                    setInvoice(null);
+                    return;
+                }
+
+                // ✅ Only set invoice if allowed
+                setInvoice(invoiceData);
+
 
             } catch (err) {
                 console.error("🔥 Firestore error:", err);
@@ -118,7 +192,7 @@ export default function PublicInvoicePage() {
     React.useEffect(() => {
         if (!invoice) return;
 
-        const lineItems = invoice.meta?.lineItems || [];
+        const lineItems = (invoice.meta?.lineItems || []) as { qty: number; rate: number }[];
 
         const subtotal = lineItems.reduce(
             (sum: number, item: any) => sum + item.qty * Number(item.rate || 0),
@@ -177,56 +251,56 @@ export default function PublicInvoicePage() {
     }
 
 
-if (!authorized && invoice) {
-    return (
-        <div className="min-h-screen bg-[#050509] flex items-center justify-center relative text-white">
+    if (!authorized && invoice) {
+        return (
+            <div className="min-h-screen bg-[#050509] flex items-center justify-center relative text-white">
 
-            {/* BACKGROUND GLOW */}
-            <div className="absolute w-[700px] h-[700px] bg-indigo-600/20 blur-[120px] rounded-full" />
+                {/* BACKGROUND GLOW */}
+                <div className="absolute w-[700px] h-[700px] bg-indigo-600/20 blur-[120px] rounded-full" />
 
-            {/* MODAL */}
-            <div className="relative z-10 w-full max-w-md bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-[0_30px_100px_rgba(0,0,0,0.9)]">
+                {/* MODAL */}
+                <div className="relative z-10 w-full max-w-md bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-[0_30px_100px_rgba(0,0,0,0.9)]">
 
-                {/* TITLE */}
-                <div className="text-xl font-semibold mb-2">
-                    Secure Invoice Access
-                </div>
-
-                <div className="text-sm text-white/50 mb-6">
-                    Enter your email to view this invoice
-                </div>
-
-                {/* INPUT */}
-                <input
-                    type="email"
-                    placeholder="you@example.com"
-                    value={emailInput}
-                    onChange={(e) => setEmailInput(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all"
-                />
-
-                {/* ERROR */}
-                {authError && (
-                    <div className="text-red-400 text-sm mt-3">
-                        {authError}
+                    {/* TITLE */}
+                    <div className="text-xl font-semibold mb-2">
+                        Secure Invoice Access
                     </div>
-                )}
 
-                {/* BUTTON */}
-                <button
-                    onClick={verifyAccess}
-                    className="w-full mt-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 transition-all font-medium"
-                >
-                    Continue
-                </button>
+                    <div className="text-sm text-white/50 mb-6">
+                        Enter your email to view this invoice
+                    </div>
 
+                    {/* INPUT */}
+                    <input
+                        type="email"
+                        placeholder="you@example.com"
+                        value={emailInput}
+                        onChange={(e) => setEmailInput(e.target.value)}
+                        className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                    />
+
+                    {/* ERROR */}
+                    {authError && (
+                        <div className="text-red-400 text-sm mt-3">
+                            {authError}
+                        </div>
+                    )}
+
+                    {/* BUTTON */}
+                    <button
+                        onClick={verifyAccess}
+                        className="w-full mt-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 transition-all font-medium"
+                    >
+                        Continue
+                    </button>
+
+                </div>
             </div>
-        </div>
-    );
-}
+        );
+    }
 
 
-    const currency = invoice.currency || "INR";
+    const currency = (invoice.currency || "INR") as "INR" | "USD";
 
     const formatNumber = (value: number) =>
         formatCurrency(value, currency);
@@ -234,7 +308,11 @@ if (!authorized && invoice) {
     const currencySymbol = getCurrencySymbol(currency);
 
     // CALCULATIONS
-    const lineItems = invoice.meta?.lineItems || [];
+    const lineItems = (invoice.meta?.lineItems || []).map((item: any) => ({
+        desc: item.desc || "",
+        qty: item.qty,
+        rate: Number(item.rate || 0),
+    }));
 
     const subtotal = lineItems.reduce(
         (sum: number, item: any) => sum + item.qty * Number(item.rate || 0),
@@ -273,7 +351,7 @@ if (!authorized && invoice) {
             const res = await fetch("/api/razorpay-checkout/order", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ amount: numericAmount, invoiceId: id }),
+                body: JSON.stringify({ amount: numericAmount, invoiceId: invoice?.id! }),
             });
 
             const data = await res.json();
@@ -304,7 +382,8 @@ if (!authorized && invoice) {
                             razorpay_order_id: response.razorpay_order_id,
                             razorpay_payment_id: response.razorpay_payment_id,
                             razorpay_signature: response.razorpay_signature,
-                            invoiceId: id,
+                            invoiceId: invoice?.id!,
+                            userId: invoice?.id!,
                             amount: numericAmount,
                         }),
                     });
@@ -317,6 +396,12 @@ if (!authorized && invoice) {
 
                     toast.success("Payment successful 🎉", {
                         description: `₹${numericAmount.toLocaleString("en-IN")} received`,
+
+                    });
+                    await fetch("/api/public-invoice/close", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ publicId: id }),
                     });
 
 
@@ -350,18 +435,18 @@ if (!authorized && invoice) {
                         <div className="relative w-full max-w-[720px]">
                             <InvoicePreview
                                 id={id}
-                                client={invoice.client}
-                                date={invoice.date}
-                                dueDate={invoice.dueDate}
-                                clientAddress={invoice.clientAddress}
-                                status={invoice.paymentStatus}
-                                lineItems={lineItems}
+                                client={invoice.client || ""}
+                                date={invoice.date || ""}
+                                dueDate={invoice.dueDate || ""}
+                                clientAddress={invoice.clientAddress || ""}
+                                status={invoice.paymentStatus || "unpaid"}
+                                lineItems={lineItems || []}
                                 subtotal={subtotal}
                                 taxAmount={taxAmount}
                                 total={total}
-                                currency={invoice.currency}
+                                currency={invoice.currency || "INR"}
                                 notes={invoice.meta?.notes || ""}
-                                company={invoice.company}
+                                company={invoice.company || {}}
                             />
                         </div>
                     </div>
@@ -514,7 +599,7 @@ ${processing || !isValidAmount
                                                         headers: { "Content-Type": "application/json" },
                                                         body: JSON.stringify({
                                                             amount: numericAmount,
-                                                            invoiceId: id,
+                                                            invoiceId: invoice.id,
                                                             currency: invoice.currency,
                                                         }),
                                                     });
@@ -538,7 +623,7 @@ ${processing || !isValidAmount
                                                         headers: { "Content-Type": "application/json" },
                                                         body: JSON.stringify({
                                                             orderID: data.orderID,
-                                                            invoiceId: id,
+                                                            invoiceId: invoice.id,
                                                         }),
                                                     });
 
@@ -550,6 +635,12 @@ ${processing || !isValidAmount
 
                                                     toast.success("Payment successful 🎉", {
                                                         description: `${currencySymbol}${formatNumber(numericAmount)} received`,
+                                                    });
+
+                                                    await fetch("/api/public-invoice/close", {
+                                                        method: "POST",
+                                                        headers: { "Content-Type": "application/json" },
+                                                        body: JSON.stringify({ publicId: id }),
                                                     });
 
                                                     setProcessing(false);

@@ -44,6 +44,8 @@ export async function POST(req: Request) {
         await db!.collection("publicInvoices").doc(publicId).set({
             invoicePath: `users/${userId}/invoices/${invoiceId}`,
             token,
+            autoCloseOnFullPayment: true,
+            isActive: true,
             createdAt: new Date(),
         });
 

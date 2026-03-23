@@ -1,23 +1,24 @@
 import admin from "firebase-admin";
 
-let app: admin.app.App;
-
 if (!admin.apps.length) {
   if (!process.env.FIREBASE_ADMIN_KEY) {
-    console.warn("⚠️ FIREBASE_ADMIN_KEY not set (skipping admin init)");
-  } else {
-    try {
-      const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_KEY);
+    throw new Error("FIREBASE_ADMIN_KEY not set");
+  }
 
-      app = admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-      });
-    } catch (err) {
-      console.error("🔥 Failed to parse FIREBASE_ADMIN_KEY", err);
-    }
+  try {
+    const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_KEY);
+
+    // 🔥 FIX: restore line breaks in private key
+    serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, "\n");
+
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+    });
+
+  } catch (err) {
+    console.error("🔥 Failed to parse FIREBASE_ADMIN_KEY", err);
+    throw err;
   }
 }
 
-export const db = admin.apps.length
-  ? admin.firestore()
-  : null;
+export const db = admin.firestore();

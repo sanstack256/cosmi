@@ -16,6 +16,8 @@ export async function POST(req: Request) {
       receipt: invoiceId,
     });
 
+    console.log("CREATED ORDER:", order.id);
+
     return NextResponse.json({
       orderId: order.id,
       key: process.env.RAZORPAY_KEY_ID,
