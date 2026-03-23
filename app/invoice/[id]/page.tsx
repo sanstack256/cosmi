@@ -103,12 +103,6 @@ export default function PublicInvoicePage() {
 
                 const publicData = pubSnap.data();
 
-                // 🔒 Manual revoke
-                if (publicData.isActive === false) {
-                    setInvoice(null);
-                    return;
-                }
-
 
                 console.log("PUBLIC DATA:", publicData);
 
@@ -403,7 +397,7 @@ export default function PublicInvoicePage() {
                         description: `₹${numericAmount.toLocaleString("en-IN")} received`,
 
                     });
-                    
+
 
 
                     setProcessing(false);
@@ -432,6 +426,12 @@ export default function PublicInvoicePage() {
                     {/* LEFT */}
                     <div className="relative flex justify-center">
                         <div className="absolute inset-0 bg-white/5 blur-xl rounded-3xl opacity-60" />
+
+                        {isFullyPaid && (
+                            <div className="absolute top-4 right-4 z-20 bg-green-500/90 text-white text-xs px-3 py-1 rounded-full shadow-lg backdrop-blur">
+                                PAID
+                            </div>
+                        )}
 
                         <div className="relative w-full max-w-[720px]">
                             <InvoicePreview
@@ -742,20 +742,34 @@ ${processing || !isValidAmount
 
                                 </>
                             ) : (
-                                <div className="text-center py-10">
+                                <div className="text-center py-12 relative">
 
-                                    <div className="text-sm text-green-400 mb-2">
-                                        Payment complete
+                                    {/* Glow */}
+                                    <div className="absolute inset-0 bg-green-500/10 blur-3xl rounded-full" />
+
+                                    {/* Content */}
+                                    <div className="relative z-10">
+
+                                        <div className="text-sm text-green-400 mb-3 tracking-wide uppercase">
+                                            Payment Complete
+                                        </div>
+
+                                        <div className="text-4xl font-semibold text-white">
+                                            {currencySymbol}{formatNumber(total)}
+                                        </div>
+
+                                        <div className="text-sm text-white/50 mt-3">
+                                            This invoice has been fully settled
+                                        </div>
+
+                                        <div className="w-full h-px bg-white/10 my-6" />
+
+                                        <div className="text-xs text-white/40 space-y-1">
+                                            <div>✔ Payment recorded securely</div>
+                                            <div>✔ Receipt available in payment history</div>
+                                        </div>
+
                                     </div>
-
-                                    <div className="text-3xl font-semibold text-white animate-pulse">
-                                        {currencySymbol}{formatNumber(total)}
-                                    </div>
-
-                                    <div className="text-sm text-white/50 mt-2">
-                                        This invoice has been fully settled
-                                    </div>
-
                                 </div>
                             )}
 
