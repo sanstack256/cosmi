@@ -147,6 +147,11 @@ export default function PublicInvoicePage() {
 
                 // 🔒 AUTO CLOSE CHECK (CORRECT LOCATION)
 
+                const lineItems = (invoiceSnap.data()?.meta?.lineItems || []) as {
+                    qty: number;
+                    rate: number;
+                }[];
+
                 const subtotal = lineItems.reduce(
                     (sum: number, item: any) => sum + item.qty * Number(item.rate || 0),
                     0
@@ -383,7 +388,7 @@ export default function PublicInvoicePage() {
                             razorpay_payment_id: response.razorpay_payment_id,
                             razorpay_signature: response.razorpay_signature,
                             invoiceId: invoice?.id!,
-                            userId: invoice?.id!,
+                            userId: invoice?.userId!,
                             amount: numericAmount,
                         }),
                     });
