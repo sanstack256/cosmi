@@ -41,7 +41,7 @@ export async function POST(req: Request) {
         const publicId = randomUUID().replace(/-/g, "").slice(0, 16);
         const token = randomUUID().replace(/-/g, "");
 
-        await db.collection("publicInvoices").doc(publicId).set({
+        await db!.collection("publicInvoices").doc(publicId).set({
             invoicePath: `users/${userId}/invoices/${invoiceId}`,
             token,
             createdAt: new Date(),
