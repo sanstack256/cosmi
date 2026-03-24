@@ -3,8 +3,11 @@
 
 import React from "react";
 import Link from "next/link"; // <<-- added
+import { useRouter } from "next/navigation";
+
 
 export default function Home() {
+  const router = useRouter();
   return (
     <main className="min-h-screen bg-gradient-to-b from-[#0b0b2b] via-[#050505] to-black">
       {/* Navbar */}
@@ -60,8 +63,9 @@ export default function Home() {
             and get paid on time every time.
           </p>
 
-          <button className="btn px-[23px] py-[15px] text-lg font-semibold">
-            Start Free
+          <button onClick={() => router.push("/signup")}
+            className="btn px-[23px] py-[15px] text-lg font-semibold" >
+            Create Your First Invoice
           </button>
         </div>
 
