@@ -159,6 +159,7 @@ export default function SignUp() {
           >
             {busy ? "Creating account…" : "Continue"}
           </button>
+
         </form>
 
         {error && <p className="text-crimson mt-6 text-center text-sm">{error}</p>}
@@ -172,7 +173,13 @@ export default function SignUp() {
             Sign In
           </span>
         </p>
+
+        
+
+
       </motion.div>
+
+     
 
       {/* SAME animation */}
       <style>{`

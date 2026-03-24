@@ -6,97 +6,147 @@ import { useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
 import { doc, setDoc } from "firebase/firestore";
 
-export default function OnboardingPage() {
-  const { user, loading } = useAuth();
-  const router = useRouter();
+export default function Onboarding() {
+    const { user, loading } = useAuth();
+    const router = useRouter();
 
-  const [companyName, setCompanyName] = useState("");
-  const [currency, setCurrency] = useState("INR");
-  const [saving, setSaving] = useState(false);
+    const [step, setStep] = useState(0);
+    const [companyName, setCompanyName] = useState("");
+    const [currency, setCurrency] = useState("INR");
+    const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    if (!loading && !user) {
-      router.replace("/signin");
+    useEffect(() => {
+        if (!loading && !user) {
+            router.replace("/signin");
+        }
+    }, [user, loading]);
+
+    async function handleFinish() {
+        if (!user) return;
+
+        setSaving(true);
+
+        try {
+            await setDoc(
+                doc(db, "users", user.uid),
+                {
+                    company: {
+                        name: companyName,
+                        currency,
+                    },
+                    onboardingComplete: true,
+                },
+                { merge: true }
+            );
+
+            router.replace("/invoice-editor");
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setSaving(false);
+        }
     }
-  }, [user, loading]);
 
-  async function handleContinue(e: React.FormEvent) {
-    e.preventDefault();
-    if (!user) return;
+    return (
+        <div className="min-h-screen bg-black flex items-center justify-center text-white px-6">
 
-    setSaving(true);
+            <div className="w-full max-w-md">
 
-    try {
-      await setDoc(
-        doc(db, "users", user.uid),
-        {
-          company: {
-            name: companyName,
-            currency,
-          },
-          onboardingComplete: true,
-        },
-        { merge: true }
-      );
+                {/* CARD */}
+                <div className="bg-[#0b0b0f]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-8 transition-all">
 
-      router.replace("/invoice-editor"); // 🔥 MAGIC MOMENT
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setSaving(false);
-    }
-  }
+                    {/* PROGRESS */}
+                    <div className="h-1 bg-white/10 rounded-full mb-6 overflow-hidden">
+                        <div
+                            className="h-full bg-indigo-500 transition-all duration-300"
+                            style={{ width: step === 0 ? "50%" : "100%" }}
+                        />
+                    </div>
 
-  return (
-    <div className="min-h-screen bg-[#050509] flex items-center justify-center relative text-white px-6">
+                    {/* STEP 1 */}
+                    {step === 0 && (
+                        <div className="space-y-6 animate-fade-in">
 
-      {/* Glow */}
-      <div className="absolute w-[700px] h-[700px] bg-indigo-600/20 blur-[120px] rounded-full" />
+                            <div>
+                                <h2 className="text-2xl font-semibold mb-2">
+                                    What’s your business name?
+                                </h2>
+                                <p className="text-white/50 text-sm">
+                                    This will appear on your invoices
+                                </p>
+                            </div>
 
-      <div className="relative z-10 w-full max-w-md">
+                            <input
+                                type="text"
+                                placeholder="e.g. Cosmi Labs"
+                                value={companyName}
+                                onChange={(e) => setCompanyName(e.target.value)}
+                                className="w-full px-4 py-3 bg-black/40 border border-white/10 rounded-lg focus:border-indigo-400 outline-none"
+                                autoFocus
+                            />
 
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8">
+                            <button
+                                onClick={() => setStep(1)}
+                                disabled={!companyName}
+                                className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 rounded-lg transition disabled:opacity-40"
+                            >
+                                Continue
+                            </button>
 
-          <h1 className="text-2xl font-semibold mb-2 text-center">
-            Let’s set things up
-          </h1>
+                        </div>
+                    )}
 
-          <p className="text-sm text-white/50 text-center mb-6">
-            Takes less than 30 seconds
-          </p>
+                    {/* STEP 2 */}
+                    {step === 1 && (
+                        <div className="space-y-6 animate-fade-in">
 
-          <form onSubmit={handleContinue} className="space-y-4">
+                            <div>
+                                <h2 className="text-2xl font-semibold mb-2">
+                                    What currency do you usually invoice in?
+                                </h2>
+                                <p className="text-white/50 text-sm">
+                                    This will be used as default currency in your invoices. You can change this anytime later.
+                                </p>
+                            </div>
 
-            <input
-              type="text"
-              placeholder="Your business name"
-              value={companyName}
-              onChange={(e) => setCompanyName(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-indigo-500 outline-none"
-              required
-            />
+                            <div className="flex gap-3">
 
-            <select
-              value={currency}
-              onChange={(e) => setCurrency(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10"
-            >
-              <option value="INR">INR (₹)</option>
-              <option value="USD">USD ($)</option>
-            </select>
+                                <button
+                                    onClick={() => setCurrency("INR")}
+                                    className={`flex-1 py-3 rounded-lg border transition ${currency === "INR"
+                                            ? "bg-indigo-600 border-indigo-500"
+                                            : "border-white/10 hover:bg-white/5"
+                                        }`}
+                                >
+                                    INR ₹
+                                </button>
 
-            <button
-              type="submit"
-              disabled={saving}
-              className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 transition"
-            >
-              {saving ? "Saving..." : "Continue"}
-            </button>
+                                <button
+                                    onClick={() => setCurrency("USD")}
+                                    className={`flex-1 py-3 rounded-lg border transition ${currency === "USD"
+                                            ? "bg-indigo-600 border-indigo-500"
+                                            : "border-white/10 hover:bg-white/5"
+                                        }`}
+                                >
+                                    USD $
+                                </button>
 
-          </form>
+                            </div>
 
+                            <button
+                                onClick={handleFinish}
+                                disabled={saving}
+                                className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 rounded-lg transition"
+                            >
+                                {saving ? "Setting up..." : "Finish"}
+                            </button>
+
+                        </div>
+                    )}
+
+                </div>
+
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 }
