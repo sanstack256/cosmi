@@ -147,7 +147,7 @@ export default function SignIn() {
         initial={{ opacity: 0, y: 36, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.7, ease: "easeOut" }}
-        className="relative z-30 w-full max-w-md p-8 rounded-2xl bg-[#0b0b0f]/80 backdrop-blur-xl border border-white/20 shadow-[0_0_50px_rgba(129,140,248,0.5),0_0_110px_rgba(129,140,248,0.35)] hover:shadow-[0_0_70px_rgba(129,140,248,0.65),0_0_150px_rgba(129,140,248,0.45)] transition"
+        className="relative z-30 w-full max-w-md p-8 rounded-2xl bg-[#0b0b0f]/80 backdrop-blur-xl border border-white/20 shadow-[0_0_40px_rgba(129,140,248,0.5),0_0_110px_rgba(129,140,248,0.35)] hover:shadow-[0_0_50px_rgba(129,140,248,0.65),0_0_150px_rgba(129,140,248,0.45)] transition"
       >
         <h2 className="text-3xl font-bold text-white text-center mb-6">Welcome Back</h2>
 
@@ -201,7 +201,7 @@ export default function SignIn() {
 
         <p className="text-white/60 mt-6 text-center text-sm">
           Don't have an account?{" "}
-          <a className="text-indigo-300 hover:underline cursor-pointer">Sign Up</a>
+          <a href="/signup" className="text-indigo-300 hover:underline cursor-pointer">Sign Up</a>
         </p>
       </motion.div>
 
