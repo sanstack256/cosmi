@@ -23,6 +23,7 @@ export default function InvoicesPage() {
 
   const isPro = plan === "pro";
 
+  const [showProModal, setShowProModal] = useState(false);
 
   const statusParam = searchParams.get("status");
   const sortParam = searchParams.get("sort");
@@ -63,7 +64,7 @@ export default function InvoicesPage() {
 
   const handleDuplicate = (invoice: Invoice) => {
     if (plan !== "pro") {
-      alert("Duplicate is a Pro feature");
+      setShowProModal(true);
       return;
     }
 
@@ -355,10 +356,11 @@ export default function InvoicesPage() {
                         handleDuplicate(invoice);
                       }}
                       className={`
-                        text-xs px-3 py-1 rounded-md border transition-all duration-200 flex items-center gap-1
-                        ${isPro
-                          ? "border-white/10 text-slate-300 hover:bg-white/5"
-                          : "border-violet-500/20 text-violet-400/80 hover:bg-violet-500/10 opacity-0 group-hover:opacity-100"
+                          text-xs px-3 py-1 rounded-md border flex items-center gap-1
+                          transition-all duration-200 ease-out
+                          ${isPro
+                          ? "border-white/10 text-slate-300 hover:bg-white/5 hover:scale-[1.03]"
+                          : "border-violet-500/20 text-violet-400/80 hover:bg-violet-500/10 opacity-0 group-hover:opacity-100 translate-x-1 group-hover:translate-x-0 delay-50"
                         }
                       `}
                     >
@@ -485,6 +487,51 @@ export default function InvoicesPage() {
 
         </div>
       )}
+
+
+      {showProModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          onClick={() => setShowProModal(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-[420px] rounded-2xl border border-violet-500/30 bg-[#0f1020] p-6 
+                 shadow-[0_0_40px_rgba(124,58,237,0.25)]"
+          >
+            <h3 className="text-lg font-semibold text-violet-400 mb-2">
+              Pro Feature
+            </h3>
+
+            <p className="text-sm text-slate-400 mb-6">
+              Duplicate invoices instantly and save time on recurring work.
+              Upgrade to Pro to unlock this feature.
+            </p>
+
+            <div className="flex items-center justify-end gap-3 mt-2">
+
+              <button
+                onClick={() => setShowProModal(false)}
+                className="px-4 py-2 rounded-lg border border-white/10 text-slate-300 hover:bg-white/5"
+              >
+                Maybe later
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowProModal(false);
+                  router.push("/pricing");
+                }}
+                className="px-4 py-2 rounded-lg bg-violet-500 hover:bg-violet-600 text-white font-medium transition-all duration-200 hover:scale-[1.03]"
+              >
+                View plans
+              </button>
+
+            </div>
+          </div>
+        </div>
+      )}
+
 
     </div>
   );

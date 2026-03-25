@@ -48,6 +48,8 @@ export function useInvoiceEditor() {
   const searchParams = useSearchParams();
   const editId = searchParams?.get("id") ?? null;
 
+  const duplicateId = searchParams?.get("duplicateId") ?? null;
+
   const { user, isPro } = useAuth();
   const [shouldUpsellClient, setShouldUpsellClient] = useState(false);
   const { invoices, clients, addInvoice, updateInvoice, addClient } = useInvoices();
@@ -124,6 +126,48 @@ export function useInvoiceEditor() {
     }
 
   }, [editingInvoice]);
+
+  
+
+
+  useEffect(() => {
+  if (!duplicateId || editId) return;
+
+  const source = invoices.find((i) => i.id === duplicateId);
+  if (!source) return;
+
+  // 🔥 populate fields
+  setClient(source.client || "");
+  setClientEmail((source as any).clientEmail || "");
+  setPaymentStatus(source.paymentStatus || "unpaid");
+
+  if (source.currency) {
+    setCurrency(source.currency);
+  }
+
+  // date → set as today (not copied)
+  setDate(new Date().toISOString().slice(0, 10));
+
+  setNotes(source.meta?.notes ?? "");
+
+  if (source.meta?.lineItems?.length) {
+    setLineItems(
+      source.meta.lineItems.map((li: any) => ({
+        desc: li.desc,
+        qty: li.qty,
+        rate: String(li.rate ?? ""),
+      }))
+    );
+  }
+
+  setDueDate("");
+  setClientAddress("");
+  setTaxRate(0);
+  setDiscount(0);
+
+}, [duplicateId, editId, invoices]);
+
+
 
   /* ------------------------------------------
      Load company profile
