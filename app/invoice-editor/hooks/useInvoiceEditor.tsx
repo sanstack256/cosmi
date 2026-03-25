@@ -4,9 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-
+import { useRef } from "react";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useInvoices, Invoice } from "@/app/providers/InvoiceProvider";
+import { useToast } from "@/app/providers/ToastProvider";
 
 /* ------------------------------------------
    Types
@@ -49,6 +50,10 @@ export function useInvoiceEditor() {
   const editId = searchParams?.get("id") ?? null;
 
   const duplicateId = searchParams?.get("duplicateId") ?? null;
+
+  const { showToast } = useToast();
+
+  const hasInitializedDuplicate = useRef(false);
 
   const { user, isPro } = useAuth();
   const [shouldUpsellClient, setShouldUpsellClient] = useState(false);
@@ -127,45 +132,51 @@ export function useInvoiceEditor() {
 
   }, [editingInvoice]);
 
-  
+
 
 
   useEffect(() => {
-  if (!duplicateId || editId) return;
+    if (!duplicateId || editId) return;
 
-  const source = invoices.find((i) => i.id === duplicateId);
-  if (!source) return;
+    const source = invoices.find((i) => i.id === duplicateId);
+    if (!source) return;
 
-  // 🔥 populate fields
-  setClient(source.client || "");
-  setClientEmail((source as any).clientEmail || "");
-  setPaymentStatus(source.paymentStatus || "unpaid");
+    // 🚨 prevent double execution (Strict Mode fix)
+    if (hasInitializedDuplicate.current) return;
+    hasInitializedDuplicate.current = true;
 
-  if (source.currency) {
-    setCurrency(source.currency);
-  }
+    // 🔥 populate fields
+    setClient(source.client || "");
+    setClientEmail((source as any).clientEmail || "");
+    setPaymentStatus(source.paymentStatus || "unpaid");
 
-  // date → set as today (not copied)
-  setDate(new Date().toISOString().slice(0, 10));
+    if (source.currency) {
+      setCurrency(source.currency);
+    }
 
-  setNotes(source.meta?.notes ?? "");
+    // date → set as today (not copied)
+    setDate(new Date().toISOString().slice(0, 10));
 
-  if (source.meta?.lineItems?.length) {
-    setLineItems(
-      source.meta.lineItems.map((li: any) => ({
-        desc: li.desc,
-        qty: li.qty,
-        rate: String(li.rate ?? ""),
-      }))
-    );
-  }
+    setNotes(source.meta?.notes ?? "");
 
-  setDueDate("");
-  setClientAddress("");
-  setTaxRate(0);
-  setDiscount(0);
+    if (source.meta?.lineItems?.length) {
+      setLineItems(
+        source.meta.lineItems.map((li: any) => ({
+          desc: li.desc,
+          qty: li.qty,
+          rate: String(li.rate ?? ""),
+        }))
+      );
+    }
 
-}, [duplicateId, editId, invoices]);
+    setDueDate("");
+    setClientAddress("");
+    setTaxRate(0);
+    setDiscount(0);
+
+    // ✅ show only once
+    showToast("Invoice duplicated. Review details before issuing.");
+  }, [duplicateId, editId, invoices]);
 
 
 
@@ -430,5 +441,7 @@ export function useInvoiceEditor() {
 
     shouldUpsellClient,
     setShouldUpsellClient,
+
+    setLineItems,
   };
 }

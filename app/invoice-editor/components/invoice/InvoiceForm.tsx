@@ -54,6 +54,8 @@ type Props = {
   addLine: () => void;
   removeLine: (index: number) => void;
 
+  setLineItems: (items: LineItem[]) => void;
+
   subtotalFormatted: string;
 
   onSave: () => void;
@@ -152,9 +154,12 @@ export default function InvoiceForm({
   errors,
   setErrors,
   isValidating,
+  setLineItems,
 }: Props) {
+
+  
   const router = useRouter();
-  const { clients } = useInvoices();
+  const { clients, invoices } = useInvoices();
 
   const [search, setSearch] = useState("");
   const [showResults, setShowResults] = useState(false);
@@ -386,12 +391,56 @@ export default function InvoiceForm({
               value={client}
               placeholder="Search or type client name..."
               onChange={(e) => {
-                setClient(e.target.value);
-                setSearch(e.target.value);
+                const value = e.target.value;
+
+                setClient(value);
+                setSearch(value);
                 setShowResults(true);
 
                 if (errors.client) {
                   setErrors(prev => ({ ...prev, client: false }));
+                }
+
+
+                // 🔥 SMART AUTOFILL (PRO ONLY)
+                if (isPro) {
+
+                  // 🚨 SAFETY: don't run on empty input
+                  if (!value.trim()) return;
+
+                  const match = clients.find(
+                    c => c.name.toLowerCase() === value.toLowerCase()
+                  );
+
+                  if (match) {
+                    // ✅ Email
+                    setClientEmail(match.email || "");
+
+                    // 🔥 Find last invoice for this client
+                    const lastInvoice = invoices
+                      .filter(inv => inv.client.toLowerCase() === match.name.toLowerCase())
+                      .sort((a, b) => {
+                        return new Date(b.date).getTime() - new Date(a.date).getTime();
+                      })[0];
+
+                    if (lastInvoice) {
+                      // ✅ Currency
+                      if (lastInvoice.currency) {
+                        setCurrency(lastInvoice.currency);
+                      }
+
+                      // ✅ Line items
+                      if (lastInvoice.meta?.lineItems?.length) {
+                        setLineItems(
+                          lastInvoice.meta.lineItems.map((li: any) => ({
+                            desc: li.desc,
+                            qty: li.qty,
+                            rate: String(li.rate ?? ""),
+                          }))
+                        );
+                      }
+                    }
+                  }
                 }
               }}
 
@@ -464,6 +513,27 @@ export default function InvoiceForm({
                       setClientEmail(c.email || "");
                       setSearch("");
                       setShowResults(false);
+
+                      // 🔥 also trigger autofill on click
+                      if (isPro) {
+                        const lastInvoice = invoices
+                          .filter(inv => inv.client.toLowerCase() === c.name.toLowerCase())
+                          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+
+                        if (lastInvoice) {
+                          if (lastInvoice.currency) setCurrency(lastInvoice.currency);
+
+                          if (lastInvoice.meta?.lineItems?.length) {
+                            setLineItems(
+                              lastInvoice.meta.lineItems.map((li: any) => ({
+                                desc: li.desc,
+                                qty: li.qty,
+                                rate: String(li.rate ?? ""),
+                              }))
+                            );
+                          }
+                        }
+                      }
                     }}
                     className="px-4 py-2 text-sm hover:bg-white/5 cursor-pointer"
                   >

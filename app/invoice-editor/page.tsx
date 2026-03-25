@@ -64,6 +64,8 @@ export default function InvoiceEditorPage() {
 
     shouldUpsellClient,
     setShouldUpsellClient,
+
+    setLineItems,
   } = useInvoiceEditor();
 
   const [toast, setToast] = useState<string | null>(null);
@@ -438,6 +440,7 @@ export default function InvoiceEditorPage() {
           errors={errors}
           setErrors={setErrors}
           isValidating={isValidating}
+          setLineItems={setLineItems}
         />
 
       </div>

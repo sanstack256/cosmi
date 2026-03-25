@@ -36,7 +36,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             {children}
 
             {/* Toast UI */}
-            <div className="fixed bottom-6 right-6 space-y-3 z-50">
+            <div className="fixed top-6 left-1/2 -translate-x-1/2 space-y-3 z-50 flex flex-col items-center animate-in fade-in slide-in-from-top-2 duration-300">
                 {toasts.map((toast) => (
                     <div
                         key={toast.id}
