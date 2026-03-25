@@ -3,6 +3,8 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { Invoice, useInvoices } from "@/app/providers/InvoiceProvider";
 import { useState, useEffect } from "react";
+import { useAuth } from "@/app/providers/AuthProvider";
+import { Crown } from "lucide-react";
 
 type PaymentStatus = "unpaid" | "paid" | "overdue";
 
@@ -17,6 +19,9 @@ export default function InvoicesPage() {
   const router = useRouter();
   const { invoices, cancelInvoice, updateInvoice, removeInvoice } = useInvoices();
   const searchParams = useSearchParams();
+  const { plan } = useAuth();
+
+  const isPro = plan === "pro";
 
 
   const statusParam = searchParams.get("status");
@@ -53,7 +58,17 @@ export default function InvoicesPage() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const [cancelTarget, setCancelTarget] = useState<string | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<Invoice | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<Invoice | null>(null);
+
+
+  const handleDuplicate = (invoice: Invoice) => {
+    if (plan !== "pro") {
+      alert("Duplicate is a Pro feature");
+      return;
+    }
+
+    router.push(`/invoice-editor?duplicateId=${invoice.id}`);
+  };
 
   function updateQuery(params: {
     status?: string;
@@ -269,7 +284,7 @@ export default function InvoicesPage() {
             {filteredInvoices.map((invoice) => (
               <tr
                 key={invoice.id}
-                className="border-b border-white/5 hover:bg-white/[0.03] cursor-pointer"
+                className="group border-b border-white/5 hover:bg-white/[0.03] cursor-pointer"
                 onClick={() =>
                   router.push(`/dashboard/invoices/${invoice.id}`)
                 }
@@ -330,26 +345,49 @@ export default function InvoicesPage() {
                   className="px-6 py-4"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  {invoice.lifecycle === "issued" && invoice.paymentStatus !== "paid" && (
-                    <button
-                      onClick={() => setCancelTarget(invoice.id)}
-                      className="text-xs px-3 py-1 rounded-md border border-rose-500/30 text-rose-300 hover:bg-rose-500/10"
-                    >
-                      Cancel
-                    </button>
+                  <div className="flex items-center justify-end gap-2">
 
-                  )}
-                  {invoice.lifecycle === "draft" && (
+
+
                     <button
                       onClick={(e) => {
-                        e.stopPropagation()
-                        setDeleteTarget(invoice)
+                        e.stopPropagation();
+                        handleDuplicate(invoice);
                       }}
-                      className="px-3 py-1 rounded-lg border border-rose-500/30 text-rose-400 hover:bg-rose-500/10 transition text-sm"
+                      className={`
+                        text-xs px-3 py-1 rounded-md border transition-all duration-200 flex items-center gap-1
+                        ${isPro
+                          ? "border-white/10 text-slate-300 hover:bg-white/5"
+                          : "border-violet-500/20 text-violet-400/80 hover:bg-violet-500/10 opacity-0 group-hover:opacity-100"
+                        }
+                      `}
                     >
-                      Delete
+                      {!isPro && <Crown size={12} className="opacity-80" />}
+                      Duplicate
                     </button>
-                  )}
+
+
+                    {invoice.lifecycle === "issued" && invoice.paymentStatus !== "paid" && (
+                      <button
+                        onClick={() => setCancelTarget(invoice.id)}
+                        className="text-xs px-3 py-1 rounded-md border border-rose-500/30 text-rose-300 hover:bg-rose-500/10"
+                      >
+                        Cancel
+                      </button>
+
+                    )}
+                    {invoice.lifecycle === "draft" && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setDeleteTarget(invoice)
+                        }}
+                        className="px-3 py-1 rounded-lg border border-rose-500/30 text-rose-400 hover:bg-rose-500/10 transition text-sm"
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </div>
                 </td>
 
 

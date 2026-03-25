@@ -179,6 +179,10 @@ export default function DashboardPage() {
     });
   }, [invoices, search, statusFilter]);
 
+  const recentInvoices = useMemo(() => {
+    return filteredInvoices.slice(0, 5);
+  }, [filteredInvoices]);
+
   /* ---- NEW: safer PDF export using hidden iframe (improved) ---- */
   function exportInvoiceAsPDF(inv: Invoice) {
     const printable = buildPrintableHTML({
@@ -279,6 +283,8 @@ export default function DashboardPage() {
       value: number;
     }[] = [];
 
+
+
     // Generate months first
     for (let i = monthsToShow - 1; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
@@ -291,9 +297,8 @@ export default function DashboardPage() {
 
     // Add invoice values
     invoices.forEach((inv) => {
-      const date = inv.createdAt?.toDate
-        ? inv.createdAt.toDate()
-        : new Date(inv.createdAt);
+      const date = new Date(inv.date);
+      if (isNaN(date.getTime())) return;
       if (isNaN(date.getTime())) return;
 
       const month = date.getMonth() + 1;
@@ -304,24 +309,26 @@ export default function DashboardPage() {
       );
 
       if (bucket) {
-        const numericAmount = Number(
-          inv.amount.replace(/[^0-9.-]+/g, "")
-        );
+        const numericAmount = parseAmountToNumber(inv.amount);
         bucket.value += numericAmount;
       }
     });
 
+
+    // ✅ Trim empty months (Stripe-style)
+    const firstNonZeroIndex = buckets.findIndex((b) => b.value > 0);
+
+    const trimmedBuckets =
+      firstNonZeroIndex === -1
+        ? buckets
+        : buckets.slice(Math.max(0, firstNonZeroIndex - 1));
+
+
     // Format labels
-    return buckets.map((b) => ({
-      label:
-        revenueRange === "12m"
-          ? new Date(b.year, b.month - 1).toLocaleString("en-IN", {
-            month: "short",
-          })
-          : new Date(b.year, b.month - 1).toLocaleString("en-IN", {
-            month: "short",
-            year: "numeric",
-          }),
+    return trimmedBuckets.map((b) => ({
+      label: new Date(b.year, b.month - 1).toLocaleString("en-IN", {
+        month: "short",
+      }),
 
       value: b.value,
     }));
@@ -331,15 +338,25 @@ export default function DashboardPage() {
 
 
   const calculateGrowthPercentage = (data: any[]) => {
-    if (data.length < 2) return 0;
+    if (data.length < 2) return null;
 
-    const last = data[data.length - 1].value;
-    const prev = data[data.length - 2].value;
+    const last = Number(data[data.length - 1].value || 0);
+    const prev = Number(data[data.length - 2].value || 0);
 
-    if (!prev) return 0;
+    // 🚀 No previous revenue
+    if (prev === 0 && last > 0) return "new";
 
-    return (((last - prev) / prev) * 100).toFixed(1);
+    // 🚀 Too small baseline
+    if (prev < 1000) return "new";
+
+    const growth = ((last - prev) / prev) * 100;
+
+    // 🚀 EXTREME spike → treat as new (Stripe behavior)
+    if (growth > 300) return "new";
+
+    return Number(growth.toFixed(1));
   };
+
 
   const growth = calculateGrowthPercentage(revenueChartData);
 
@@ -466,10 +483,19 @@ export default function DashboardPage() {
                           : "This month"}
                     </h2>
 
-                    <p className={`text-xs mt-1 ${Number(growth) >= 0 ? "text-emerald-400" : "text-rose-400"
-                      }`}>
-                      {Number(growth) >= 0 ? "+" : ""}
-                      {growth}% vs previous period
+                    <p className="text-xs mt-1">
+                      {growth === "new" && (
+                        <span className="text-emerald-400">
+                          Revenue picked up this period
+                        </span>
+                      )}
+
+                      {typeof growth === "number" && (
+                        <span className={growth >= 0 ? "text-emerald-400" : "text-rose-400"}>
+                          {growth >= 0 ? "+" : ""}
+                          {growth}% vs previous period
+                        </span>
+                      )}
                     </p>
                   </div>
 
@@ -542,6 +568,30 @@ export default function DashboardPage() {
                     </AreaChart>
 
                   </ResponsiveContainer>
+
+                </div>
+                <div className="mt-4 text-xs text-slate-400">
+                  {growth === "new" && (
+                    <span className="text-emerald-400">
+                      First revenue recorded in this period
+                    </span>
+                  )}
+
+                  {typeof growth === "number" && growth > 0 && (
+                    <span className="text-emerald-400">
+                      ↑ {growth}% increase
+                    </span>
+                  )}
+
+                  {typeof growth === "number" && growth < 0 && (
+                    <span className="text-rose-400">
+                      ↓ {Math.abs(growth)}% decrease
+                    </span>
+                  )}
+
+                  {typeof growth === "number" && growth === 0 && (
+                    <span>No change this period</span>
+                  )}
                 </div>
               </div>
 
@@ -556,15 +606,6 @@ export default function DashboardPage() {
                   <Link href="/dashboard/invoices" className="text-[11px] text-violet-300 hover:text-violet-200">View all</Link>
                 </div>
 
-                {/* Filters */}
-                <div className="flex items-center gap-2 mb-3">
-                  <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value === "All" ? "All" : (e.target.value as InvoiceStatus))} className="bg-black/50 border border-white/12 text-[11px] rounded-xl px-2 py-1">
-                    <option value="All">All statuses</option>
-                    <option value="Paid">Paid</option>
-                    <option value="Pending">Pending</option>
-                    <option value="Overdue">Overdue</option>
-                  </select>
-                </div>
 
                 {/* TABLE */}
                 <div className="w-full">
@@ -582,13 +623,13 @@ export default function DashboardPage() {
                     </thead>
 
                     <tbody>
-                      {filteredInvoices.length === 0 && (
+                      {recentInvoices.length === 0 && (
                         <tr>
                           <td colSpan={6} className="py-6 text-center text-slate-500 text-[11px]">No invoices found.</td>
                         </tr>
                       )}
 
-                      {filteredInvoices.map((inv) => (
+                      {recentInvoices.map((inv) => (
                         <tr key={inv.id} className="border-b border-white/12 last:border-0 hover:bg-white/5">
                           <td className="py-2 pr-4 w-[120px]">
 

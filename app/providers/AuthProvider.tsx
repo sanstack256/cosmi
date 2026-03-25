@@ -30,10 +30,17 @@ import { ToastProvider } from "./ToastProvider"
    Types
 ----------------------------------------- */
 
+type PlanType = "free" | "pro" | "business";
+
 type AuthCtx = {
   user: User | null;
   loading: boolean;
-  plan: "free" | "pro" | "business";
+
+  plan: PlanType;
+  isPro: boolean;
+  isBusiness: boolean;
+  planLoaded: boolean;
+
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
@@ -52,7 +59,8 @@ const googleProvider = new GoogleAuthProvider();
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [plan, setPlan] = useState<"free" | "pro" | "business">("free");
+  const [plan, setPlan] = useState<PlanType>("free");
+  const [planLoaded, setPlanLoaded] = useState(false);
 
   /* 🔐 Auth state */
   useEffect(() => {
@@ -68,24 +76,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!user) {
       setPlan("free");
+      setPlanLoaded(true);
       return;
     }
 
     async function loadPlan() {
-      if (!user) return; // ✅ tell TS user is not null
+      if (!user) return;
 
       try {
         const ref = doc(db, "users", user.uid);
         const snap = await getDoc(ref);
 
         if (snap.exists()) {
-          setPlan(snap.data().plan || "free");
+          const rawPlan = snap.data().plan;
+
+          if (rawPlan === "pro" || rawPlan === "business") {
+            setPlan(rawPlan);
+          } else {
+            setPlan("free");
+          }
         } else {
           setPlan("free");
         }
       } catch (err) {
         console.error("Plan load failed:", err);
         setPlan("free");
+      } finally {
+        setPlanLoaded(true);
       }
     }
 
@@ -132,26 +149,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   /* ---------------- Context value ---------------- */
 
   const value = useMemo(
-    () => ({
-      user,
-      loading,
-      plan,
-      signInWithEmail,
-      signInWithGoogle,
-      signOut,
-      getIdToken,
-      sendPasswordReset,
-    }),
-    [user, loading, plan]
+    () => {
+      const isPro = plan === "pro" || plan === "business";
+      const isBusiness = plan === "business";
+
+      return {
+        user,
+        loading,
+
+        plan,
+        isPro,
+        isBusiness,
+        planLoaded,
+
+        signInWithEmail,
+        signInWithGoogle,
+        signOut,
+        getIdToken,
+        sendPasswordReset,
+      };
+    },
+    [user, loading, plan, planLoaded]
   );
 
   return (
-  <ToastProvider>
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  </ToastProvider>
-);
+    <ToastProvider>
+      <AuthContext.Provider value={value}>
+        {children}
+      </AuthContext.Provider>
+    </ToastProvider>
+  );
 }
 
 /* ----------------------------------------

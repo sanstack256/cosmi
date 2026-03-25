@@ -48,7 +48,8 @@ export function useInvoiceEditor() {
   const searchParams = useSearchParams();
   const editId = searchParams?.get("id") ?? null;
 
-  const { user, plan } = useAuth();
+  const { user, isPro } = useAuth();
+  const [shouldUpsellClient, setShouldUpsellClient] = useState(false);
   const { invoices, clients, addInvoice, updateInvoice, addClient } = useInvoices();
 
   /* ---------- Company ---------- */
@@ -241,12 +242,6 @@ export function useInvoiceEditor() {
   ): Promise<any | null> {
     try {
 
-      const formattedDate = new Date(date).toLocaleDateString("en-IN", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      });
-
       console.log("CLIENT EMAIL STATE:", clientEmail);
 
 
@@ -254,12 +249,7 @@ export function useInvoiceEditor() {
         (c) => c.name.toLowerCase() === client.toLowerCase()
       );
 
-      if (client.trim() && !existingClient) {
-        await addClient({
-          name: client,
-          email: clientEmail || "",
-        });
-      }
+
 
 
 
@@ -268,7 +258,7 @@ export function useInvoiceEditor() {
         clientEmail: clientEmail?.trim() || null,
         amount: formatCurrencyINR(total),
         paymentStatus,
-        date: formattedDate,
+        date: date,
         dueDate,
         currency,
 
@@ -322,11 +312,16 @@ export function useInvoiceEditor() {
 
 
       // 🔥 CREATE PUBLIC LINK HERE
-console.log("🚀 CALLING ensurePublicLink with:", invoiceId);
+      console.log("🚀 CALLING ensurePublicLink with:", invoiceId);
       await ensurePublicLink(invoiceId);
 
 
       setCreatedInvoiceId(invoiceId);
+
+      // 🚀 TRIGGER UPSELL AFTER SUCCESS
+      if (!isPro && client.trim() && !existingClient) {
+        setShouldUpsellClient(true);
+      }
 
       showToast("Invoice saved");
 
@@ -388,5 +383,8 @@ console.log("🚀 CALLING ensurePublicLink with:", invoiceId);
 
     createdInvoiceId,
     ensurePublicLink,
+
+    shouldUpsellClient,
+    setShouldUpsellClient,
   };
 }

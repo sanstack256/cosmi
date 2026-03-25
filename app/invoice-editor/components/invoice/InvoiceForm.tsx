@@ -9,6 +9,8 @@ import { useInvoices } from "@/app/providers/InvoiceProvider";
 import { useRef, useEffect } from "react";
 import { Calendar } from "lucide-react";
 import { getCurrencySymbol, formatCurrency } from "@/app/utils/currency";
+import { useAuth } from "@/app/providers/AuthProvider";
+import { Crown } from "lucide-react";
 
 
 type Props = {
@@ -152,23 +154,29 @@ export default function InvoiceForm({
   isValidating,
 }: Props) {
   const router = useRouter();
-  const { clients, addClient } = useInvoices();
+  const { clients } = useInvoices();
 
   const [search, setSearch] = useState("");
   const [showResults, setShowResults] = useState(false);
 
+  const { isPro } = useAuth();
 
 
-  const filteredClients = clients.filter((c) =>
-    c.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
+
+  const filteredClients = isPro
+    ? clients.filter((c) =>
+      c.name.toLowerCase().includes(search.toLowerCase())
+    )
+    : [];
 
 
   const handlePrint = () => {
     window.print();
   };
 
-const currencySymbol = getCurrencySymbol(currency);
+  const currencySymbol = getCurrencySymbol(currency);
 
 
   const isIssued = editingInvoice?.lifecycle === "issued";
@@ -431,7 +439,21 @@ const currencySymbol = getCurrencySymbol(currency);
               </div>
             )}
 
-            {showResults && search && (
+            {/* 🚀 PRO GHOST CTA */}
+            {!isPro && client.trim() && (
+              <button
+                type="button"
+                onClick={() => setShowUpgradeModal(true)}
+                className="mt-1 text-[11px] text-violet-400 hover:text-violet-300 transition"
+              >
+                <span className="inline-flex items-center gap-1">
+                  <Crown className="w-3 h-3 text-violet-400" />
+                  Save this client for future use — Pro
+                </span>
+              </button>
+            )}
+
+            {isPro && showResults && search && (
               <div className="absolute z-20 mt-2 w-full bg-[#0f0f18] border border-white/10 rounded-xl shadow-lg max-h-48 overflow-y-auto">
 
                 {filteredClients.map((c) => (
@@ -923,6 +945,56 @@ const currencySymbol = getCurrencySymbol(currency);
 
         </div>
       </div>
+
+
+      {/* 🚀 PRO UPGRADE MODAL */}
+      {showUpgradeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-auto">
+
+          {/* BACKDROP */}
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowUpgradeModal(false)}
+          />
+
+          {/* MODAL */}
+          <div className="relative w-full max-w-md rounded-2xl border border-white/10 bg-[#0b0b12] p-6 shadow-2xl">
+
+            <div className="text-lg font-semibold text-white mb-2">
+              Save clients & auto-fill invoices
+            </div>
+
+            <div className="text-sm text-slate-400 mb-4">
+              Stop typing client details every time.
+            </div>
+
+            <div className="space-y-2 text-sm text-slate-300 mb-6">
+              <div>• Save clients once</div>
+              <div>• Auto-fill details instantly</div>
+              <div>• Create invoices faster</div>
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowUpgradeModal(false)}
+                className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-sm text-white"
+              >
+                Maybe later
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowUpgradeModal(false);
+                  // TODO: route to pricing later
+                }}
+                className="px-4 py-2 rounded-lg bg-violet-500 hover:bg-violet-600 text-black font-semibold text-sm"
+              >
+                Upgrade to Pro
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
 
     </>

@@ -61,6 +61,9 @@ export default function InvoiceEditorPage() {
     idToUse,
     createdInvoiceId,
     ensurePublicLink,
+
+    shouldUpsellClient,
+    setShouldUpsellClient,
   } = useInvoiceEditor();
 
   const [toast, setToast] = useState<string | null>(null);
@@ -292,6 +295,11 @@ export default function InvoiceEditorPage() {
       setSaving(true);
       const saved = await saveInvoice(showToast);
 
+      if (shouldUpsellClient) {
+        showToast("Save clients & autofill with Pro");
+        setShouldUpsellClient(false);
+      }
+
       invoiceId = saved?.id;
 
       console.log("🔥 FINAL INVOICE ID:", invoiceId);
@@ -362,7 +370,12 @@ export default function InvoiceEditorPage() {
 
     try {
       setSaving(true);
-      await saveInvoice(showToast);
+      const result = await saveInvoice(showToast);
+
+      if (shouldUpsellClient) {
+        showToast("Save clients & autofill with Pro");
+        setShouldUpsellClient(false);
+      }
     } finally {
       setSaving(false);
     }

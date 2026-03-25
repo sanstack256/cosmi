@@ -137,7 +137,7 @@ export function useInvoices() {
    Helpers
 ------------------------------- */
 
-const FREE_LIMIT = 5;
+
 
 function getMonthRange() {
   const now = new Date();
@@ -155,7 +155,7 @@ function pad(num: number) {
 ------------------------------- */
 
 export function InvoiceProvider({ children }: { children: React.ReactNode }) {
-  const { user, plan } = useAuth();
+  const { user, isPro } = useAuth();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
 
@@ -211,22 +211,7 @@ export function InvoiceProvider({ children }: { children: React.ReactNode }) {
   async function addInvoice(invoice: Omit<Invoice, "id">) {
     if (!user) throw new Error("Not authenticated");
 
-    if (plan === "free") {
-      const { start, end } = getMonthRange();
 
-      const ref = collection(db, "users", user.uid, "invoices");
-      const q = query(
-        ref,
-        where("createdAt", ">=", Timestamp.fromDate(start)),
-        where("createdAt", "<", Timestamp.fromDate(end))
-      );
-
-      const snap = await getCountFromServer(q);
-
-      if (snap.data().count >= FREE_LIMIT) {
-        throw new Error("FREE_LIMIT_REACHED");
-      }
-    }
 
     const invoicesRef = collection(db, "users", user.uid, "invoices");
     const newInvoiceRef = doc(invoicesRef);
@@ -314,7 +299,10 @@ export function InvoiceProvider({ children }: { children: React.ReactNode }) {
   async function addClient(client: Omit<Client, "id">) {
     if (!user) throw new Error("Not authenticated");
 
-    console.log("CLIENT OBJECT RECEIVED:", client);
+    // 🔒 Prevent premature execution before plan loads
+    if (!isPro) {
+      throw new Error("PRO_REQUIRED_CLIENTS");
+    }
 
     const ref = collection(db, "users", user.uid, "clients");
     const newClientRef = doc(ref);
