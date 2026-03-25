@@ -80,6 +80,19 @@ export default function InvoiceEditorPage() {
   const isValidating = useRef(false);
 
 
+  const [showRecurringModal, setShowRecurringModal] = useState(false);
+
+  const [recurringType, setRecurringType] = useState<"weekly" | "monthly" | "custom">("monthly");
+
+  const [intervalDays, setIntervalDays] = useState(30);
+
+  const [startDate, setStartDate] = useState(
+    new Date().toISOString().slice(0, 10)
+  );
+
+  const [endDate, setEndDate] = useState("");
+
+
   const [highlightSection, setHighlightSection] = useState<string | null>(null);
 
   const [errors, setErrors] = useState({
@@ -449,6 +462,20 @@ export default function InvoiceEditorPage() {
       <div className="flex-1 flex justify-center py-6 px-4">
         <div className="flex flex-col items-center gap-4">
 
+          {/* 🔥 RECURRING BUTTON */}
+          <button
+            onClick={() => {
+              if (plan !== "pro") {
+                showToast("Recurring invoices are a Pro feature");
+                return;
+              }
+              setShowRecurringModal(true);
+            }}
+            className="w-full max-w-md px-4 py-2 rounded-lg border border-white/10 text-slate-300 hover:bg-white/5 transition"
+          >
+            Make recurring
+          </button>
+
           <InvoicePreview
             id={idToUse}
             client={client}
@@ -467,6 +494,94 @@ export default function InvoiceEditorPage() {
           />
         </div>
       </div>
+
+      {showRecurringModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          onClick={() => setShowRecurringModal(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-[480px] rounded-2xl border border-violet-500/20 
+                 bg-[#0b0b12] p-6 
+                 shadow-[0_0_60px_rgba(124,58,237,0.25)]"
+          >
+            {/* TITLE */}
+            <h3 className="text-lg font-semibold text-white mb-5">
+              Make this invoice recurring
+            </h3>
+
+            {/* INTERVAL */}
+            <label className="text-xs text-slate-400">Interval</label>
+            <select
+              value={recurringType}
+              onChange={(e) => setRecurringType(e.target.value as any)}
+              className="w-full mt-1 mb-4 bg-white/5 border border-white/10 
+                   rounded-lg px-3 py-2 text-sm text-white"
+            >
+              <option value="monthly">Monthly</option>
+              <option value="weekly">Weekly</option>
+              <option value="custom">Custom</option>
+            </select>
+
+            {/* CUSTOM INTERVAL */}
+            {recurringType === "custom" && (
+              <input
+                type="number"
+                value={intervalDays}
+                onChange={(e) => setIntervalDays(Number(e.target.value))}
+                placeholder="Every X days"
+                className="w-full mb-4 bg-white/5 border border-white/10 
+                     rounded-lg px-3 py-2 text-sm text-white"
+              />
+            )}
+
+            {/* START DATE */}
+            <label className="text-xs text-slate-400">Start date</label>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="w-full mt-1 mb-4 bg-white/5 border border-white/10 
+                   rounded-lg px-3 py-2 text-sm text-white"
+            />
+
+            {/* END DATE */}
+            <label className="text-xs text-slate-400">
+              End date (optional)
+            </label>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="w-full mt-1 mb-6 bg-white/5 border border-white/10 
+                   rounded-lg px-3 py-2 text-sm text-white"
+            />
+
+            {/* ACTIONS */}
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowRecurringModal(false)}
+                className="px-4 py-2 rounded-lg border border-white/10 
+                     text-slate-300 hover:bg-white/5 transition"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={() => {
+                  showToast("Recurring setup saved (next step coming)");
+                  setShowRecurringModal(false);
+                }}
+                className="px-4 py-2 rounded-lg bg-violet-500 
+                     hover:bg-violet-600 text-white transition"
+              >
+                Save recurring
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {toast && (
         <div className="fixed bottom-6 right-6 z-50 px-4 py-2 rounded-lg bg-[#111118] border border-white/10 text-white shadow-lg">
