@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
-
+import React, { useState, useRef, useEffect } from "react";
 import InvoiceForm from "@/app/invoice-editor/components/invoice/InvoiceForm";
 import InvoicePreview from "@/app/invoice-editor/components/invoice/InvoicePreview";
 import { formatCurrencyINR } from "@/app/invoice-editor/hooks/useInvoiceEditor";
@@ -10,6 +9,10 @@ import { useAuth } from "@/app/providers/AuthProvider";
 import { useInvoices } from "@/app/providers/InvoiceProvider";
 import { useRouter } from "next/navigation";
 import { getCurrencySymbol, formatCurrency } from "@/app/utils/currency";
+import { Calendar } from "lucide-react";
+import { DayPicker } from "react-day-picker";
+import "react-day-picker/dist/style.css";
+import { format } from "date-fns";
 
 
 export default function InvoiceEditorPage() {
@@ -77,8 +80,12 @@ export default function InvoiceEditorPage() {
   const dateRef = useRef<HTMLInputElement>(null);
   const dueDateRef = useRef<HTMLInputElement>(null);
   const lineItemsRef = useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLDivElement | null>(null);
+  const startPickerRef = useRef<HTMLDivElement>(null);
+  const endPickerRef = useRef<HTMLDivElement>(null);
   const isValidating = useRef(false);
 
+  const [showStartPicker, setShowStartPicker] = useState(false);
 
   const [showRecurringModal, setShowRecurringModal] = useState(false);
 
@@ -90,10 +97,14 @@ export default function InvoiceEditorPage() {
     new Date().toISOString().slice(0, 10)
   );
 
+  const [showEndPicker, setShowEndPicker] = useState(false);
+
   const [endDate, setEndDate] = useState("");
 
 
   const [highlightSection, setHighlightSection] = useState<string | null>(null);
+
+
 
   const [errors, setErrors] = useState({
     client: false,
@@ -102,6 +113,8 @@ export default function InvoiceEditorPage() {
     dueDate: false,
     lineItems: false,
   });
+
+
 
 
   const { invoices, issueInvoice } = useInvoices();
@@ -139,6 +152,51 @@ export default function InvoiceEditorPage() {
     win.print();
     win.close();
   }
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        startPickerRef.current &&
+        !startPickerRef.current.contains(e.target as Node)
+      ) {
+        setShowStartPicker(false);
+      }
+
+      if (
+        endPickerRef.current &&
+        !endPickerRef.current.contains(e.target as Node)
+      ) {
+        setShowEndPicker(false);
+      }
+    }
+
+    if (showStartPicker || showEndPicker) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showStartPicker, showEndPicker]);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        startPickerRef.current &&
+        !startPickerRef.current.contains(e.target as Node)
+      ) {
+        setShowStartPicker(false);
+      }
+    }
+
+    if (showStartPicker) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showStartPicker]);
 
   async function handleSendEmail() {
     if (!clientEmail) {
@@ -497,10 +555,11 @@ export default function InvoiceEditorPage() {
 
       {showRecurringModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm "
           onClick={() => setShowRecurringModal(false)}
         >
           <div
+            ref={modalRef}
             onClick={(e) => e.stopPropagation()}
             className="w-[480px] rounded-2xl border border-violet-500/20 
                  bg-[#0b0b12] p-6 
@@ -526,37 +585,222 @@ export default function InvoiceEditorPage() {
 
             {/* CUSTOM INTERVAL */}
             {recurringType === "custom" && (
-              <input
-                type="number"
-                value={intervalDays}
-                onChange={(e) => setIntervalDays(Number(e.target.value))}
-                placeholder="Every X days"
-                className="w-full mb-4 bg-white/5 border border-white/10 
-                     rounded-lg px-3 py-2 text-sm text-white"
-              />
+              <div className="mb-4">
+                <label className="text-xs text-slate-400">
+                  Repeat every
+                </label>
+
+                <div className="relative mt-1">
+                  <input
+                    type="number"
+                    value={intervalDays}
+                    onChange={(e) => setIntervalDays(Number(e.target.value))}
+                    className="w-full bg-white/5 border border-white/10 
+                   rounded-lg px-3 py-2 pr-14 text-sm text-white"
+                  />
+
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">
+                    days
+                  </span>
+                </div>
+
+                <p className="text-[11px] text-slate-500 mt-1">
+                  Example: 30 = every month
+                </p>
+              </div>
             )}
 
             {/* START DATE */}
-            <label className="text-xs text-slate-400">Start date</label>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="w-full mt-1 mb-4 bg-white/5 border border-white/10 
-                   rounded-lg px-3 py-2 text-sm text-white"
-            />
+            <div className="mb-4 relative">
+              <label className="text-xs text-slate-400">Start date</label>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setShowStartPicker((p) => !p);
+                  setShowEndPicker(false);
+                }}
+                className="w-full mt-1 bg-white/5 border border-white/10 
+               rounded-lg px-3 py-2 text-sm text-left text-white 
+               flex justify-between items-center"
+              >
+                {startDate
+                  ? format(new Date(startDate), "dd MMM yyyy")
+                  : "Select date"}
+
+                <Calendar size={16} className="text-white/60" />
+              </button>
+
+              {showStartPicker && (
+                <div
+                  ref={startPickerRef}
+                  className="absolute z-50 mt-2 bg-[#0b0b12] border border-white/10 rounded-xl p-3 shadow-xl">
+                  <DayPicker
+                    mode="single"
+                    selected={
+                      startDate
+                        ? new Date(
+                          Number(startDate.slice(0, 4)),
+                          Number(startDate.slice(5, 7)) - 1,
+                          Number(startDate.slice(8, 10))
+                        )
+                        : undefined
+                    }
+                    onSelect={(date) => {
+                      if (!date) return;
+
+                      const local = new Date(
+                        date.getFullYear(),
+                        date.getMonth(),
+                        date.getDate()
+                      );
+
+                      const formatted = local.toLocaleDateString("en-CA");
+
+                      setStartDate(formatted);
+                      setShowStartPicker(false);
+                    }}
+                    classNames={{
+                      months: "text-white",
+                      month: "space-y-2",
+                      caption: "flex justify-between items-center text-sm text-white mb-2",
+                      nav: "flex gap-2",
+                      nav_button:
+                        "h-7 w-7 rounded-md border border-white/10 hover:bg-white/10 text-white",
+                      table: "w-full border-collapse",
+                      head_row: "flex",
+                      head_cell: "text-xs text-slate-400 w-9 text-center",
+                      row: "flex w-full mt-1",
+                      cell: "w-9 h-9 text-center text-sm",
+                      day: "w-9 h-9 rounded-lg hover:bg-violet-500/20 transition-all duration-150",
+                      day_selected: "bg-violet-600 text-white",
+                      day_today: "text-violet-400",
+                      day_outside: "text-slate-600",
+
+                      // 🔥 CRITICAL: remove all weird states
+                      day_range_start: "",
+                      day_range_end: "",
+                      day_range_middle: "",
+                    }}
+                    styles={{
+                      day: {
+                        outline: "none",
+                        boxShadow: "none",
+                      },
+                    }}
+                  />
+                </div>
+              )}
+            </div>
 
             {/* END DATE */}
-            <label className="text-xs text-slate-400">
-              End date (optional)
-            </label>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="w-full mt-1 mb-6 bg-white/5 border border-white/10 
-                   rounded-lg px-3 py-2 text-sm text-white"
-            />
+            <div className="mb-6 relative">
+              <label className="text-xs text-slate-400">
+                End date (optional)
+              </label>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setShowEndPicker((p) => !p);
+                  setShowStartPicker(false);
+                }}
+                className="w-full mt-1 bg-white/5 border border-white/10 
+               rounded-lg px-3 py-2 text-sm text-left text-white 
+               flex justify-between items-center"
+              >
+                {endDate
+                  ? format(new Date(endDate), "dd MMM yyyy")
+                  : "No end date"}
+
+                <Calendar size={16} className="text-white/60" />
+              </button>
+
+              {showEndPicker && (
+                <div
+                  ref={endPickerRef}
+                  className="
+    absolute left-0 top-full mt-2 sm:bottom-full sm:top-auto sm:mb-2
+    z-50
+    bg-[#0b0b12]
+    border border-violet-500/20
+    rounded-xl p-3
+    shadow-[0_0_40px_rgba(124,58,237,0.25)]
+
+    max-w-[90vw]
+  "
+                >
+                  <DayPicker
+                    mode="single"
+                    selected={
+                      startDate
+                        ? new Date(
+                          Number(startDate.slice(0, 4)),
+                          Number(startDate.slice(5, 7)) - 1,
+                          Number(startDate.slice(8, 10))
+                        )
+                        : undefined
+                    }
+                    onSelect={(date) => {
+                      if (!date) return;
+
+                      const local = new Date(
+                        date.getFullYear(),
+                        date.getMonth(),
+                        date.getDate()
+                      );
+
+                      const formatted = local.toLocaleDateString("en-CA");
+
+                      setStartDate(formatted);
+                      setShowStartPicker(false);
+                    }}
+                    classNames={{
+                      months: "text-white",
+                      month: "space-y-2",
+                      caption: "flex justify-between items-center text-sm text-white mb-2",
+                      nav: "flex gap-2",
+                      nav_button:
+                        "h-7 w-7 rounded-md border border-white/10 hover:bg-white/10 text-white",
+                      table: "w-full border-collapse",
+                      head_row: "flex",
+                      head_cell: "text-xs text-slate-400 w-9 text-center",
+                      row: "flex w-full mt-1",
+                      cell: "w-9 h-9 text-center text-sm",
+                      day: "w-9 h-9 rounded-lg hover:bg-violet-500/20 transition-all duration-150",
+                      day_selected: "bg-violet-600 text-white",
+                      day_today: "text-violet-400",
+                      day_outside: "text-slate-600",
+
+                      // 🔥 CRITICAL: remove all weird states
+                      day_range_start: "",
+                      day_range_end: "",
+                      day_range_middle: "",
+                    }}
+                    styles={{
+                      day: {
+                        outline: "none",
+                        boxShadow: "none",
+                      },
+                    }}
+                  />
+
+                  {/* 🔥 CLEAR BUTTON */}
+                  <div className="flex justify-end mt-2">
+                    <button
+                      onClick={() => {
+                        setEndDate("");
+                        setShowEndPicker(false);
+                      }}
+                      className="text-xs text-slate-400 hover:text-white"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
 
             {/* ACTIONS */}
             <div className="flex justify-end gap-3">
