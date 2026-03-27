@@ -179,24 +179,6 @@ export default function InvoiceEditorPage() {
     };
   }, [showStartPicker, showEndPicker]);
 
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (
-        startPickerRef.current &&
-        !startPickerRef.current.contains(e.target as Node)
-      ) {
-        setShowStartPicker(false);
-      }
-    }
-
-    if (showStartPicker) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [showStartPicker]);
 
   async function handleSendEmail() {
     if (!clientEmail) {
@@ -529,7 +511,13 @@ export default function InvoiceEditorPage() {
               }
               setShowRecurringModal(true);
             }}
-            className="w-full max-w-md px-4 py-2 rounded-lg border border-white/10 text-slate-300 hover:bg-white/5 transition"
+            className="
+  w-full max-w-md px-4 py-2 rounded-lg
+  bg-gradient-to-r from-violet-600 to-indigo-600
+  text-white font-medium
+  hover:opacity-90 transition-all
+  shadow-[0_0_20px_rgba(124,58,237,0.35)]
+"
           >
             Make recurring
           </button>
@@ -556,7 +544,11 @@ export default function InvoiceEditorPage() {
       {showRecurringModal && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm "
-          onClick={() => setShowRecurringModal(false)}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowRecurringModal(false);
+            }
+          }}
         >
           <div
             ref={modalRef}
@@ -587,7 +579,7 @@ export default function InvoiceEditorPage() {
             {recurringType === "custom" && (
               <div className="mb-4">
                 <label className="text-xs text-slate-400">
-                  Repeat every
+                  Repeat every (in days)
                 </label>
 
                 <div className="relative mt-1">
@@ -720,24 +712,23 @@ export default function InvoiceEditorPage() {
                 <div
                   ref={endPickerRef}
                   className="
-    absolute left-0 top-full mt-2 sm:bottom-full sm:top-auto sm:mb-2
-    z-50
-    bg-[#0b0b12]
-    border border-violet-500/20
-    rounded-xl p-3
-    shadow-[0_0_40px_rgba(124,58,237,0.25)]
-
-    max-w-[90vw]
-  "
+  absolute left-0 top-full mt-2
+  z-50
+  bg-[#0b0b12]
+  border border-violet-500/20
+  rounded-xl p-3
+  shadow-[0_0_40px_rgba(124,58,237,0.25)]
+  max-w-[90vw]
+"
                 >
                   <DayPicker
                     mode="single"
                     selected={
-                      startDate
+                      endDate
                         ? new Date(
-                          Number(startDate.slice(0, 4)),
-                          Number(startDate.slice(5, 7)) - 1,
-                          Number(startDate.slice(8, 10))
+                          Number(endDate.slice(0, 4)),
+                          Number(endDate.slice(5, 7)) - 1,
+                          Number(endDate.slice(8, 10))
                         )
                         : undefined
                     }
@@ -752,8 +743,8 @@ export default function InvoiceEditorPage() {
 
                       const formatted = local.toLocaleDateString("en-CA");
 
-                      setStartDate(formatted);
-                      setShowStartPicker(false);
+                      setEndDate(formatted);          // ✅ FIXED
+                      setShowEndPicker(false);        // ✅ FIXED
                     }}
                     classNames={{
                       months: "text-white",
@@ -772,7 +763,7 @@ export default function InvoiceEditorPage() {
                       day_today: "text-violet-400",
                       day_outside: "text-slate-600",
 
-                      // 🔥 CRITICAL: remove all weird states
+                      // 🔥 kill weird styles
                       day_range_start: "",
                       day_range_end: "",
                       day_range_middle: "",
@@ -828,7 +819,7 @@ export default function InvoiceEditorPage() {
       )}
 
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 px-4 py-2 rounded-lg bg-[#111118] border border-white/10 text-white shadow-lg">
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-lg bg-[#111118] border border-white/10 text-white shadow-lg">
           {toast}
         </div>
       )}

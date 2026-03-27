@@ -1,0 +1,19 @@
+# Diff Summary
+
+Date : 2026-03-26 23:25:39
+
+Directory /Users/nssanjeev/Documents/cosmi
+
+Total : 0 files,  0 codes, 0 comments, 0 blanks, all 0 lines
+
+[Summary](results.md) / [Details](details.md) / Diff Summary / [Diff Details](diff-details.md)
+
+## Languages
+| language | files | code | comment | blank | total |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+
+## Directories
+| path | files | code | comment | blank | total |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+
+[Summary](results.md) / [Details](details.md) / Diff Summary / [Diff Details](diff-details.md)

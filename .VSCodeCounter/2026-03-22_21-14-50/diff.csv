@@ -1,9 +1,0 @@
-"filename", "language", "JSON", "TypeScript", "TypeScript JSX", "comment", "blank", "total"
-"/Users/nssanjeev/Documents/cosmi/app/api/create-public-link/route.ts", "TypeScript", 0, 30, 0, 0, 10, 40
-"/Users/nssanjeev/Documents/cosmi/app/invoice-editor/hooks/useInvoiceEditor.tsx", "TypeScript JSX", 0, 0, 25, 2, 9, 36
-"/Users/nssanjeev/Documents/cosmi/app/invoice-editor/page.tsx", "TypeScript JSX", 0, 0, 5, 2, 6, 13
-"/Users/nssanjeev/Documents/cosmi/app/invoice/[id]/page.tsx", "TypeScript JSX", 0, 0, 90, 7, 36, 133
-"/Users/nssanjeev/Documents/cosmi/lib/firebase-admin.ts", "TypeScript", 0, 9, 0, 0, 2, 11
-"/Users/nssanjeev/Documents/cosmi/package-lock.json", "JSON", 1293, 0, 0, 0, 0, 1293
-"/Users/nssanjeev/Documents/cosmi/package.json", "JSON", 1, 0, 0, 0, 0, 1
-"Total", "-", 1294, 39, 120, 11, 63, 1527
