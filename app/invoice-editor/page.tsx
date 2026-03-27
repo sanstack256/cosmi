@@ -11,8 +11,14 @@ import { useRouter } from "next/navigation";
 import { getCurrencySymbol, formatCurrency } from "@/app/utils/currency";
 import { Calendar } from "lucide-react";
 import { DayPicker } from "react-day-picker";
-import "react-day-picker/dist/style.css";
 import { format } from "date-fns";
+import { collection, addDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase"; // adjust if needed
+import { getNextRunDate } from "@/lib/recurring";
+import "react-day-picker/dist/style.css";
+import CosmiCalendar from "@/app/components/ui/CosmiCalendar";
+
+
 
 
 export default function InvoiceEditorPage() {
@@ -83,13 +89,27 @@ export default function InvoiceEditorPage() {
   const modalRef = useRef<HTMLDivElement | null>(null);
   const startPickerRef = useRef<HTMLDivElement>(null);
   const endPickerRef = useRef<HTMLDivElement>(null);
+  const endButtonRef = useRef<HTMLButtonElement>(null);
+
+
   const isValidating = useRef(false);
+
+  const [customDays, setCustomDays] = useState<number>(30);
+
+  const [openUpwards, setOpenUpwards] = useState(false);
+
+  const [endPickerUpwards, setEndPickerUpwards] = useState(false);
+
+  const [startPickerUpwards, setStartPickerUpwards] = useState(false);
+
+
+  const [paymentStatus, setPaymentStatus] = useState("unpaid");
 
   const [showStartPicker, setShowStartPicker] = useState(false);
 
   const [showRecurringModal, setShowRecurringModal] = useState(false);
 
-  const [recurringType, setRecurringType] = useState<"weekly" | "monthly" | "custom">("monthly");
+  const [interval, setInterval] = useState<"weekly" | "monthly" | "custom">("monthly");
 
   const [intervalDays, setIntervalDays] = useState(30);
 
@@ -98,6 +118,7 @@ export default function InvoiceEditorPage() {
   );
 
   const [showEndPicker, setShowEndPicker] = useState(false);
+
 
   const [endDate, setEndDate] = useState("");
 
@@ -122,7 +143,7 @@ export default function InvoiceEditorPage() {
   const currentInvoice = editingInvoice;
 
 
-  const { plan } = useAuth();
+  const { user, plan } = useAuth();
 
   const currencySymbol = getCurrencySymbol(currency);
 
@@ -436,6 +457,56 @@ export default function InvoiceEditorPage() {
     }
   }
 
+  const handleSaveRecurring = async () => {
+    if (!user) {
+      showToast("User not authenticated");
+      return;
+    }
+
+
+    try {
+      const nextRunAt = getNextRunDate({
+        interval,
+        customDays,
+        startDate,
+      });
+
+      await addDoc(collection(db, "recurringInvoices"), {
+        userId: user.uid,
+
+        interval,
+        customDays: interval === "custom" ? customDays : null,
+
+        startDate,
+        endDate: endDate || null,
+
+        nextRunAt,
+        lastGeneratedAt: null,
+
+        status: "active",
+
+        template: {
+          client,
+          clientEmail,
+          paymentStatus,
+          lineItems,
+          notes,
+          taxRate,
+          discount,
+          currency,
+        },
+
+        history: [],
+      });
+
+      setShowRecurringModal(false);
+      showToast("Recurring invoice created");
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to create recurring invoice");
+    }
+  };
+
   /* ------------------------------------------
      UI
   ------------------------------------------- */
@@ -543,7 +614,7 @@ export default function InvoiceEditorPage() {
 
       {showRecurringModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm "
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               setShowRecurringModal(false);
@@ -554,8 +625,8 @@ export default function InvoiceEditorPage() {
             ref={modalRef}
             onClick={(e) => e.stopPropagation()}
             className="w-[480px] rounded-2xl border border-violet-500/20 
-                 bg-[#0b0b12] p-6 
-                 shadow-[0_0_60px_rgba(124,58,237,0.25)]"
+      bg-[#0b0b12] p-6 
+      shadow-[0_0_60px_rgba(124,58,237,0.25)]"
           >
             {/* TITLE */}
             <h3 className="text-lg font-semibold text-white mb-5">
@@ -565,56 +636,29 @@ export default function InvoiceEditorPage() {
             {/* INTERVAL */}
             <label className="text-xs text-slate-400">Interval</label>
             <select
-              value={recurringType}
-              onChange={(e) => setRecurringType(e.target.value as any)}
+              value={interval}
+              onChange={(e) => setInterval(e.target.value as any)}
               className="w-full mt-1 mb-4 bg-white/5 border border-white/10 
-                   rounded-lg px-3 py-2 text-sm text-white"
+        rounded-lg px-3 py-2 text-sm text-white"
             >
               <option value="monthly">Monthly</option>
               <option value="weekly">Weekly</option>
               <option value="custom">Custom</option>
             </select>
 
-            {/* CUSTOM INTERVAL */}
-            {recurringType === "custom" && (
-              <div className="mb-4">
-                <label className="text-xs text-slate-400">
-                  Repeat every (in days)
-                </label>
-
-                <div className="relative mt-1">
-                  <input
-                    type="number"
-                    value={intervalDays}
-                    onChange={(e) => setIntervalDays(Number(e.target.value))}
-                    className="w-full bg-white/5 border border-white/10 
-                   rounded-lg px-3 py-2 pr-14 text-sm text-white"
-                  />
-
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">
-                    days
-                  </span>
-                </div>
-
-                <p className="text-[11px] text-slate-500 mt-1">
-                  Example: 30 = every month
-                </p>
-              </div>
-            )}
-
             {/* START DATE */}
-            <div className="mb-4 relative">
+            <div className="mb-4">
               <label className="text-xs text-slate-400">Start date</label>
 
               <button
                 type="button"
                 onClick={() => {
-                  setShowStartPicker((p) => !p);
+                  setShowStartPicker((prev) => !prev);
                   setShowEndPicker(false);
                 }}
                 className="w-full mt-1 bg-white/5 border border-white/10 
-               rounded-lg px-3 py-2 text-sm text-left text-white 
-               flex justify-between items-center"
+          rounded-lg px-3 py-2 text-sm text-left text-white 
+          flex justify-between items-center"
               >
                 {startDate
                   ? format(new Date(startDate), "dd MMM yyyy")
@@ -623,70 +667,24 @@ export default function InvoiceEditorPage() {
                 <Calendar size={16} className="text-white/60" />
               </button>
 
-              {showStartPicker && (
-                <div
-                  ref={startPickerRef}
-                  className="absolute z-50 mt-2 bg-[#0b0b12] border border-white/10 rounded-xl p-3 shadow-xl">
-                  <DayPicker
-                    mode="single"
-                    selected={
-                      startDate
-                        ? new Date(
-                          Number(startDate.slice(0, 4)),
-                          Number(startDate.slice(5, 7)) - 1,
-                          Number(startDate.slice(8, 10))
-                        )
-                        : undefined
-                    }
-                    onSelect={(date) => {
-                      if (!date) return;
-
-                      const local = new Date(
-                        date.getFullYear(),
-                        date.getMonth(),
-                        date.getDate()
-                      );
-
-                      const formatted = local.toLocaleDateString("en-CA");
-
-                      setStartDate(formatted);
-                      setShowStartPicker(false);
-                    }}
-                    classNames={{
-                      months: "text-white",
-                      month: "space-y-2",
-                      caption: "flex justify-between items-center text-sm text-white mb-2",
-                      nav: "flex gap-2",
-                      nav_button:
-                        "h-7 w-7 rounded-md border border-white/10 hover:bg-white/10 text-white",
-                      table: "w-full border-collapse",
-                      head_row: "flex",
-                      head_cell: "text-xs text-slate-400 w-9 text-center",
-                      row: "flex w-full mt-1",
-                      cell: "w-9 h-9 text-center text-sm",
-                      day: "w-9 h-9 rounded-lg hover:bg-violet-500/20 transition-all duration-150",
-                      day_selected: "bg-violet-600 text-white",
-                      day_today: "text-violet-400",
-                      day_outside: "text-slate-600",
-
-                      // 🔥 CRITICAL: remove all weird states
-                      day_range_start: "",
-                      day_range_end: "",
-                      day_range_middle: "",
-                    }}
-                    styles={{
-                      day: {
-                        outline: "none",
-                        boxShadow: "none",
-                      },
-                    }}
-                  />
-                </div>
-              )}
+              <div
+                className={`
+            overflow-hidden transition-all duration-300
+            ${showStartPicker ? "max-h-[400px] opacity-100 mt-3" : "max-h-0 opacity-0"}
+          `}
+              >
+                <CosmiCalendar
+                  value={startDate}
+                  onChange={(date) => {
+                    setStartDate(date);
+                    setShowStartPicker(false);
+                  }}
+                />
+              </div>
             </div>
 
             {/* END DATE */}
-            <div className="mb-6 relative">
+            <div className="mb-6">
               <label className="text-xs text-slate-400">
                 End date (optional)
               </label>
@@ -694,12 +692,12 @@ export default function InvoiceEditorPage() {
               <button
                 type="button"
                 onClick={() => {
-                  setShowEndPicker((p) => !p);
+                  setShowEndPicker((prev) => !prev);
                   setShowStartPicker(false);
                 }}
                 className="w-full mt-1 bg-white/5 border border-white/10 
-               rounded-lg px-3 py-2 text-sm text-left text-white 
-               flex justify-between items-center"
+          rounded-lg px-3 py-2 text-sm text-left text-white 
+          flex justify-between items-center"
               >
                 {endDate
                   ? format(new Date(endDate), "dd MMM yyyy")
@@ -708,126 +706,61 @@ export default function InvoiceEditorPage() {
                 <Calendar size={16} className="text-white/60" />
               </button>
 
-              {showEndPicker && (
-                <div
-                  ref={endPickerRef}
-                  className="
-  absolute left-0 top-full mt-2
-  z-50
-  bg-[#0b0b12]
-  border border-violet-500/20
-  rounded-xl p-3
-  shadow-[0_0_40px_rgba(124,58,237,0.25)]
-  max-w-[90vw]
-"
-                >
-                  <DayPicker
-                    mode="single"
-                    selected={
-                      endDate
-                        ? new Date(
-                          Number(endDate.slice(0, 4)),
-                          Number(endDate.slice(5, 7)) - 1,
-                          Number(endDate.slice(8, 10))
-                        )
-                        : undefined
-                    }
-                    onSelect={(date) => {
-                      if (!date) return;
+              <div
+                className={`
+            overflow-hidden transition-all duration-300
+            ${showEndPicker ? "max-h-[420px] opacity-100 mt-3" : "max-h-0 opacity-0"}
+          `}
+              >
+                <CosmiCalendar
+                  value={endDate}
+                  onChange={(date) => {
+                    setEndDate(date);
+                    setShowEndPicker(false);
+                  }}
+                />
 
-                      const local = new Date(
-                        date.getFullYear(),
-                        date.getMonth(),
-                        date.getDate()
-                      );
+                <div className="mt-3 pt-2 border-t border-white/5 flex justify-between items-center">
+                  <span className="text-[11px] text-slate-500">
+                    Optional
+                  </span>
 
-                      const formatted = local.toLocaleDateString("en-CA");
-
-                      setEndDate(formatted);          // ✅ FIXED
-                      setShowEndPicker(false);        // ✅ FIXED
+                  <button
+                    onClick={() => {
+                      setEndDate("");
+                      setShowEndPicker(false);
                     }}
-                    classNames={{
-                      months: "text-white",
-                      month: "space-y-2",
-                      caption: "flex justify-between items-center text-sm text-white mb-2",
-                      nav: "flex gap-2",
-                      nav_button:
-                        "h-7 w-7 rounded-md border border-white/10 hover:bg-white/10 text-white",
-                      table: "w-full border-collapse",
-                      head_row: "flex",
-                      head_cell: "text-xs text-slate-400 w-9 text-center",
-                      row: "flex w-full mt-1",
-                      cell: "w-9 h-9 text-center text-sm",
-                      day: "w-9 h-9 rounded-lg hover:bg-violet-500/20 transition-all duration-150",
-                      day_selected: "bg-violet-600 text-white",
-                      day_today: "text-violet-400",
-                      day_outside: "text-slate-600",
-
-                      // 🔥 kill weird styles
-                      day_range_start: "",
-                      day_range_end: "",
-                      day_range_middle: "",
-                    }}
-                    styles={{
-                      day: {
-                        outline: "none",
-                        boxShadow: "none",
-                      },
-                    }}
-                  />
-
-                  {/* 🔥 CLEAR BUTTON */}
-                  <div className="flex justify-end mt-2">
-                    <button
-                      onClick={() => {
-                        setEndDate("");
-                        setShowEndPicker(false);
-                      }}
-                      className="text-xs text-slate-400 hover:text-white"
-                    >
-                      Clear
-                    </button>
-                  </div>
+                    className="text-xs px-2 py-1 rounded-md 
+              text-slate-400 hover:text-white 
+              hover:bg-white/5 transition"
+                  >
+                    Clear
+                  </button>
                 </div>
-              )}
+              </div>
             </div>
 
-
-            {/* ACTIONS */}
+            {/* ✅ ACTIONS (CORRECT PLACE) */}
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setShowRecurringModal(false)}
                 className="px-4 py-2 rounded-lg border border-white/10 
-                     text-slate-300 hover:bg-white/5 transition"
+          text-slate-300 hover:bg-white/5 transition"
               >
                 Cancel
               </button>
 
               <button
-                onClick={() => {
-                  showToast("Recurring setup saved (next step coming)");
-                  setShowRecurringModal(false);
-                }}
-                className="px-4 py-2 rounded-lg bg-violet-500 
-                     hover:bg-violet-600 text-white transition"
+                onClick={handleSaveRecurring}
+                className="px-4 py-2 rounded-lg bg-violet-500 hover:bg-violet-600 text-white transition"
               >
                 Save recurring
               </button>
             </div>
           </div>
         </div>
-      )}
 
-      {toast && (
-        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-lg bg-[#111118] border border-white/10 text-white shadow-lg">
-          {toast}
-        </div>
       )}
     </div>
-
-
   );
-
-
-
 }
