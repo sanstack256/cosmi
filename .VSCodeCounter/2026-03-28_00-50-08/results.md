@@ -1,20 +1,20 @@
 # Summary
 
-Date : 2026-03-26 01:03:01
+Date : 2026-03-28 00:50:08
 
 Directory /Users/nssanjeev/Documents/cosmi
 
-Total : 75 files,  18641 codes, 508 comments, 2027 blanks, all 21176 lines
+Total : 77 files,  18952 codes, 513 comments, 2084 blanks, all 21549 lines
 
 Summary / [Details](details.md) / [Diff Summary](diff.md) / [Diff Details](diff-details.md)
 
 ## Languages
 | language | files | code | comment | blank | total |
 | :--- | ---: | ---: | ---: | ---: | ---: |
-| JSON | 2 | 10,035 | 0 | 2 | 10,037 |
-| TypeScript JSX | 42 | 7,645 | 457 | 1,790 | 9,892 |
-| TypeScript | 19 | 595 | 36 | 171 | 802 |
-| PostCSS | 1 | 244 | 12 | 41 | 297 |
+| JSON | 2 | 10,080 | 0 | 2 | 10,082 |
+| TypeScript JSX | 43 | 7,877 | 461 | 1,840 | 10,178 |
+| TypeScript | 20 | 614 | 36 | 173 | 823 |
+| PostCSS | 1 | 259 | 13 | 46 | 318 |
 | JavaScript | 4 | 52 | 3 | 8 | 63 |
 | JSON with Comments | 1 | 42 | 0 | 1 | 43 |
 | Markdown | 1 | 23 | 0 | 14 | 37 |
@@ -23,10 +23,10 @@ Summary / [Details](details.md) / [Diff Summary](diff.md) / [Diff Details](diff-
 ## Directories
 | path | files | code | comment | blank | total |
 | :--- | ---: | ---: | ---: | ---: | ---: |
-| . | 75 | 18,641 | 508 | 2,027 | 21,176 |
-| . (Files) | 10 | 10,168 | 6 | 31 | 10,205 |
-| app | 51 | 8,354 | 493 | 1,969 | 10,816 |
-| app (Files) | 6 | 590 | 36 | 92 | 718 |
+| . | 77 | 18,952 | 513 | 2,084 | 21,549 |
+| . (Files) | 10 | 10,213 | 6 | 31 | 10,250 |
+| app | 52 | 8,601 | 498 | 2,024 | 11,123 |
+| app (Files) | 6 | 605 | 37 | 97 | 739 |
 | app/api | 7 | 454 | 24 | 137 | 615 |
 | app/api/create-public-link | 1 | 50 | 2 | 12 | 64 |
 | app/api/paypal-capture | 1 | 133 | 9 | 41 | 183 |
@@ -38,9 +38,10 @@ Summary / [Details](details.md) / [Diff Summary](diff.md) / [Diff Details](diff-
 | app/api/razorpay-checkout/success | 1 | 112 | 9 | 36 | 157 |
 | app/api/send-reminder | 1 | 28 | 1 | 10 | 39 |
 | app/company | 1 | 266 | 10 | 44 | 320 |
-| app/components | 7 | 405 | 39 | 58 | 502 |
+| app/components | 8 | 501 | 44 | 76 | 621 |
 | app/components (Files) | 6 | 358 | 33 | 52 | 443 |
 | app/components/hero | 1 | 47 | 6 | 6 | 59 |
+| app/components/ui | 1 | 96 | 5 | 18 | 119 |
 | app/dashboard | 6 | 2,164 | 92 | 528 | 2,784 |
 | app/dashboard (Files) | 2 | 892 | 49 | 194 | 1,135 |
 | app/dashboard/clients | 2 | 356 | 12 | 101 | 469 |
@@ -50,8 +51,8 @@ Summary / [Details](details.md) / [Diff Summary](diff.md) / [Diff Details](diff-
 | app/dashboard/invoices (Files) | 1 | 462 | 7 | 105 | 574 |
 | app/dashboard/invoices/[id] | 1 | 454 | 24 | 128 | 606 |
 | app/invoice | 1 | 592 | 35 | 167 | 794 |
-| app/invoice-editor | 5 | 1,911 | 129 | 487 | 2,527 |
-| app/invoice-editor (Files) | 2 | 560 | 30 | 118 | 708 |
+| app/invoice-editor | 5 | 2,047 | 128 | 519 | 2,694 |
+| app/invoice-editor (Files) | 2 | 696 | 29 | 150 | 875 |
 | app/invoice-editor/components | 2 | 1,047 | 60 | 265 | 1,372 |
 | app/invoice-editor/components/invoice | 2 | 1,047 | 60 | 265 | 1,372 |
 | app/invoice-editor/hooks | 1 | 304 | 39 | 104 | 447 |
@@ -69,7 +70,7 @@ Summary / [Details](details.md) / [Diff Summary](diff.md) / [Diff Details](diff-
 | app/test-auth | 1 | 12 | 0 | 4 | 16 |
 | app/test-firestore | 1 | 33 | 0 | 9 | 42 |
 | app/utils | 1 | 11 | 0 | 1 | 12 |
-| lib | 8 | 97 | 9 | 25 | 131 |
+| lib | 9 | 116 | 9 | 27 | 152 |
 | public | 5 | 5 | 0 | 0 | 5 |
 | types | 1 | 17 | 0 | 2 | 19 |
 

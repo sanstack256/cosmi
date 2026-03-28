@@ -1,4 +1,4 @@
-"filename", "language", "TypeScript", "JavaScript", "JSON with Comments", "XML", "JSON", "Markdown", "TypeScript JSX", "PostCSS", "comment", "blank", "total"
+"filename", "language", "TypeScript", "JSON with Comments", "JavaScript", "XML", "JSON", "Markdown", "TypeScript JSX", "PostCSS", "comment", "blank", "total"
 "/Users/nssanjeev/Documents/cosmi/README.md", "Markdown", 0, 0, 0, 0, 0, 23, 0, 0, 0, 14, 37
 "/Users/nssanjeev/Documents/cosmi/app/ProvidersWrapper.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 26, 0, 0, 6, 32
 "/Users/nssanjeev/Documents/cosmi/app/api/create-public-link/route.ts", "TypeScript", 50, 0, 0, 0, 0, 0, 0, 0, 2, 12, 64
@@ -16,19 +16,20 @@
 "/Users/nssanjeev/Documents/cosmi/app/components/SignOutButton.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 171, 0, 20, 18, 209
 "/Users/nssanjeev/Documents/cosmi/app/components/UserMenu.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 107, 0, 5, 17, 129
 "/Users/nssanjeev/Documents/cosmi/app/components/hero/HeroVisual.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 47, 0, 6, 6, 59
+"/Users/nssanjeev/Documents/cosmi/app/components/ui/CosmiCalendar.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 137, 0, 6, 27, 170
 "/Users/nssanjeev/Documents/cosmi/app/dashboard/clients/[id]/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 31, 0, 0, 11, 42
 "/Users/nssanjeev/Documents/cosmi/app/dashboard/clients/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 325, 0, 12, 90, 427
 "/Users/nssanjeev/Documents/cosmi/app/dashboard/invoices/[id]/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 454, 0, 24, 128, 606
-"/Users/nssanjeev/Documents/cosmi/app/dashboard/invoices/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 394, 0, 7, 88, 489
+"/Users/nssanjeev/Documents/cosmi/app/dashboard/invoices/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 462, 0, 7, 105, 574
 "/Users/nssanjeev/Documents/cosmi/app/dashboard/layout.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 208, 0, 10, 28, 246
-"/Users/nssanjeev/Documents/cosmi/app/dashboard/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 683, 0, 35, 159, 877
-"/Users/nssanjeev/Documents/cosmi/app/globals.css", "PostCSS", 0, 0, 0, 0, 0, 0, 0, 244, 12, 41, 297
+"/Users/nssanjeev/Documents/cosmi/app/dashboard/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 684, 0, 39, 166, 889
+"/Users/nssanjeev/Documents/cosmi/app/globals.css", "PostCSS", 0, 0, 0, 0, 0, 0, 0, 259, 13, 46, 318
 "/Users/nssanjeev/Documents/cosmi/app/head.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 14, 0, 4, 4, 22
-"/Users/nssanjeev/Documents/cosmi/app/invoice-editor/components/invoice/InvoiceForm.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 770, 0, 35, 198, 1003
+"/Users/nssanjeev/Documents/cosmi/app/invoice-editor/components/invoice/InvoiceForm.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 818, 0, 42, 213, 1073
 "/Users/nssanjeev/Documents/cosmi/app/invoice-editor/components/invoice/InvoicePreview.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 229, 0, 18, 52, 299
-"/Users/nssanjeev/Documents/cosmi/app/invoice-editor/hooks/useInvoiceEditor.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 274, 0, 35, 87, 396
+"/Users/nssanjeev/Documents/cosmi/app/invoice-editor/hooks/useInvoiceEditor.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 304, 0, 39, 104, 447
 "/Users/nssanjeev/Documents/cosmi/app/invoice-editor/loading.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 103, 0, 1, 5, 109
-"/Users/nssanjeev/Documents/cosmi/app/invoice-editor/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 361, 0, 22, 98, 481
+"/Users/nssanjeev/Documents/cosmi/app/invoice-editor/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 649, 0, 28, 159, 836
 "/Users/nssanjeev/Documents/cosmi/app/invoice/[id]/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 592, 0, 35, 167, 794
 "/Users/nssanjeev/Documents/cosmi/app/layout.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 44, 0, 4, 10, 58
 "/Users/nssanjeev/Documents/cosmi/app/onboarding/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 121, 0, 4, 27, 152
@@ -51,7 +52,7 @@
 "/Users/nssanjeev/Documents/cosmi/app/test-firebase.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 19, 0, 1, 3, 23
 "/Users/nssanjeev/Documents/cosmi/app/test-firestore/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 33, 0, 0, 9, 42
 "/Users/nssanjeev/Documents/cosmi/app/utils/currency.ts", "TypeScript", 11, 0, 0, 0, 0, 0, 0, 0, 0, 1, 12
-"/Users/nssanjeev/Documents/cosmi/eslint.config.mjs", "JavaScript", 0, 14, 0, 0, 0, 0, 0, 0, 2, 3, 19
+"/Users/nssanjeev/Documents/cosmi/eslint.config.mjs", "JavaScript", 0, 0, 14, 0, 0, 0, 0, 0, 2, 3, 19
 "/Users/nssanjeev/Documents/cosmi/global.d.ts", "TypeScript", 12, 0, 0, 0, 0, 0, 0, 0, 2, 3, 17
 "/Users/nssanjeev/Documents/cosmi/lib/currency.ts", "TypeScript", 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4
 "/Users/nssanjeev/Documents/cosmi/lib/date.ts", "TypeScript", 6, 0, 0, 0, 0, 0, 0, 0, 1, 3, 10
@@ -60,18 +61,19 @@
 "/Users/nssanjeev/Documents/cosmi/lib/firebase.ts", "TypeScript", 16, 0, 0, 0, 0, 0, 0, 0, 3, 5, 24
 "/Users/nssanjeev/Documents/cosmi/lib/invoiceLimits.ts", "TypeScript", 20, 0, 0, 0, 0, 0, 0, 0, 1, 4, 25
 "/Users/nssanjeev/Documents/cosmi/lib/razorpay.ts", "TypeScript", 5, 0, 0, 0, 0, 0, 0, 0, 0, 2, 7
+"/Users/nssanjeev/Documents/cosmi/lib/recurring.ts", "TypeScript", 19, 0, 0, 0, 0, 0, 0, 0, 0, 2, 21
 "/Users/nssanjeev/Documents/cosmi/lib/storage.ts", "TypeScript", 9, 0, 0, 0, 0, 0, 0, 0, 3, 5, 17
 "/Users/nssanjeev/Documents/cosmi/next.config.ts", "TypeScript", 4, 0, 0, 0, 0, 0, 0, 0, 1, 3, 8
-"/Users/nssanjeev/Documents/cosmi/package-lock.json", "JSON", 0, 0, 0, 0, 9995, 0, 0, 0, 0, 1, 9996
-"/Users/nssanjeev/Documents/cosmi/package.json", "JSON", 0, 0, 0, 0, 40, 0, 0, 0, 0, 1, 41
-"/Users/nssanjeev/Documents/cosmi/postcss.config.js", "JavaScript", 0, 6, 0, 0, 0, 0, 0, 0, 0, 1, 7
-"/Users/nssanjeev/Documents/cosmi/postcss.config.mjs", "JavaScript", 0, 6, 0, 0, 0, 0, 0, 0, 0, 2, 8
+"/Users/nssanjeev/Documents/cosmi/package-lock.json", "JSON", 0, 0, 0, 0, 10039, 0, 0, 0, 0, 1, 10040
+"/Users/nssanjeev/Documents/cosmi/package.json", "JSON", 0, 0, 0, 0, 41, 0, 0, 0, 0, 1, 42
+"/Users/nssanjeev/Documents/cosmi/postcss.config.js", "JavaScript", 0, 0, 6, 0, 0, 0, 0, 0, 0, 1, 7
+"/Users/nssanjeev/Documents/cosmi/postcss.config.mjs", "JavaScript", 0, 0, 6, 0, 0, 0, 0, 0, 0, 2, 8
 "/Users/nssanjeev/Documents/cosmi/public/file.svg", "XML", 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1
 "/Users/nssanjeev/Documents/cosmi/public/globe.svg", "XML", 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1
 "/Users/nssanjeev/Documents/cosmi/public/next.svg", "XML", 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1
 "/Users/nssanjeev/Documents/cosmi/public/vercel.svg", "XML", 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1
 "/Users/nssanjeev/Documents/cosmi/public/window.svg", "XML", 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1
-"/Users/nssanjeev/Documents/cosmi/tailwind.config.js", "JavaScript", 0, 26, 0, 0, 0, 0, 0, 0, 1, 2, 29
-"/Users/nssanjeev/Documents/cosmi/tsconfig.json", "JSON with Comments", 0, 0, 42, 0, 0, 0, 0, 0, 0, 1, 43
+"/Users/nssanjeev/Documents/cosmi/tailwind.config.js", "JavaScript", 0, 0, 26, 0, 0, 0, 0, 0, 1, 2, 29
+"/Users/nssanjeev/Documents/cosmi/tsconfig.json", "JSON with Comments", 0, 42, 0, 0, 0, 0, 0, 0, 0, 1, 43
 "/Users/nssanjeev/Documents/cosmi/types/lord-icon.d.ts", "TypeScript", 17, 0, 0, 0, 0, 0, 0, 0, 0, 2, 19
-"Total", "-", 595, 52, 42, 5, 10035, 23, 7402, 244, 486, 1956, 20840
+"Total", "-", 614, 42, 52, 5, 10080, 23, 7974, 259, 514, 2107, 21670

@@ -1,10 +1,10 @@
 # Details
 
-Date : 2026-03-25 22:51:36
+Date : 2026-03-28 00:50:08
 
 Directory /Users/nssanjeev/Documents/cosmi
 
-Total : 75 files,  18398 codes, 486 comments, 1956 blanks, all 20840 lines
+Total : 77 files,  18952 codes, 513 comments, 2084 blanks, all 21549 lines
 
 [Summary](results.md) / Details / [Diff Summary](diff.md) / [Diff Details](diff-details.md)
 
@@ -28,19 +28,20 @@ Total : 75 files,  18398 codes, 486 comments, 1956 blanks, all 20840 lines
 | [app/components/SignOutButton.tsx](/app/components/SignOutButton.tsx) | TypeScript JSX | 171 | 20 | 18 | 209 |
 | [app/components/UserMenu.tsx](/app/components/UserMenu.tsx) | TypeScript JSX | 107 | 5 | 17 | 129 |
 | [app/components/hero/HeroVisual.tsx](/app/components/hero/HeroVisual.tsx) | TypeScript JSX | 47 | 6 | 6 | 59 |
+| [app/components/ui/CosmiCalendar.tsx](/app/components/ui/CosmiCalendar.tsx) | TypeScript JSX | 96 | 5 | 18 | 119 |
 | [app/dashboard/clients/\[id\]/page.tsx](/app/dashboard/clients/%5Bid%5D/page.tsx) | TypeScript JSX | 31 | 0 | 11 | 42 |
 | [app/dashboard/clients/page.tsx](/app/dashboard/clients/page.tsx) | TypeScript JSX | 325 | 12 | 90 | 427 |
 | [app/dashboard/invoices/\[id\]/page.tsx](/app/dashboard/invoices/%5Bid%5D/page.tsx) | TypeScript JSX | 454 | 24 | 128 | 606 |
-| [app/dashboard/invoices/page.tsx](/app/dashboard/invoices/page.tsx) | TypeScript JSX | 394 | 7 | 88 | 489 |
+| [app/dashboard/invoices/page.tsx](/app/dashboard/invoices/page.tsx) | TypeScript JSX | 462 | 7 | 105 | 574 |
 | [app/dashboard/layout.tsx](/app/dashboard/layout.tsx) | TypeScript JSX | 208 | 10 | 28 | 246 |
-| [app/dashboard/page.tsx](/app/dashboard/page.tsx) | TypeScript JSX | 683 | 35 | 159 | 877 |
-| [app/globals.css](/app/globals.css) | PostCSS | 244 | 12 | 41 | 297 |
+| [app/dashboard/page.tsx](/app/dashboard/page.tsx) | TypeScript JSX | 684 | 39 | 166 | 889 |
+| [app/globals.css](/app/globals.css) | PostCSS | 259 | 13 | 46 | 318 |
 | [app/head.tsx](/app/head.tsx) | TypeScript JSX | 14 | 4 | 4 | 22 |
-| [app/invoice-editor/components/invoice/InvoiceForm.tsx](/app/invoice-editor/components/invoice/InvoiceForm.tsx) | TypeScript JSX | 770 | 35 | 198 | 1,003 |
+| [app/invoice-editor/components/invoice/InvoiceForm.tsx](/app/invoice-editor/components/invoice/InvoiceForm.tsx) | TypeScript JSX | 818 | 42 | 213 | 1,073 |
 | [app/invoice-editor/components/invoice/InvoicePreview.tsx](/app/invoice-editor/components/invoice/InvoicePreview.tsx) | TypeScript JSX | 229 | 18 | 52 | 299 |
-| [app/invoice-editor/hooks/useInvoiceEditor.tsx](/app/invoice-editor/hooks/useInvoiceEditor.tsx) | TypeScript JSX | 274 | 35 | 87 | 396 |
+| [app/invoice-editor/hooks/useInvoiceEditor.tsx](/app/invoice-editor/hooks/useInvoiceEditor.tsx) | TypeScript JSX | 304 | 39 | 104 | 447 |
 | [app/invoice-editor/loading.tsx](/app/invoice-editor/loading.tsx) | TypeScript JSX | 103 | 1 | 5 | 109 |
-| [app/invoice-editor/page.tsx](/app/invoice-editor/page.tsx) | TypeScript JSX | 361 | 22 | 98 | 481 |
+| [app/invoice-editor/page.tsx](/app/invoice-editor/page.tsx) | TypeScript JSX | 593 | 28 | 145 | 766 |
 | [app/invoice/\[id\]/page.tsx](/app/invoice/%5Bid%5D/page.tsx) | TypeScript JSX | 592 | 35 | 167 | 794 |
 | [app/layout.tsx](/app/layout.tsx) | TypeScript JSX | 44 | 4 | 10 | 58 |
 | [app/onboarding/page.tsx](/app/onboarding/page.tsx) | TypeScript JSX | 121 | 4 | 27 | 152 |
@@ -72,10 +73,11 @@ Total : 75 files,  18398 codes, 486 comments, 1956 blanks, all 20840 lines
 | [lib/firebase.ts](/lib/firebase.ts) | TypeScript | 16 | 3 | 5 | 24 |
 | [lib/invoiceLimits.ts](/lib/invoiceLimits.ts) | TypeScript | 20 | 1 | 4 | 25 |
 | [lib/razorpay.ts](/lib/razorpay.ts) | TypeScript | 5 | 0 | 2 | 7 |
+| [lib/recurring.ts](/lib/recurring.ts) | TypeScript | 19 | 0 | 2 | 21 |
 | [lib/storage.ts](/lib/storage.ts) | TypeScript | 9 | 3 | 5 | 17 |
 | [next.config.ts](/next.config.ts) | TypeScript | 4 | 1 | 3 | 8 |
-| [package-lock.json](/package-lock.json) | JSON | 9,995 | 0 | 1 | 9,996 |
-| [package.json](/package.json) | JSON | 40 | 0 | 1 | 41 |
+| [package-lock.json](/package-lock.json) | JSON | 10,039 | 0 | 1 | 10,040 |
+| [package.json](/package.json) | JSON | 41 | 0 | 1 | 42 |
 | [postcss.config.js](/postcss.config.js) | JavaScript | 6 | 0 | 1 | 7 |
 | [postcss.config.mjs](/postcss.config.mjs) | JavaScript | 6 | 0 | 2 | 8 |
 | [public/file.svg](/public/file.svg) | XML | 1 | 0 | 0 | 1 |

@@ -2,13 +2,40 @@
 
 import { useState } from "react";
 
+
+function getToday() {
+    const d = new Date()
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate())
+}
+
+function addDays(base: Date, days: number) {
+    const d = new Date(base)
+    d.setDate(d.getDate() + days)
+    return d
+}
+
+function getEndOfMonth(base: Date) {
+    return new Date(base.getFullYear(), base.getMonth() + 1, 0)
+}
+
+function formatDate(date: Date) {
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const dd = String(date.getDate()).padStart(2, "0");
+
+    return `${yyyy}-${mm}-${dd}`;
+}
+
+
 type Props = {
-    value?: string; // YYYY-MM-DD
+    value: string | null
     onChange: (date: string) => void;
 };
 
 export default function CosmiCalendar({ value, onChange }: Props) {
     const today = new Date();
+
+    const baseDate = value ? new Date(value) : getToday();
 
     const [currentMonth, setCurrentMonth] = useState(
         value ? new Date(value) : today
@@ -53,6 +80,30 @@ export default function CosmiCalendar({ value, onChange }: Props) {
 
     return (
         <div className="w-[280px] bg-[#0b0b12] border border-white/10 rounded-xl p-3 shadow-[0_0_30px_rgba(124,58,237,0.25)]">
+
+            {/* Quick Actions */}
+            <div className="flex gap-2 mb-3">
+                {[
+                    { label: "Today", date: getToday() },
+                    { label: "+7 days", date: addDays(getToday(), 7) },
+                    { label: "End of month", date: getEndOfMonth(getToday()) },
+                ].map((item) => (
+                    <button
+                        key={item.label}
+                        type="button"
+                        onClick={() => onChange(formatDate(item.date))}
+                        className="
+                px-3 py-1.5 text-xs rounded-md
+                bg-white/[0.04] hover:bg-white/[0.08]
+                border border-white/[0.06]
+                text-white/80 hover:text-white
+                transition-all duration-150
+            "
+                    >
+                        {item.label}
+                    </button>
+                ))}
+            </div>
 
             {/* HEADER */}
             <div className="flex justify-between items-center mb-3">

@@ -1,15 +1,15 @@
-Date : 2026-03-24 00:23:29
+Date : 2026-03-28 00:50:08
 Directory : /Users/nssanjeev/Documents/cosmi
-Total : 75 files,  18169 codes, 485 comments, 1896 blanks, all 20550 lines
+Total : 77 files,  18952 codes, 513 comments, 2084 blanks, all 21549 lines
 
 Languages
 +--------------------+------------+------------+------------+------------+------------+
 | language           | files      | code       | comment    | blank      | total      |
 +--------------------+------------+------------+------------+------------+------------+
-| JSON               |          2 |     10,035 |          0 |          2 |     10,037 |
-| TypeScript JSX     |         42 |      7,199 |        434 |      1,663 |      9,296 |
-| TypeScript         |         19 |        595 |         36 |        171 |        802 |
-| PostCSS            |          1 |        218 |         12 |         37 |        267 |
+| JSON               |          2 |     10,080 |          0 |          2 |     10,082 |
+| TypeScript JSX     |         43 |      7,877 |        461 |      1,840 |     10,178 |
+| TypeScript         |         20 |        614 |         36 |        173 |        823 |
+| PostCSS            |          1 |        259 |         13 |         46 |        318 |
 | JavaScript         |          4 |         52 |          3 |          8 |         63 |
 | JSON with Comments |          1 |         42 |          0 |          1 |         43 |
 | Markdown           |          1 |         23 |          0 |         14 |         37 |
@@ -20,10 +20,10 @@ Directories
 +-------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
 | path                                                                                      | files      | code       | comment    | blank      | total      |
 +-------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
-| .                                                                                         |         75 |     18,169 |        485 |      1,896 |     20,550 |
-| . (Files)                                                                                 |         10 |     10,168 |          6 |         31 |     10,205 |
-| app                                                                                       |         51 |      7,882 |        470 |      1,838 |     10,190 |
-| app (Files)                                                                               |          6 |        561 |         36 |         87 |        684 |
+| .                                                                                         |         77 |     18,952 |        513 |      2,084 |     21,549 |
+| . (Files)                                                                                 |         10 |     10,213 |          6 |         31 |     10,250 |
+| app                                                                                       |         52 |      8,601 |        498 |      2,024 |     11,123 |
+| app (Files)                                                                               |          6 |        605 |         37 |         97 |        739 |
 | app/api                                                                                   |          7 |        454 |         24 |        137 |        615 |
 | app/api/create-public-link                                                                |          1 |         50 |          2 |         12 |         64 |
 | app/api/paypal-capture                                                                    |          1 |        133 |          9 |         41 |        183 |
@@ -35,39 +35,39 @@ Directories
 | app/api/razorpay-checkout/success                                                         |          1 |        112 |          9 |         36 |        157 |
 | app/api/send-reminder                                                                     |          1 |         28 |          1 |         10 |         39 |
 | app/company                                                                               |          1 |        266 |         10 |         44 |        320 |
-| app/components                                                                            |          7 |        405 |         39 |         58 |        502 |
+| app/components                                                                            |          8 |        501 |         44 |         76 |        621 |
 | app/components (Files)                                                                    |          6 |        358 |         33 |         52 |        443 |
 | app/components/hero                                                                       |          1 |         47 |          6 |          6 |         59 |
-| app/dashboard                                                                             |          6 |      2,074 |         89 |        495 |      2,658 |
-| app/dashboard (Files)                                                                     |          2 |        870 |         46 |        178 |      1,094 |
+| app/components/ui                                                                         |          1 |         96 |          5 |         18 |        119 |
+| app/dashboard                                                                             |          6 |      2,164 |         92 |        528 |      2,784 |
+| app/dashboard (Files)                                                                     |          2 |        892 |         49 |        194 |      1,135 |
 | app/dashboard/clients                                                                     |          2 |        356 |         12 |        101 |        469 |
 | app/dashboard/clients (Files)                                                             |          1 |        325 |         12 |         90 |        427 |
 | app/dashboard/clients/[id]                                                                |          1 |         31 |          0 |         11 |         42 |
-| app/dashboard/invoices                                                                    |          2 |        848 |         31 |        216 |      1,095 |
-| app/dashboard/invoices (Files)                                                            |          1 |        394 |          7 |         88 |        489 |
+| app/dashboard/invoices                                                                    |          2 |        916 |         31 |        233 |      1,180 |
+| app/dashboard/invoices (Files)                                                            |          1 |        462 |          7 |        105 |        574 |
 | app/dashboard/invoices/[id]                                                               |          1 |        454 |         24 |        128 |        606 |
 | app/invoice                                                                               |          1 |        592 |         35 |        167 |        794 |
-| app/invoice-editor                                                                        |          5 |      1,672 |        105 |        422 |      2,199 |
-| app/invoice-editor (Files)                                                                |          2 |        454 |         23 |        100 |        577 |
-| app/invoice-editor/components                                                             |          2 |        944 |         48 |        238 |      1,230 |
-| app/invoice-editor/components/invoice                                                     |          2 |        944 |         48 |        238 |      1,230 |
-| app/invoice-editor/hooks                                                                  |          1 |        274 |         34 |         84 |        392 |
+| app/invoice-editor                                                                        |          5 |      2,047 |        128 |        519 |      2,694 |
+| app/invoice-editor (Files)                                                                |          2 |        696 |         29 |        150 |        875 |
+| app/invoice-editor/components                                                             |          2 |      1,047 |         60 |        265 |      1,372 |
+| app/invoice-editor/components/invoice                                                     |          2 |      1,047 |         60 |        265 |      1,372 |
+| app/invoice-editor/hooks                                                                  |          1 |        304 |         39 |        104 |        447 |
 | app/invoice/[id]                                                                          |          1 |        592 |         35 |        167 |        794 |
+| app/onboarding                                                                            |          1 |        121 |          4 |         27 |        152 |
 | app/payment-success                                                                       |          1 |         30 |          0 |         13 |         43 |
 | app/pricing                                                                               |          1 |        118 |          8 |         23 |        149 |
 | app/profile                                                                               |          5 |        738 |         41 |        147 |        926 |
 | app/profile (Files)                                                                       |          1 |        311 |         14 |         62 |        387 |
 | app/profile/components                                                                    |          4 |        427 |         27 |         85 |        539 |
-| app/providers                                                                             |          4 |        538 |         57 |        168 |        763 |
+| app/providers                                                                             |          4 |        546 |         58 |        174 |        778 |
 | app/signin                                                                                |          1 |        184 |         11 |         24 |        219 |
 | app/signout                                                                               |          1 |         19 |          1 |          5 |         25 |
-| app/signup                                                                                |          2 |        175 |         14 |         34 |        223 |
-| app/signup (Files)                                                                        |          1 |         73 |          3 |         14 |         90 |
-| app/signup/company                                                                        |          1 |        102 |         11 |         20 |        133 |
+| app/signup                                                                                |          1 |        160 |          5 |         29 |        194 |
 | app/test-auth                                                                             |          1 |         12 |          0 |          4 |         16 |
 | app/test-firestore                                                                        |          1 |         33 |          0 |          9 |         42 |
 | app/utils                                                                                 |          1 |         11 |          0 |          1 |         12 |
-| lib                                                                                       |          8 |         97 |          9 |         25 |        131 |
+| lib                                                                                       |          9 |        116 |          9 |         27 |        152 |
 | public                                                                                    |          5 |          5 |          0 |          0 |          5 |
 | types                                                                                     |          1 |         17 |          0 |          2 |         19 |
 +-------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
@@ -93,22 +93,24 @@ Files
 | /Users/nssanjeev/Documents/cosmi/app/components/SignOutButton.tsx                         | TypeScript JSX     |        171 |         20 |         18 |        209 |
 | /Users/nssanjeev/Documents/cosmi/app/components/UserMenu.tsx                              | TypeScript JSX     |        107 |          5 |         17 |        129 |
 | /Users/nssanjeev/Documents/cosmi/app/components/hero/HeroVisual.tsx                       | TypeScript JSX     |         47 |          6 |          6 |         59 |
+| /Users/nssanjeev/Documents/cosmi/app/components/ui/CosmiCalendar.tsx                      | TypeScript JSX     |         96 |          5 |         18 |        119 |
 | /Users/nssanjeev/Documents/cosmi/app/dashboard/clients/[id]/page.tsx                      | TypeScript JSX     |         31 |          0 |         11 |         42 |
 | /Users/nssanjeev/Documents/cosmi/app/dashboard/clients/page.tsx                           | TypeScript JSX     |        325 |         12 |         90 |        427 |
 | /Users/nssanjeev/Documents/cosmi/app/dashboard/invoices/[id]/page.tsx                     | TypeScript JSX     |        454 |         24 |        128 |        606 |
-| /Users/nssanjeev/Documents/cosmi/app/dashboard/invoices/page.tsx                          | TypeScript JSX     |        394 |          7 |         88 |        489 |
+| /Users/nssanjeev/Documents/cosmi/app/dashboard/invoices/page.tsx                          | TypeScript JSX     |        462 |          7 |        105 |        574 |
 | /Users/nssanjeev/Documents/cosmi/app/dashboard/layout.tsx                                 | TypeScript JSX     |        208 |         10 |         28 |        246 |
-| /Users/nssanjeev/Documents/cosmi/app/dashboard/page.tsx                                   | TypeScript JSX     |        662 |         36 |        150 |        848 |
-| /Users/nssanjeev/Documents/cosmi/app/globals.css                                          | PostCSS            |        218 |         12 |         37 |        267 |
+| /Users/nssanjeev/Documents/cosmi/app/dashboard/page.tsx                                   | TypeScript JSX     |        684 |         39 |        166 |        889 |
+| /Users/nssanjeev/Documents/cosmi/app/globals.css                                          | PostCSS            |        259 |         13 |         46 |        318 |
 | /Users/nssanjeev/Documents/cosmi/app/head.tsx                                             | TypeScript JSX     |         14 |          4 |          4 |         22 |
-| /Users/nssanjeev/Documents/cosmi/app/invoice-editor/components/invoice/InvoiceForm.tsx    | TypeScript JSX     |        715 |         30 |        186 |        931 |
+| /Users/nssanjeev/Documents/cosmi/app/invoice-editor/components/invoice/InvoiceForm.tsx    | TypeScript JSX     |        818 |         42 |        213 |      1,073 |
 | /Users/nssanjeev/Documents/cosmi/app/invoice-editor/components/invoice/InvoicePreview.tsx | TypeScript JSX     |        229 |         18 |         52 |        299 |
-| /Users/nssanjeev/Documents/cosmi/app/invoice-editor/hooks/useInvoiceEditor.tsx            | TypeScript JSX     |        274 |         34 |         84 |        392 |
+| /Users/nssanjeev/Documents/cosmi/app/invoice-editor/hooks/useInvoiceEditor.tsx            | TypeScript JSX     |        304 |         39 |        104 |        447 |
 | /Users/nssanjeev/Documents/cosmi/app/invoice-editor/loading.tsx                           | TypeScript JSX     |        103 |          1 |          5 |        109 |
-| /Users/nssanjeev/Documents/cosmi/app/invoice-editor/page.tsx                              | TypeScript JSX     |        351 |         22 |         95 |        468 |
+| /Users/nssanjeev/Documents/cosmi/app/invoice-editor/page.tsx                              | TypeScript JSX     |        593 |         28 |        145 |        766 |
 | /Users/nssanjeev/Documents/cosmi/app/invoice/[id]/page.tsx                                | TypeScript JSX     |        592 |         35 |        167 |        794 |
 | /Users/nssanjeev/Documents/cosmi/app/layout.tsx                                           | TypeScript JSX     |         44 |          4 |         10 |         58 |
-| /Users/nssanjeev/Documents/cosmi/app/page.tsx                                             | TypeScript JSX     |        240 |         15 |         27 |        282 |
+| /Users/nssanjeev/Documents/cosmi/app/onboarding/page.tsx                                  | TypeScript JSX     |        121 |          4 |         27 |        152 |
+| /Users/nssanjeev/Documents/cosmi/app/page.tsx                                             | TypeScript JSX     |        243 |         15 |         28 |        286 |
 | /Users/nssanjeev/Documents/cosmi/app/payment-success/page.tsx                             | TypeScript JSX     |         30 |          0 |         13 |         43 |
 | /Users/nssanjeev/Documents/cosmi/app/pricing/page.tsx                                     | TypeScript JSX     |        118 |          8 |         23 |        149 |
 | /Users/nssanjeev/Documents/cosmi/app/profile/components/AddCompanyModal.tsx               | TypeScript JSX     |        173 |         13 |         36 |        222 |
@@ -116,14 +118,13 @@ Files
 | /Users/nssanjeev/Documents/cosmi/app/profile/components/DeleteCompanyModal.tsx            | TypeScript JSX     |         47 |          0 |          7 |         54 |
 | /Users/nssanjeev/Documents/cosmi/app/profile/components/EditCompanyModal.tsx              | TypeScript JSX     |        149 |         12 |         28 |        189 |
 | /Users/nssanjeev/Documents/cosmi/app/profile/page.tsx                                     | TypeScript JSX     |        311 |         14 |         62 |        387 |
-| /Users/nssanjeev/Documents/cosmi/app/providers/AuthProvider.tsx                           | TypeScript JSX     |        120 |         13 |         35 |        168 |
-| /Users/nssanjeev/Documents/cosmi/app/providers/InvoiceProvider.tsx                        | TypeScript JSX     |        350 |         42 |        118 |        510 |
+| /Users/nssanjeev/Documents/cosmi/app/providers/AuthProvider.tsx                           | TypeScript JSX     |        140 |         13 |         42 |        195 |
+| /Users/nssanjeev/Documents/cosmi/app/providers/InvoiceProvider.tsx                        | TypeScript JSX     |        338 |         43 |        117 |        498 |
 | /Users/nssanjeev/Documents/cosmi/app/providers/PayPalProvider.tsx                         | TypeScript JSX     |         18 |          0 |          4 |         22 |
 | /Users/nssanjeev/Documents/cosmi/app/providers/ToastProvider.tsx                          | TypeScript JSX     |         50 |          2 |         11 |         63 |
 | /Users/nssanjeev/Documents/cosmi/app/signin/page.tsx                                      | TypeScript JSX     |        184 |         11 |         24 |        219 |
 | /Users/nssanjeev/Documents/cosmi/app/signout/page.tsx                                     | TypeScript JSX     |         19 |          1 |          5 |         25 |
-| /Users/nssanjeev/Documents/cosmi/app/signup/company/page.tsx                              | TypeScript JSX     |        102 |         11 |         20 |        133 |
-| /Users/nssanjeev/Documents/cosmi/app/signup/page.tsx                                      | TypeScript JSX     |         73 |          3 |         14 |         90 |
+| /Users/nssanjeev/Documents/cosmi/app/signup/page.tsx                                      | TypeScript JSX     |        160 |          5 |         29 |        194 |
 | /Users/nssanjeev/Documents/cosmi/app/test-auth/page.tsx                                   | TypeScript JSX     |         12 |          0 |          4 |         16 |
 | /Users/nssanjeev/Documents/cosmi/app/test-firebase.tsx                                    | TypeScript JSX     |         19 |          1 |          3 |         23 |
 | /Users/nssanjeev/Documents/cosmi/app/test-firestore/page.tsx                              | TypeScript JSX     |         33 |          0 |          9 |         42 |
@@ -137,10 +138,11 @@ Files
 | /Users/nssanjeev/Documents/cosmi/lib/firebase.ts                                          | TypeScript         |         16 |          3 |          5 |         24 |
 | /Users/nssanjeev/Documents/cosmi/lib/invoiceLimits.ts                                     | TypeScript         |         20 |          1 |          4 |         25 |
 | /Users/nssanjeev/Documents/cosmi/lib/razorpay.ts                                          | TypeScript         |          5 |          0 |          2 |          7 |
+| /Users/nssanjeev/Documents/cosmi/lib/recurring.ts                                         | TypeScript         |         19 |          0 |          2 |         21 |
 | /Users/nssanjeev/Documents/cosmi/lib/storage.ts                                           | TypeScript         |          9 |          3 |          5 |         17 |
 | /Users/nssanjeev/Documents/cosmi/next.config.ts                                           | TypeScript         |          4 |          1 |          3 |          8 |
-| /Users/nssanjeev/Documents/cosmi/package-lock.json                                        | JSON               |      9,995 |          0 |          1 |      9,996 |
-| /Users/nssanjeev/Documents/cosmi/package.json                                             | JSON               |         40 |          0 |          1 |         41 |
+| /Users/nssanjeev/Documents/cosmi/package-lock.json                                        | JSON               |     10,039 |          0 |          1 |     10,040 |
+| /Users/nssanjeev/Documents/cosmi/package.json                                             | JSON               |         41 |          0 |          1 |         42 |
 | /Users/nssanjeev/Documents/cosmi/postcss.config.js                                        | JavaScript         |          6 |          0 |          1 |          7 |
 | /Users/nssanjeev/Documents/cosmi/postcss.config.mjs                                       | JavaScript         |          6 |          0 |          2 |          8 |
 | /Users/nssanjeev/Documents/cosmi/public/file.svg                                          | XML                |          1 |          0 |          0 |          1 |
@@ -151,5 +153,5 @@ Files
 | /Users/nssanjeev/Documents/cosmi/tailwind.config.js                                       | JavaScript         |         26 |          1 |          2 |         29 |
 | /Users/nssanjeev/Documents/cosmi/tsconfig.json                                            | JSON with Comments |         42 |          0 |          1 |         43 |
 | /Users/nssanjeev/Documents/cosmi/types/lord-icon.d.ts                                     | TypeScript         |         17 |          0 |          2 |         19 |
-| Total                                                                                     |                    |     18,169 |        485 |      1,896 |     20,550 |
+| Total                                                                                     |                    |     18,952 |        513 |      2,084 |     21,549 |
 +-------------------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+

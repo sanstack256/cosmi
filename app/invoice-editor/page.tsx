@@ -19,6 +19,36 @@ import "react-day-picker/dist/style.css";
 import CosmiCalendar from "@/app/components/ui/CosmiCalendar";
 
 
+function formatDateLocal(date: Date) {
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function getSmartStartDate({
+  interval,
+  customDays,
+}: {
+  interval: "weekly" | "monthly" | "custom";
+  customDays: number;
+}) {
+  const base = new Date();
+
+  if (interval === "weekly") {
+    base.setDate(base.getDate() + 7);
+  } else if (interval === "monthly") {
+    base.setMonth(base.getMonth() + 1);
+  } if (interval === "custom") {
+    const days = Math.max(1, customDays || 1);
+    base.setDate(base.getDate() + days);
+  }
+
+  return formatDateLocal(base);
+}
+
+
 
 
 export default function InvoiceEditorPage() {
@@ -111,11 +141,9 @@ export default function InvoiceEditorPage() {
 
   const [interval, setInterval] = useState<"weekly" | "monthly" | "custom">("monthly");
 
-  const [intervalDays, setIntervalDays] = useState(30);
 
-  const [startDate, setStartDate] = useState(
-    new Date().toISOString().slice(0, 10)
-  );
+
+  const [startDate, setStartDate] = useState("");
 
   const [showEndPicker, setShowEndPicker] = useState(false);
 
@@ -173,6 +201,17 @@ export default function InvoiceEditorPage() {
     win.print();
     win.close();
   }
+
+  useEffect(() => {
+    if (!showRecurringModal) return;
+
+    const smartDate = getSmartStartDate({
+      interval,
+      customDays,
+    });
+
+    setStartDate(smartDate);
+  }, [interval, customDays, showRecurringModal]);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -475,7 +514,7 @@ export default function InvoiceEditorPage() {
         userId: user.uid,
 
         interval,
-        customDays: interval === "custom" ? customDays : null,
+        customDays: interval === "custom" ? Math.max(1, customDays) : null,
 
         startDate,
         endDate: endDate || null,
@@ -580,6 +619,14 @@ export default function InvoiceEditorPage() {
                 showToast("Recurring invoices are a Pro feature");
                 return;
               }
+
+              const smartDate = getSmartStartDate({
+                interval,
+                customDays,
+              });
+
+              setStartDate(smartDate);
+              setEndDate("");
               setShowRecurringModal(true);
             }}
             className="
@@ -645,6 +692,29 @@ export default function InvoiceEditorPage() {
               <option value="weekly">Weekly</option>
               <option value="custom">Custom</option>
             </select>
+
+            {interval === "custom" && (
+              <div className="mt-3">
+                <label className="text-xs text-slate-400">
+                  Repeat every (days)
+                </label>
+
+                <input
+                  type="number"
+                  min={1}
+                  value={customDays}
+                  onChange={(e) => {
+                    const val = Number(e.target.value);
+                    if (val >= 1) setCustomDays(val);
+                  }}
+                  className="
+        w-full mt-1 bg-white/5 border border-white/10
+        rounded-lg px-3 py-2 text-sm text-white
+        focus:outline-none focus:ring-1 focus:ring-violet-500
+      "
+                />
+              </div>
+            )}
 
             {/* START DATE */}
             <div className="mb-4">
