@@ -5,6 +5,9 @@ import { Invoice, useInvoices } from "@/app/providers/InvoiceProvider";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { Crown } from "lucide-react";
+import { db } from "@/lib/firebase";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
+
 
 type PaymentStatus = "unpaid" | "paid" | "overdue";
 
@@ -19,7 +22,7 @@ export default function InvoicesPage() {
   const router = useRouter();
   const { invoices, cancelInvoice, updateInvoice, removeInvoice } = useInvoices();
   const searchParams = useSearchParams();
-  const { plan } = useAuth();
+  const { plan, user } = useAuth();
 
   const isPro = plan === "pro";
 
@@ -60,6 +63,8 @@ export default function InvoicesPage() {
 
   const [cancelTarget, setCancelTarget] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Invoice | null>(null);
+
+  const [recurringMap, setRecurringMap] = useState<Record<string, boolean>>({});
 
 
   const handleDuplicate = (invoice: Invoice) => {
@@ -107,6 +112,32 @@ export default function InvoicesPage() {
 
     });
   }, [invoices]);
+
+
+  useEffect(() => {
+  if (!user?.uid) return;
+
+  const q = query(
+    collection(db, "recurringInvoices"),
+    where("userId", "==", user.uid)
+  );
+
+  const unsubscribe = onSnapshot(q, (snapshot) => {
+    const map: Record<string, boolean> = {};
+
+    snapshot.docs.forEach((doc) => {
+      const data = doc.data();
+      if (data.invoiceId) {
+        map[data.invoiceId] = true;
+      }
+    });
+
+    setRecurringMap(map);
+  });
+
+  return () => unsubscribe();
+}, [user]);
+
 
 
   useEffect(() => {

@@ -9,14 +9,14 @@ import { useAuth } from "@/app/providers/AuthProvider";
 import { useInvoices } from "@/app/providers/InvoiceProvider";
 import { useRouter } from "next/navigation";
 import { getCurrencySymbol, formatCurrency } from "@/app/utils/currency";
-import { Calendar } from "lucide-react";
-import { DayPicker } from "react-day-picker";
+import { Calendar, Crown } from "lucide-react";
 import { format } from "date-fns";
 import { collection, addDoc, query, where, onSnapshot, getDocs, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { getNextRunDate } from "@/lib/recurring";
 import "react-day-picker/dist/style.css";
 import CosmiCalendar from "@/app/components/ui/CosmiCalendar";
+import { useToast } from "@/app/providers/ToastProvider";
 
 
 
@@ -154,9 +154,6 @@ export default function InvoiceEditorPage() {
 
 
 
-
-
-  const [toast, setToast] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   const printRef = useRef<HTMLDivElement>(null);
@@ -181,6 +178,7 @@ export default function InvoiceEditorPage() {
 
   const [startPickerUpwards, setStartPickerUpwards] = useState(false);
 
+  const { showToast } = useToast();
 
   const [paymentStatus, setPaymentStatus] = useState("unpaid");
 
@@ -199,6 +197,7 @@ export default function InvoiceEditorPage() {
 
   const [endDate, setEndDate] = useState("");
 
+  const [showProModal, setShowProModal] = useState(false);
 
   const [highlightSection, setHighlightSection] = useState<string | null>(null);
 
@@ -398,11 +397,6 @@ export default function InvoiceEditorPage() {
     }
   }
 
-
-  function showToast(msg: string) {
-    setToast(msg);
-    setTimeout(() => setToast(null), 1800);
-  }
 
   /* ------------------------------------------
      Validation Before Save
@@ -608,6 +602,9 @@ export default function InvoiceEditorPage() {
   }
 
   const handleSaveRecurring = async () => {
+
+    console.log("SAVE RECURRING CLICKED");
+
     let finalInvoiceId = invoiceId;
 
     if (!finalInvoiceId) {
@@ -655,6 +652,7 @@ export default function InvoiceEditorPage() {
         showToast("Recurring updated");
       } else {
         await addDoc(collection(db, "recurringInvoices"), {
+
           userId: user.uid,
           invoiceId: finalInvoiceId, // ✅ FIXED
 
@@ -683,13 +681,15 @@ export default function InvoiceEditorPage() {
           history: [],
         });
 
-        showToast("Recurring invoice created");
+        showToast("Recurring invoice created", "success");
+
+        setShowRecurringModal(false);
       }
 
       setShowRecurringModal(false); // ✅ always runs now
     } catch (err) {
       console.error(err);
-      showToast("Failed to create recurring invoice");
+      showToast("Failed to create recurring invoice", "error");
     }
   };
 
@@ -795,7 +795,7 @@ export default function InvoiceEditorPage() {
             <button
               onClick={() => {
                 if (plan !== "pro") {
-                  showToast("Recurring invoices are available on Pro plan");
+                  setShowProModal(true);
                   return;
                 }
 
@@ -813,7 +813,7 @@ export default function InvoiceEditorPage() {
   text-left
   transition-all duration-200
 
-  ${plan !== "pro" || !invoiceId
+  ${!invoiceId
                   ? "opacity-50 cursor-not-allowed"
                   : "hover:border-violet-500/40 hover:bg-violet-500/5 hover:-translate-y-[1px] hover:shadow-[0_0_20px_rgba(124,58,237,0.15)]"
                 }
@@ -829,7 +829,12 @@ export default function InvoiceEditorPage() {
                   </div>
                 </div>
 
-                <div className="text-violet-400 text-sm font-medium opacity-80 group-hover:opacity-100 transition">
+                <div className="flex items-center gap-2 text-violet-400 text-sm font-medium opacity-80 group-hover:opacity-100 transition">
+
+                  {plan !== "pro" && (
+                    <Crown size={14} className="text-violet-400" />
+                  )}
+
                   Setup →
                 </div>
               </div>
@@ -1235,6 +1240,50 @@ shadow-[0_0_60px_rgba(124,58,237,0.25)]"
         </div>
 
       )}
+
+      {showProModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-md rounded-2xl border border-violet-500/20 
+      bg-[#0b0b12] p-6 
+      shadow-[0_0_60px_rgba(124,58,237,0.25)]"
+          >
+            {/* TITLE */}
+            <div className="text-lg font-semibold text-white mb-2">
+              Recurring nvoices are a Pro feature
+            </div>
+
+            {/* DESCRIPTION */}
+            <div className="text-sm text-slate-400 mb-6 leading-relaxed">
+              Automatically generate recurring invoices and save time on manual billing.
+              Upgrade to Pro to unlock this feature.
+            </div>
+
+            {/* ACTIONS */}
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowProModal(false)}
+                className="px-4 py-2 rounded-lg border border-white/10 
+          text-slate-300 hover:bg-white/5 transition"
+              >
+                Maybe later
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowProModal(false);
+                  router.push("/pricing");
+                }}
+                className="px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-700 text-white transition"
+              >
+                View plans
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
