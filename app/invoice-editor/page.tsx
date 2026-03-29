@@ -12,11 +12,12 @@ import { getCurrencySymbol, formatCurrency } from "@/app/utils/currency";
 import { Calendar } from "lucide-react";
 import { DayPicker } from "react-day-picker";
 import { format } from "date-fns";
-import { collection, addDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase"; // adjust if needed
+import { collection, addDoc, query, where, onSnapshot, getDocs, updateDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import { getNextRunDate } from "@/lib/recurring";
 import "react-day-picker/dist/style.css";
 import CosmiCalendar from "@/app/components/ui/CosmiCalendar";
+
 
 
 function formatDateLocal(date: Date) {
@@ -83,7 +84,7 @@ function getSmartStartDate({
     base.setDate(base.getDate() + 7);
   } else if (interval === "monthly") {
     base.setMonth(base.getMonth() + 1);
-  } if (interval === "custom") {
+  } else if (interval === "custom") {
     const days = Math.max(1, customDays || 1);
     base.setDate(base.getDate() + days);
   }
@@ -95,6 +96,7 @@ function getSmartStartDate({
 
 
 export default function InvoiceEditorPage() {
+
 
   const router = useRouter();
 
@@ -150,6 +152,10 @@ export default function InvoiceEditorPage() {
     setLineItems,
   } = useInvoiceEditor();
 
+
+
+
+
   const [toast, setToast] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -167,7 +173,7 @@ export default function InvoiceEditorPage() {
 
   const isValidating = useRef(false);
 
-  const [customDays, setCustomDays] = useState<number | "">(30);
+  const [customDays, setCustomDays] = useState<number | "">("");
 
   const [openUpwards, setOpenUpwards] = useState(false);
 
@@ -184,7 +190,7 @@ export default function InvoiceEditorPage() {
 
   const [interval, setInterval] = useState<"weekly" | "monthly" | "custom">("monthly");
 
-
+  const [recurringData, setRecurringData] = useState<any>(null);
 
   const [startDate, setStartDate] = useState("");
 
@@ -227,16 +233,22 @@ export default function InvoiceEditorPage() {
           : null
       : null;
 
+  const isCustomIntervalInvalid =
+    interval === "custom" &&
+    (safeCustomDays < 1 || safeCustomDays > 365);
+
 
   const isRecurringInvalid =
     !startDate ||
     Boolean(isEndBeforeStart) ||
-    (interval === "custom" && !safeCustomDays);
+    (interval === "custom" && isCustomIntervalInvalid);
 
 
   const { invoices, issueInvoice } = useInvoices();
 
   const currentInvoice = editingInvoice;
+
+  const invoiceId = currentInvoice?.id;
 
   const { user, plan } = useAuth();
 
@@ -268,6 +280,38 @@ export default function InvoiceEditorPage() {
     win.print();
     win.close();
   }
+
+  useEffect(() => {
+    if (!invoiceId || !user) return;
+
+    if (!invoiceId || !user?.uid) return;
+
+    const q = query(
+      collection(db, "recurringInvoices"),
+      where("invoiceId", "==", invoiceId),
+      where("userId", "==", user.uid)
+    );
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      if (!snapshot.empty) {
+        const doc = snapshot.docs[0];
+        setRecurringData({ id: doc.id, ...doc.data() });
+      } else {
+        setRecurringData(null);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [invoiceId, user]);
+
+
+  useEffect(() => {
+    if (!recurringData || !showRecurringModal) return;
+
+    setInterval(recurringData.interval);
+    setCustomDays(recurringData.customDays || "");
+    setStartDate(recurringData.startDate);
+    setEndDate(recurringData.endDate || "");
+  }, [recurringData, showRecurringModal]);
 
   useEffect(() => {
     if (!showRecurringModal) return;
@@ -564,11 +608,22 @@ export default function InvoiceEditorPage() {
   }
 
   const handleSaveRecurring = async () => {
+    let finalInvoiceId = invoiceId;
+
+    if (!finalInvoiceId) {
+      const saved = await saveInvoice(showToast);
+      finalInvoiceId = saved?.id;
+    }
+
+    if (!finalInvoiceId) {
+      showToast("Failed to prepare invoice");
+      return;
+    }
+
     if (!user) {
       showToast("User not authenticated");
       return;
     }
-
 
     try {
       const nextRunAt = getNextRunDate({
@@ -577,49 +632,75 @@ export default function InvoiceEditorPage() {
         startDate,
       });
 
-      await addDoc(collection(db, "recurringInvoices"), {
-        userId: user.uid,
+      const existingQuery = query(
+        collection(db, "recurringInvoices"),
+        where("invoiceId", "==", finalInvoiceId),
+        where("userId", "==", user.uid)
+      );
 
-        interval,
-        customDays:
-          interval === "custom" ? Math.max(1, safeCustomDays) : null,
+      const existingSnap = await getDocs(existingQuery);
 
-        startDate,
-        endDate: endDate || null,
+      if (!existingSnap.empty) {
+        const docRef = existingSnap.docs[0].ref;
 
-        nextRunAt,
-        lastGeneratedAt: null,
+        await updateDoc(docRef, {
+          interval,
+          customDays:
+            interval === "custom" ? Math.max(1, safeCustomDays) : null,
+          startDate,
+          endDate: endDate || null,
+          nextRunAt,
+        });
 
-        status: "active",
+        showToast("Recurring updated");
+      } else {
+        await addDoc(collection(db, "recurringInvoices"), {
+          userId: user.uid,
+          invoiceId: finalInvoiceId, // ✅ FIXED
 
-        template: {
-          client,
-          clientEmail,
-          paymentStatus,
-          lineItems,
-          notes,
-          taxRate,
-          discount,
-          currency,
-        },
+          interval,
+          customDays:
+            interval === "custom" ? Math.max(1, safeCustomDays) : null,
 
-        history: [],
-      });
+          startDate,
+          endDate: endDate || null,
 
-      setShowRecurringModal(false);
-      showToast("Recurring invoice created");
+          nextRunAt,
+          lastGeneratedAt: null,
+          status: "active",
+
+          template: {
+            client,
+            clientEmail,
+            paymentStatus,
+            lineItems,
+            notes,
+            taxRate,
+            discount,
+            currency,
+          },
+
+          history: [],
+        });
+
+        showToast("Recurring invoice created");
+      }
+
+      setShowRecurringModal(false); // ✅ always runs now
     } catch (err) {
       console.error(err);
       showToast("Failed to create recurring invoice");
     }
   };
 
-
-  const nextRunPreview = getNextRunPreview({
-    interval,
-    customDays: safeCustomDays,
-    startDate,
-  });
+  const nextRunPreview =
+    interval === "custom" && isCustomIntervalInvalid
+      ? null
+      : getNextRunPreview({
+        interval,
+        customDays: safeCustomDays,
+        startDate,
+      });
 
 
 
@@ -690,32 +771,72 @@ export default function InvoiceEditorPage() {
         <div className="flex flex-col items-center gap-4">
 
           {/* 🔥 RECURRING BUTTON */}
-          <button
-            onClick={() => {
-              if (plan !== "pro") {
-                showToast("Recurring invoices are a Pro feature");
-                return;
-              }
+          {recurringData ? (
+            <div className="w-full max-w-md p-4 rounded-xl border border-violet-500/20 bg-white/[0.03]">
 
-              const smartDate = getSmartStartDate({
-                interval,
-                customDays: safeCustomDays,
-              });
+              <div className="text-sm text-white font-medium">
+                Recurring • {recurringData.interval.charAt(0).toUpperCase() + recurringData.interval.slice(1)}
+              </div>
 
-              setStartDate(smartDate);
-              setEndDate("");
-              setShowRecurringModal(true);
-            }}
-            className="
-  w-full max-w-md px-4 py-2 rounded-lg
-  bg-gradient-to-r from-violet-600 to-indigo-600
-  text-white font-medium
-  hover:opacity-90 transition-all
-  shadow-[0_0_20px_rgba(124,58,237,0.35)]
-"
-          >
-            Make recurring
-          </button>
+              <div className="text-xs text-slate-400 mt-1">
+                Next: {recurringData.nextRunAt ? formatPrettyDate(recurringData.nextRunAt) : "-"}
+              </div>
+
+              <button
+                onClick={() => setShowRecurringModal(true)}
+                className="mt-3 text-xs text-violet-400 hover:text-violet-300 transition"
+              >
+                Manage
+              </button>
+            </div>
+          ) : (
+
+
+            <button
+              onClick={() => {
+                if (plan !== "pro") {
+                  showToast("Recurring invoices are available on Pro plan");
+                  return;
+                }
+
+                if (!invoiceId) {
+                  showToast("Save & issue the invoice before enabling recurring");
+                  return;
+                }
+
+                setShowRecurringModal(true);
+              }}
+              className={`
+  group
+  w-full max-w-md p-4 rounded-xl
+  bg-white/[0.04] border border-white/10
+  text-left
+  transition-all duration-200
+
+  ${plan !== "pro" || !invoiceId
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:border-violet-500/40 hover:bg-violet-500/5 hover:-translate-y-[1px] hover:shadow-[0_0_20px_rgba(124,58,237,0.15)]"
+                }
+`}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm font-medium text-white">
+                    Make this recurring
+                  </div>
+                  <div className="text-xs text-slate-300/80 mt-1">
+                    Automatically generate invoices
+                  </div>
+                </div>
+
+                <div className="text-violet-400 text-sm font-medium opacity-80 group-hover:opacity-100 transition">
+                  Setup →
+                </div>
+              </div>
+            </button>
+
+
+          )}
 
           <InvoicePreview
             id={idToUse}
@@ -754,7 +875,7 @@ shadow-[0_0_60px_rgba(124,58,237,0.25)]"
           >
             {/* TITLE */}
             <h3 className="text-lg font-semibold text-white mb-5">
-              Make this invoice recurring
+              {recurringData ? "Manage recurring invoice" : "Make this invoice recurring"}
             </h3>
 
             {/* INTERVAL */}
@@ -793,8 +914,19 @@ shadow-[0_0_60px_rgba(124,58,237,0.25)]"
             </div>
 
 
-            {interval === "custom" && (
-              <div className="mt-3">
+            <div
+              className={`
+    overflow-hidden transition-[max-height,opacity]
+    duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]
+    ${interval === "custom" ? "max-h-[200px] opacity-100 mt-3" : "max-h-0 opacity-0 transition-all duration-300"}
+  `}
+            >
+              <div
+                className={`
+      transition-all duration-200 delay-75
+      ${interval === "custom" ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}
+    `}
+              >
                 <label className="text-xs text-slate-400">
                   Repeat every (days)
                 </label>
@@ -814,18 +946,38 @@ shadow-[0_0_60px_rgba(124,58,237,0.25)]"
 
                     const num = Number(val);
 
-                    if (!isNaN(num) && num >= 1) {
+                    if (!isNaN(num)) {
                       setCustomDays(num);
                     }
                   }}
-                  onWheel={(e) => (e.target as HTMLInputElement).blur()} // 🔥 FIX
+                  onWheel={(e) => (e.target as HTMLInputElement).blur()}
                   className={`
-    w-full mt-1 bg-white/5 border 
-    ${!customDays ? "border-red-500/40" : "border-white/10"}
-    rounded-lg px-3 py-2 text-sm text-white
-    focus:outline-none focus:ring-1 focus:ring-violet-500
+    w-full mt-3 rounded-xl px-4 py-3 text-sm text-white
+
+    bg-[#0f0f17]
+
+    border border-violet-500/20   /* 🔥 base border like tab (lighter) */
+    
+    ${customDays !== "" && isCustomIntervalInvalid
+                      ? "border-red-500/60 focus:border-red-500 focus:ring-red-500/30"
+                      : "focus:border-violet-500 focus:ring-violet-500/30"
+                    }
+
+    focus:outline-none focus:ring-2
+
+    placeholder:text-slate-500
+
+    transition-all duration-200
+
+    hover:border-violet-400/30
   `}
                 />
+
+                {interval === "custom" && customDays !== "" && isCustomIntervalInvalid && (
+                  <div className="mt-1 text-xs text-red-400">
+                    Enter a valid interval between 1 and 365 days
+                  </div>
+                )}
 
                 {suggestedInterval && (
                   <div className="mt-2 text-xs text-amber-400 flex items-center justify-between">
@@ -847,7 +999,7 @@ shadow-[0_0_60px_rgba(124,58,237,0.25)]"
                 )}
 
               </div>
-            )}
+            </div>
 
             {/* START DATE */}
             <div className="mb-4">
@@ -877,11 +1029,12 @@ shadow-[0_0_60px_rgba(124,58,237,0.25)]"
           `}
               >
                 <CosmiCalendar
-                  value={startDate}
+                  value={startDate ? new Date(startDate) : null}
                   onChange={(date) => {
                     setStartDate(date);
                     setShowStartPicker(false);
                   }}
+                  showQuickActions={true}
                 />
               </div>
             </div>
@@ -916,11 +1069,12 @@ shadow-[0_0_60px_rgba(124,58,237,0.25)]"
                 `}
               >
                 <CosmiCalendar
-                  value={endDate}
+                  value={endDate ? new Date(endDate) : null}
                   onChange={(date) => {
                     setEndDate(date);
                     setShowEndPicker(false);
                   }}
+                  showQuickActions={false}
                 />
 
                 <div className="mt-3 pt-2 border-t border-white/5 flex justify-between items-center">
@@ -1033,8 +1187,14 @@ shadow-[0_0_60px_rgba(124,58,237,0.25)]"
               <button
                 onClick={() => {
                   if (isRecurringInvalid) {
-                    // scroll to problem
+
+                    if (interval === "custom" && isCustomIntervalInvalid) {
+                      showToast("Enter a valid interval (1–365 days)");
+                      return;
+                    }
+
                     if (!startDate) {
+                      showToast("Start date is required");
                       startPickerRef.current?.scrollIntoView({
                         behavior: "smooth",
                         block: "center",
@@ -1044,6 +1204,7 @@ shadow-[0_0_60px_rgba(124,58,237,0.25)]"
                     }
 
                     if (isEndBeforeStart) {
+                      showToast("End date cannot be before start date");
                       endPickerRef.current?.scrollIntoView({
                         behavior: "smooth",
                         block: "center",
@@ -1051,10 +1212,13 @@ shadow-[0_0_60px_rgba(124,58,237,0.25)]"
                       setShowEndPicker(true);
                       return;
                     }
+
+                    return;
                   }
 
                   handleSaveRecurring();
                 }}
+
                 className={`
                       px-4 py-2 rounded-lg text-white transition
 

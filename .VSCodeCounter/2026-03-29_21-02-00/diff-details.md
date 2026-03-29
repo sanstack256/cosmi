@@ -1,18 +1,17 @@
 # Diff Details
 
-Date : 2026-03-26 01:43:16
+Date : 2026-03-29 21:02:00
 
 Directory /Users/nssanjeev/Documents/cosmi
 
-Total : 3 files,  255 codes, 3 comments, 31 blanks, all 289 lines
+Total : 2 files,  199 codes, 8 comments, 45 blanks, all 252 lines
 
 [Summary](results.md) / [Details](details.md) / [Diff Summary](diff.md) / Diff Details
 
 ## Files
 | filename | language | code | comment | blank | total |
 | :--- | :--- | ---: | ---: | ---: | ---: |
-| [app/invoice-editor/page.tsx](/app/invoice-editor/page.tsx) | TypeScript JSX | 210 | 3 | 31 | 244 |
-| [package-lock.json](/package-lock.json) | JSON | 44 | 0 | 0 | 44 |
-| [package.json](/package.json) | JSON | 1 | 0 | 0 | 1 |
+| [app/globals.css](/app/globals.css) | PostCSS | 8 | 2 | 2 | 12 |
+| [app/invoice-editor/page.tsx](/app/invoice-editor/page.tsx) | TypeScript JSX | 191 | 6 | 43 | 240 |
 
 [Summary](results.md) / [Details](details.md) / [Diff Summary](diff.md) / Diff Details

@@ -28,11 +28,12 @@ function formatDate(date: Date) {
 
 
 type Props = {
-    value: string | null
+    value: Date | null;
     onChange: (date: string) => void;
+    showQuickActions?: boolean;
 };
 
-export default function CosmiCalendar({ value, onChange }: Props) {
+export default function CosmiCalendar({ value, onChange, showQuickActions }: Props) {
     const today = new Date();
 
     const baseDate = value ? new Date(value) : getToday();
@@ -82,28 +83,30 @@ export default function CosmiCalendar({ value, onChange }: Props) {
         <div className="w-[280px] bg-[#0b0b12] border border-white/10 rounded-xl p-3 shadow-[0_0_30px_rgba(124,58,237,0.25)]">
 
             {/* Quick Actions */}
-            <div className="flex gap-2 mb-3">
-                {[
-                    { label: "Today", date: getToday() },
-                    { label: "+7 days", date: addDays(getToday(), 7) },
-                    { label: "End of month", date: getEndOfMonth(getToday()) },
-                ].map((item) => (
-                    <button
-                        key={item.label}
-                        type="button"
-                        onClick={() => onChange(formatDate(item.date))}
-                        className="
-                px-3 py-1.5 text-xs rounded-md
-                bg-white/[0.04] hover:bg-white/[0.08]
-                border border-white/[0.06]
-                text-white/80 hover:text-white
-                transition-all duration-150
-            "
-                    >
-                        {item.label}
-                    </button>
-                ))}
-            </div>
+            {showQuickActions && (
+                <div className="flex gap-2 mb-3">
+                    {[
+                        { label: "Today", date: getToday() },
+                        { label: "+7 days", date: addDays(getToday(), 7) },
+                        { label: "End of month", date: getEndOfMonth(getToday()) },
+                    ].map((item) => (
+                        <button
+                            key={item.label}
+                            type="button"
+                            onClick={() => onChange(formatDate(item.date))}
+                            className="
+          px-3 py-1.5 text-xs rounded-md
+          bg-white/[0.04] hover:bg-white/[0.08]
+          border border-white/[0.06]
+          text-white/80 hover:text-white
+          transition-all duration-150
+        "
+                        >
+                            {item.label}
+                        </button>
+                    ))}
+                </div>
+            )}
 
             {/* HEADER */}
             <div className="flex justify-between items-center mb-3">
@@ -113,7 +116,7 @@ export default function CosmiCalendar({ value, onChange }: Props) {
                     }
                     className="text-white/60 hover:text-white"
                 >
-                    ‹
+
                 </button>
 
                 <span className="text-sm font-medium text-white">
