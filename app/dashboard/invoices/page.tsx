@@ -218,8 +218,8 @@ export default function InvoicesPage() {
     });
   }
 
-  filteredInvoices.sort((a, b) => {
-  return new Date(b.date).getTime() - new Date(a.date).getTime();
+filteredInvoices.sort((a, b) => {
+  return b.createdAt.toDate().getTime() - a.createdAt.toDate().getTime();
 });
 
   const getStatusStyle = (status: string) => {

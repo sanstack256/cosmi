@@ -255,6 +255,7 @@ export default function InvoiceEditorPage() {
 
   const formatNumber = (value: number) =>
     formatCurrency(value, currency);
+  
   function handlePrint() {
     if (!printRef.current) return;
 
