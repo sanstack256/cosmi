@@ -27,6 +27,49 @@ function formatDateLocal(date: Date) {
   return `${yyyy}-${mm}-${dd}`;
 }
 
+
+
+function getNextRunPreview({
+  interval,
+  customDays,
+  startDate,
+}: {
+  interval: "weekly" | "monthly" | "custom";
+  customDays: number;
+  startDate: string;
+}) {
+  if (!startDate) return null;
+
+  const next = getNextRunDate({
+    interval,
+    customDays,
+    startDate,
+  });
+
+  return next;
+}
+
+
+function formatPrettyDate(dateStr: string) {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function getIntervalLabel(
+  interval: "weekly" | "monthly" | "custom",
+  customDays: number
+) {
+  if (interval === "weekly") return "week";
+  if (interval === "monthly") return "month";
+  return `${customDays} days`;
+}
+
+
+
 function getSmartStartDate({
   interval,
   customDays,
@@ -162,6 +205,17 @@ export default function InvoiceEditorPage() {
     dueDate: false,
     lineItems: false,
   });
+
+
+  const isEndBeforeStart =
+    startDate &&
+    endDate &&
+    new Date(endDate) < new Date(startDate);
+
+  const isMonthlyEdgeCase =
+    interval === "monthly" &&
+    startDate &&
+    new Date(startDate).getDate() >= 29;
 
 
 
@@ -405,7 +459,7 @@ export default function InvoiceEditorPage() {
 
     let invoiceId: string | null = null;
 
-    // 🔥 ALWAYS SAVE FIRST (single source of truth)
+    // ALWAYS SAVE FIRST (single source of truth)
     try {
       setSaving(true);
       const saved = await saveInvoice(showToast);
@@ -545,6 +599,15 @@ export default function InvoiceEditorPage() {
       showToast("Failed to create recurring invoice");
     }
   };
+
+
+  const nextRunPreview = getNextRunPreview({
+    interval,
+    customDays,
+    startDate,
+  });
+
+
 
   /* ------------------------------------------
      UI
@@ -766,8 +829,8 @@ export default function InvoiceEditorPage() {
                   setShowStartPicker(false);
                 }}
                 className="w-full mt-1 bg-white/5 border border-white/10 
-          rounded-lg px-3 py-2 text-sm text-left text-white 
-          flex justify-between items-center"
+                  rounded-lg px-3 py-2 text-sm text-left text-white 
+                  flex justify-between items-center"
               >
                 {endDate
                   ? format(new Date(endDate), "dd MMM yyyy")
@@ -778,9 +841,9 @@ export default function InvoiceEditorPage() {
 
               <div
                 className={`
-            overflow-hidden transition-all duration-300
-            ${showEndPicker ? "max-h-[420px] opacity-100 mt-3" : "max-h-0 opacity-0"}
-          `}
+                  overflow-hidden transition-all duration-300
+                  ${showEndPicker ? "max-h-[420px] opacity-100 mt-3" : "max-h-0 opacity-0"}
+                `}
               >
                 <CosmiCalendar
                   value={endDate}
@@ -809,6 +872,83 @@ export default function InvoiceEditorPage() {
                 </div>
               </div>
             </div>
+
+
+
+            {/* SUMMARY */}
+            <div className="mb-6 p-4 rounded-xl bg-white/[0.03] border border-white/5">
+              <p className="text-xs text-slate-400 mb-2">
+                You will generate:
+              </p>
+
+              <div className="space-y-1 text-sm text-white/90">
+                <div>
+                  • Invoice every{" "}
+                  <span className="text-white font-medium">
+                    {getIntervalLabel(interval, customDays)}
+                  </span>
+                </div>
+
+                <div>
+                  • Starting{" "}
+                  <span className="text-white font-medium">
+                    {startDate ? formatPrettyDate(startDate) : "-"}
+                  </span>
+                </div>
+
+                <div>
+                  •{" "}
+                  {endDate ? (
+                    <>
+                      Until{" "}
+                      <span className="text-white font-medium">
+                        {formatPrettyDate(endDate)}
+                      </span>
+                    </>
+                  ) : (
+                    "No end date"
+                  )}
+                </div>
+              </div>
+
+              {nextRunPreview && (
+                <div className="pt-2 mt-2 border-t border-white/5 text-xs text-slate-400">
+                  Next invoice:{" "}
+                  <span className="text-white font-medium">
+                    {formatPrettyDate(nextRunPreview)}
+                  </span>
+                </div>
+              )}
+
+              {/* ⚠ VALIDATION + INTELLIGENCE */}
+              <div className="mt-2 space-y-1 text-xs">
+
+                {/* End date error */}
+                {isEndBeforeStart && (
+                  <div className="text-red-400">
+                    ⚠ End date is before start date
+                  </div>
+                )}
+
+                {/* Monthly edge case */}
+                {isMonthlyEdgeCase && (
+                  <div className="text-amber-400">
+                    Adjusts for shorter months
+                  </div>
+                )}
+
+                {/* Empty start state */}
+                {!startDate && (
+                  <div className="text-slate-500">
+                    Pick a start date to begin
+                  </div>
+                )}
+
+              </div>
+
+            </div>
+
+
 
             {/* ✅ ACTIONS (CORRECT PLACE) */}
             <div className="flex justify-end gap-3">
