@@ -745,16 +745,39 @@ export default function InvoiceEditorPage() {
 
             {/* INTERVAL */}
             <label className="text-xs text-slate-400">Interval</label>
-            <select
-              value={interval}
-              onChange={(e) => setInterval(e.target.value as any)}
-              className="w-full mt-1 mb-4 bg-white/5 border border-white/10 
-        rounded-lg px-3 py-2 text-sm text-white"
-            >
-              <option value="monthly">Monthly</option>
-              <option value="weekly">Weekly</option>
-              <option value="custom">Custom</option>
-            </select>
+            <div className="grid grid-cols-3 gap-2 mt-2 mb-4">
+              {[
+                { key: "monthly", label: "Monthly", desc: "Every month" },
+                { key: "weekly", label: "Weekly", desc: "Every 7 days" },
+                { key: "custom", label: "Custom", desc: "Flexible" },
+              ].map((item) => {
+                const isActive = interval === item.key;
+
+                return (
+                  <button
+                    key={item.key}
+                    type="button"
+                    onClick={() => setInterval(item.key as any)}
+                    className={`
+          text-left p-3 rounded-xl border transition-all
+          
+          ${isActive
+                        ? "bg-violet-600/10 border-violet-500 text-white shadow-[0_0_20px_rgba(124,58,237,0.25)]"
+                        : "bg-white/[0.03] border-white/5 text-white/70 hover:bg-white/[0.06]"
+                      }
+        `}
+                  >
+                    <div className="text-sm font-medium">
+                      {item.label}
+                    </div>
+                    <div className="text-[11px] text-white/50 mt-0.5">
+                      {item.desc}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
 
             {interval === "custom" && (
               <div className="mt-3">
@@ -770,11 +793,12 @@ export default function InvoiceEditorPage() {
                     const val = Number(e.target.value);
                     if (val >= 1) setCustomDays(val);
                   }}
+                  onWheel={(e) => (e.target as HTMLInputElement).blur()} // key fix
                   className="
-        w-full mt-1 bg-white/5 border border-white/10
-        rounded-lg px-3 py-2 text-sm text-white
-        focus:outline-none focus:ring-1 focus:ring-violet-500
-      "
+    w-full mt-1 bg-white/5 border border-white/10
+    rounded-lg px-3 py-2 text-sm text-white
+    focus:outline-none focus:ring-1 focus:ring-violet-500
+  "
                 />
               </div>
             )}

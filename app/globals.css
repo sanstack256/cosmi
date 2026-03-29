@@ -316,3 +316,15 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .rdp-button:hover:not([disabled]):not(.rdp-day_selected) {
   background-color: rgba(124, 58, 237, 0.2);
 }
+
+/* Remove number input spinners (Chrome, Safari, Edge) */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Remove spinner (Firefox) */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
