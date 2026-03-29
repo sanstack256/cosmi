@@ -1,10 +1,10 @@
 # Details
 
-Date : 2026-03-28 00:50:08
+Date : 2026-03-29 23:29:25
 
 Directory /Users/nssanjeev/Documents/cosmi
 
-Total : 77 files,  18952 codes, 513 comments, 2084 blanks, all 21549 lines
+Total : 77 files,  19441 codes, 525 comments, 2203 blanks, all 22169 lines
 
 [Summary](results.md) / Details / [Diff Summary](diff.md) / [Diff Details](diff-details.md)
 
@@ -28,20 +28,20 @@ Total : 77 files,  18952 codes, 513 comments, 2084 blanks, all 21549 lines
 | [app/components/SignOutButton.tsx](/app/components/SignOutButton.tsx) | TypeScript JSX | 171 | 20 | 18 | 209 |
 | [app/components/UserMenu.tsx](/app/components/UserMenu.tsx) | TypeScript JSX | 107 | 5 | 17 | 129 |
 | [app/components/hero/HeroVisual.tsx](/app/components/hero/HeroVisual.tsx) | TypeScript JSX | 47 | 6 | 6 | 59 |
-| [app/components/ui/CosmiCalendar.tsx](/app/components/ui/CosmiCalendar.tsx) | TypeScript JSX | 96 | 5 | 18 | 119 |
+| [app/components/ui/CosmiCalendar.tsx](/app/components/ui/CosmiCalendar.tsx) | TypeScript JSX | 139 | 6 | 28 | 173 |
 | [app/dashboard/clients/\[id\]/page.tsx](/app/dashboard/clients/%5Bid%5D/page.tsx) | TypeScript JSX | 31 | 0 | 11 | 42 |
 | [app/dashboard/clients/page.tsx](/app/dashboard/clients/page.tsx) | TypeScript JSX | 325 | 12 | 90 | 427 |
 | [app/dashboard/invoices/\[id\]/page.tsx](/app/dashboard/invoices/%5Bid%5D/page.tsx) | TypeScript JSX | 454 | 24 | 128 | 606 |
-| [app/dashboard/invoices/page.tsx](/app/dashboard/invoices/page.tsx) | TypeScript JSX | 462 | 7 | 105 | 574 |
+| [app/dashboard/invoices/page.tsx](/app/dashboard/invoices/page.tsx) | TypeScript JSX | 482 | 8 | 114 | 604 |
 | [app/dashboard/layout.tsx](/app/dashboard/layout.tsx) | TypeScript JSX | 208 | 10 | 28 | 246 |
 | [app/dashboard/page.tsx](/app/dashboard/page.tsx) | TypeScript JSX | 684 | 39 | 166 | 889 |
-| [app/globals.css](/app/globals.css) | PostCSS | 259 | 13 | 46 | 318 |
+| [app/globals.css](/app/globals.css) | PostCSS | 267 | 15 | 48 | 330 |
 | [app/head.tsx](/app/head.tsx) | TypeScript JSX | 14 | 4 | 4 | 22 |
 | [app/invoice-editor/components/invoice/InvoiceForm.tsx](/app/invoice-editor/components/invoice/InvoiceForm.tsx) | TypeScript JSX | 818 | 42 | 213 | 1,073 |
 | [app/invoice-editor/components/invoice/InvoicePreview.tsx](/app/invoice-editor/components/invoice/InvoicePreview.tsx) | TypeScript JSX | 229 | 18 | 52 | 299 |
 | [app/invoice-editor/hooks/useInvoiceEditor.tsx](/app/invoice-editor/hooks/useInvoiceEditor.tsx) | TypeScript JSX | 304 | 39 | 104 | 447 |
 | [app/invoice-editor/loading.tsx](/app/invoice-editor/loading.tsx) | TypeScript JSX | 103 | 1 | 5 | 109 |
-| [app/invoice-editor/page.tsx](/app/invoice-editor/page.tsx) | TypeScript JSX | 593 | 28 | 145 | 766 |
+| [app/invoice-editor/page.tsx](/app/invoice-editor/page.tsx) | TypeScript JSX | 1,011 | 36 | 243 | 1,290 |
 | [app/invoice/\[id\]/page.tsx](/app/invoice/%5Bid%5D/page.tsx) | TypeScript JSX | 592 | 35 | 167 | 794 |
 | [app/layout.tsx](/app/layout.tsx) | TypeScript JSX | 44 | 4 | 10 | 58 |
 | [app/onboarding/page.tsx](/app/onboarding/page.tsx) | TypeScript JSX | 121 | 4 | 27 | 152 |

@@ -16,20 +16,20 @@
 "/Users/nssanjeev/Documents/cosmi/app/components/SignOutButton.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 171, 0, 20, 18, 209
 "/Users/nssanjeev/Documents/cosmi/app/components/UserMenu.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 107, 0, 5, 17, 129
 "/Users/nssanjeev/Documents/cosmi/app/components/hero/HeroVisual.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 47, 0, 6, 6, 59
-"/Users/nssanjeev/Documents/cosmi/app/components/ui/CosmiCalendar.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 96, 0, 5, 18, 119
+"/Users/nssanjeev/Documents/cosmi/app/components/ui/CosmiCalendar.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 139, 0, 6, 28, 173
 "/Users/nssanjeev/Documents/cosmi/app/dashboard/clients/[id]/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 31, 0, 0, 11, 42
 "/Users/nssanjeev/Documents/cosmi/app/dashboard/clients/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 325, 0, 12, 90, 427
 "/Users/nssanjeev/Documents/cosmi/app/dashboard/invoices/[id]/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 454, 0, 24, 128, 606
-"/Users/nssanjeev/Documents/cosmi/app/dashboard/invoices/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 462, 0, 7, 105, 574
+"/Users/nssanjeev/Documents/cosmi/app/dashboard/invoices/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 482, 0, 8, 114, 604
 "/Users/nssanjeev/Documents/cosmi/app/dashboard/layout.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 208, 0, 10, 28, 246
 "/Users/nssanjeev/Documents/cosmi/app/dashboard/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 684, 0, 39, 166, 889
-"/Users/nssanjeev/Documents/cosmi/app/globals.css", "PostCSS", 0, 0, 0, 0, 0, 0, 0, 259, 13, 46, 318
+"/Users/nssanjeev/Documents/cosmi/app/globals.css", "PostCSS", 0, 0, 0, 0, 0, 0, 0, 267, 15, 48, 330
 "/Users/nssanjeev/Documents/cosmi/app/head.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 14, 0, 4, 4, 22
 "/Users/nssanjeev/Documents/cosmi/app/invoice-editor/components/invoice/InvoiceForm.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 818, 0, 42, 213, 1073
 "/Users/nssanjeev/Documents/cosmi/app/invoice-editor/components/invoice/InvoicePreview.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 229, 0, 18, 52, 299
 "/Users/nssanjeev/Documents/cosmi/app/invoice-editor/hooks/useInvoiceEditor.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 304, 0, 39, 104, 447
 "/Users/nssanjeev/Documents/cosmi/app/invoice-editor/loading.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 103, 0, 1, 5, 109
-"/Users/nssanjeev/Documents/cosmi/app/invoice-editor/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 593, 0, 28, 145, 766
+"/Users/nssanjeev/Documents/cosmi/app/invoice-editor/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 1011, 0, 36, 243, 1290
 "/Users/nssanjeev/Documents/cosmi/app/invoice/[id]/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 592, 0, 35, 167, 794
 "/Users/nssanjeev/Documents/cosmi/app/layout.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 44, 0, 4, 10, 58
 "/Users/nssanjeev/Documents/cosmi/app/onboarding/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 121, 0, 4, 27, 152
@@ -76,4 +76,4 @@
 "/Users/nssanjeev/Documents/cosmi/tailwind.config.js", "JavaScript", 0, 0, 26, 0, 0, 0, 0, 0, 1, 2, 29
 "/Users/nssanjeev/Documents/cosmi/tsconfig.json", "JSON with Comments", 0, 42, 0, 0, 0, 0, 0, 0, 0, 1, 43
 "/Users/nssanjeev/Documents/cosmi/types/lord-icon.d.ts", "TypeScript", 17, 0, 0, 0, 0, 0, 0, 0, 0, 2, 19
-"Total", "-", 614, 42, 52, 5, 10080, 23, 7877, 259, 513, 2084, 21549
+"Total", "-", 614, 42, 52, 5, 10080, 23, 8358, 267, 525, 2203, 22169

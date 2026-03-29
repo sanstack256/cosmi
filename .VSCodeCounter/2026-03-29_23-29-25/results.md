@@ -1,10 +1,10 @@
 # Summary
 
-Date : 2026-03-28 00:50:08
+Date : 2026-03-29 23:29:25
 
 Directory /Users/nssanjeev/Documents/cosmi
 
-Total : 77 files,  18952 codes, 513 comments, 2084 blanks, all 21549 lines
+Total : 77 files,  19441 codes, 525 comments, 2203 blanks, all 22169 lines
 
 Summary / [Details](details.md) / [Diff Summary](diff.md) / [Diff Details](diff-details.md)
 
@@ -12,9 +12,9 @@ Summary / [Details](details.md) / [Diff Summary](diff.md) / [Diff Details](diff-
 | language | files | code | comment | blank | total |
 | :--- | ---: | ---: | ---: | ---: | ---: |
 | JSON | 2 | 10,080 | 0 | 2 | 10,082 |
-| TypeScript JSX | 43 | 7,877 | 461 | 1,840 | 10,178 |
+| TypeScript JSX | 43 | 8,358 | 471 | 1,957 | 10,786 |
 | TypeScript | 20 | 614 | 36 | 173 | 823 |
-| PostCSS | 1 | 259 | 13 | 46 | 318 |
+| PostCSS | 1 | 267 | 15 | 48 | 330 |
 | JavaScript | 4 | 52 | 3 | 8 | 63 |
 | JSON with Comments | 1 | 42 | 0 | 1 | 43 |
 | Markdown | 1 | 23 | 0 | 14 | 37 |
@@ -23,10 +23,10 @@ Summary / [Details](details.md) / [Diff Summary](diff.md) / [Diff Details](diff-
 ## Directories
 | path | files | code | comment | blank | total |
 | :--- | ---: | ---: | ---: | ---: | ---: |
-| . | 77 | 18,952 | 513 | 2,084 | 21,549 |
+| . | 77 | 19,441 | 525 | 2,203 | 22,169 |
 | . (Files) | 10 | 10,213 | 6 | 31 | 10,250 |
-| app | 52 | 8,601 | 498 | 2,024 | 11,123 |
-| app (Files) | 6 | 605 | 37 | 97 | 739 |
+| app | 52 | 9,090 | 510 | 2,143 | 11,743 |
+| app (Files) | 6 | 613 | 39 | 99 | 751 |
 | app/api | 7 | 454 | 24 | 137 | 615 |
 | app/api/create-public-link | 1 | 50 | 2 | 12 | 64 |
 | app/api/paypal-capture | 1 | 133 | 9 | 41 | 183 |
@@ -38,21 +38,21 @@ Summary / [Details](details.md) / [Diff Summary](diff.md) / [Diff Details](diff-
 | app/api/razorpay-checkout/success | 1 | 112 | 9 | 36 | 157 |
 | app/api/send-reminder | 1 | 28 | 1 | 10 | 39 |
 | app/company | 1 | 266 | 10 | 44 | 320 |
-| app/components | 8 | 501 | 44 | 76 | 621 |
+| app/components | 8 | 544 | 45 | 86 | 675 |
 | app/components (Files) | 6 | 358 | 33 | 52 | 443 |
 | app/components/hero | 1 | 47 | 6 | 6 | 59 |
-| app/components/ui | 1 | 96 | 5 | 18 | 119 |
-| app/dashboard | 6 | 2,164 | 92 | 528 | 2,784 |
+| app/components/ui | 1 | 139 | 6 | 28 | 173 |
+| app/dashboard | 6 | 2,184 | 93 | 537 | 2,814 |
 | app/dashboard (Files) | 2 | 892 | 49 | 194 | 1,135 |
 | app/dashboard/clients | 2 | 356 | 12 | 101 | 469 |
 | app/dashboard/clients (Files) | 1 | 325 | 12 | 90 | 427 |
 | app/dashboard/clients/[id] | 1 | 31 | 0 | 11 | 42 |
-| app/dashboard/invoices | 2 | 916 | 31 | 233 | 1,180 |
-| app/dashboard/invoices (Files) | 1 | 462 | 7 | 105 | 574 |
+| app/dashboard/invoices | 2 | 936 | 32 | 242 | 1,210 |
+| app/dashboard/invoices (Files) | 1 | 482 | 8 | 114 | 604 |
 | app/dashboard/invoices/[id] | 1 | 454 | 24 | 128 | 606 |
 | app/invoice | 1 | 592 | 35 | 167 | 794 |
-| app/invoice-editor | 5 | 2,047 | 128 | 519 | 2,694 |
-| app/invoice-editor (Files) | 2 | 696 | 29 | 150 | 875 |
+| app/invoice-editor | 5 | 2,465 | 136 | 617 | 3,218 |
+| app/invoice-editor (Files) | 2 | 1,114 | 37 | 248 | 1,399 |
 | app/invoice-editor/components | 2 | 1,047 | 60 | 265 | 1,372 |
 | app/invoice-editor/components/invoice | 2 | 1,047 | 60 | 265 | 1,372 |
 | app/invoice-editor/hooks | 1 | 304 | 39 | 104 | 447 |

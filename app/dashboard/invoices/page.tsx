@@ -192,12 +192,27 @@ export default function InvoicesPage() {
     {}
   );
 
-  let filteredInvoices =
-    statusFilter === "All"
-      ? [...invoices]
-      : invoices.filter(
-        (inv) => inv.paymentStatus === statusFilter
-      );
+  let filteredInvoices = [...invoices];
+
+  if (statusFilter === "unpaid") {
+    filteredInvoices = invoices.filter(
+      (inv) =>
+        inv.paymentStatus === "unpaid" ||
+        inv.paymentStatus === "partial"
+    );
+  }
+
+  if (statusFilter === "overdue") {
+    filteredInvoices = invoices.filter(
+      (inv) => inv.paymentStatus === "overdue"
+    );
+  }
+
+  if (statusFilter === "paid") {
+    filteredInvoices = invoices.filter(
+      (inv) => inv.paymentStatus === "paid"
+    );
+  }
 
   /* 🔎 Search Filter */
 
@@ -218,12 +233,28 @@ export default function InvoicesPage() {
     });
   }
 
-filteredInvoices.sort((a, b) => {
-  return b.createdAt.toDate().getTime() - a.createdAt.toDate().getTime();
-});
+  filteredInvoices.sort((a, b) => {
+    let valA: number = 0;
+    let valB: number = 0;
+
+    if (sortKey === "date") {
+      valA = a.createdAt?.toDate?.().getTime?.() || 0;
+      valB = b.createdAt?.toDate?.().getTime?.() || 0;
+    }
+
+    if (sortKey === "amount") {
+      valA = parseAmount(a.amount);
+      valB = parseAmount(b.amount);
+    }
+
+    return sortOrder === "asc" ? valA - valB : valB - valA;
+  });
+
 
   const getStatusStyle = (status: string) => {
     switch (status) {
+      case "partial":
+        return "bg-yellow-500/10 text-yellow-300 shadow-[0_0_12px_rgba(234,179,8,0.15)]";
       case "paid":
         return "bg-emerald-500/10 text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.15)]";
       case "unpaid":
@@ -286,6 +317,64 @@ filteredInvoices.sort((a, b) => {
           value={`${stats.overdueCount}`}
           accent="rose"
         />
+      </div>
+
+      <div className="flex items-center justify-between mb-4">
+
+        {/* STATUS FILTER */}
+        <div className="flex items-center gap-2">
+          {["All", "unpaid", "overdue", "paid"].map((status) => (
+            <button
+              key={status}
+              onClick={() => {
+                setStatusFilter(status);
+                updateQuery({ status });
+              }}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition
+        ${statusFilter === status
+                  ? "bg-violet-500/20 text-violet-300 border-violet-500/40"
+                  : "bg-white/5 text-slate-400 border-white/10 hover:bg-white/10"
+                }`}
+            >
+              {status === "All"
+                ? "All"
+                : status === "unpaid"
+                  ? "Needs Attention"
+                  : status.charAt(0).toUpperCase() + status.slice(1)}
+
+            </button>
+          ))}
+        </div>
+
+        {/* SORT DROPDOWN */}
+        <div className="flex items-center gap-2">
+          <select
+            value={sortKey}
+            onChange={(e) => {
+              const val = e.target.value as "date" | "amount";
+              setSortKey(val);
+              updateQuery({ sort: val });
+            }}
+            className="bg-[#0f1020] border border-white/10 rounded-lg px-3 py-1.5 text-xs"
+          >
+            <option value="date">Sort by Date</option>
+            <option value="amount">Sort by Amount</option>
+          </select>
+
+          <select
+            value={sortOrder}
+            onChange={(e) => {
+              const val = e.target.value as "asc" | "desc";
+              setSortOrder(val);
+              updateQuery({ order: val });
+            }}
+            className="bg-[#0f1020] border border-white/10 rounded-lg px-3 py-1.5 text-xs"
+          >
+            <option value="desc">Desc</option>
+            <option value="asc">Asc</option>
+          </select>
+        </div>
+
       </div>
 
       {/* Table */}

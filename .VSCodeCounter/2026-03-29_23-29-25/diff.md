@@ -1,29 +1,25 @@
 # Diff Summary
 
-Date : 2026-03-28 00:50:08
+Date : 2026-03-29 23:29:25
 
 Directory /Users/nssanjeev/Documents/cosmi
 
-Total : 4 files,  56 codes, 2 comments, 26 blanks, all 84 lines
+Total : 2 files,  64 codes, 4 comments, 20 blanks, all 88 lines
 
 [Summary](results.md) / [Details](details.md) / Diff Summary / [Diff Details](diff-details.md)
 
 ## Languages
 | language | files | code | comment | blank | total |
 | :--- | ---: | ---: | ---: | ---: | ---: |
-| TypeScript JSX | 2 | 22 | 1 | 19 | 42 |
-| TypeScript | 1 | 19 | 0 | 2 | 21 |
-| PostCSS | 1 | 15 | 1 | 5 | 21 |
+| TypeScript JSX | 2 | 64 | 4 | 20 | 88 |
 
 ## Directories
 | path | files | code | comment | blank | total |
 | :--- | ---: | ---: | ---: | ---: | ---: |
-| . | 4 | 56 | 2 | 26 | 84 |
-| app | 3 | 37 | 2 | 24 | 63 |
-| app (Files) | 1 | 15 | 1 | 5 | 21 |
-| app/components | 1 | 96 | 5 | 18 | 119 |
-| app/components/ui | 1 | 96 | 5 | 18 | 119 |
-| app/invoice-editor | 1 | -74 | -4 | 1 | -77 |
-| lib | 1 | 19 | 0 | 2 | 21 |
+| . | 2 | 64 | 4 | 20 | 88 |
+| app | 2 | 64 | 4 | 20 | 88 |
+| app/dashboard | 1 | 20 | 1 | 9 | 30 |
+| app/dashboard/invoices | 1 | 20 | 1 | 9 | 30 |
+| app/invoice-editor | 1 | 44 | 3 | 11 | 58 |
 
 [Summary](results.md) / [Details](details.md) / Diff Summary / [Diff Details](diff-details.md)
