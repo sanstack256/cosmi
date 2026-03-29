@@ -65,7 +65,7 @@ function getIntervalLabel(
 ) {
   if (interval === "weekly") return "week";
   if (interval === "monthly") return "month";
-  return `${customDays} days`;
+  return customDays ? `${customDays} days` : "custom interval";
 }
 
 
@@ -167,7 +167,7 @@ export default function InvoiceEditorPage() {
 
   const isValidating = useRef(false);
 
-  const [customDays, setCustomDays] = useState<number>(30);
+  const [customDays, setCustomDays] = useState<number | "">(30);
 
   const [openUpwards, setOpenUpwards] = useState(false);
 
@@ -208,8 +208,7 @@ export default function InvoiceEditorPage() {
 
 
   const isEndBeforeStart =
-    startDate &&
-    endDate &&
+    Boolean(startDate && endDate) &&
     new Date(endDate) < new Date(startDate);
 
   const isMonthlyEdgeCase =
@@ -217,13 +216,27 @@ export default function InvoiceEditorPage() {
     startDate &&
     new Date(startDate).getDate() >= 29;
 
+  const safeCustomDays = Number(customDays) || 0;
 
+  const suggestedInterval =
+    interval === "custom"
+      ? safeCustomDays === 7
+        ? "weekly"
+        : safeCustomDays === 30
+          ? "monthly"
+          : null
+      : null;
+
+
+  const isRecurringInvalid =
+    !startDate ||
+    Boolean(isEndBeforeStart) ||
+    (interval === "custom" && !safeCustomDays);
 
 
   const { invoices, issueInvoice } = useInvoices();
 
   const currentInvoice = editingInvoice;
-
 
   const { user, plan } = useAuth();
 
@@ -261,7 +274,7 @@ export default function InvoiceEditorPage() {
 
     const smartDate = getSmartStartDate({
       interval,
-      customDays,
+      customDays: safeCustomDays,
     });
 
     setStartDate(smartDate);
@@ -560,7 +573,7 @@ export default function InvoiceEditorPage() {
     try {
       const nextRunAt = getNextRunDate({
         interval,
-        customDays,
+        customDays: safeCustomDays,
         startDate,
       });
 
@@ -568,7 +581,8 @@ export default function InvoiceEditorPage() {
         userId: user.uid,
 
         interval,
-        customDays: interval === "custom" ? Math.max(1, customDays) : null,
+        customDays:
+          interval === "custom" ? Math.max(1, safeCustomDays) : null,
 
         startDate,
         endDate: endDate || null,
@@ -603,7 +617,7 @@ export default function InvoiceEditorPage() {
 
   const nextRunPreview = getNextRunPreview({
     interval,
-    customDays,
+    customDays: safeCustomDays,
     startDate,
   });
 
@@ -685,7 +699,7 @@ export default function InvoiceEditorPage() {
 
               const smartDate = getSmartStartDate({
                 interval,
-                customDays,
+                customDays: safeCustomDays,
               });
 
               setStartDate(smartDate);
@@ -734,9 +748,9 @@ export default function InvoiceEditorPage() {
           <div
             ref={modalRef}
             onClick={(e) => e.stopPropagation()}
-            className="w-[480px] rounded-2xl border border-violet-500/20 
-      bg-[#0b0b12] p-6 
-      shadow-[0_0_60px_rgba(124,58,237,0.25)]"
+            className="w-[480px] max-h-[90vh] overflow-y-auto rounded-2xl border border-violet-500/20 
+bg-[#0b0b12] p-6 
+shadow-[0_0_60px_rgba(124,58,237,0.25)]"
           >
             {/* TITLE */}
             <h3 className="text-lg font-semibold text-white mb-5">
@@ -788,18 +802,50 @@ export default function InvoiceEditorPage() {
                 <input
                   type="number"
                   min={1}
+                  placeholder="Enter custom interval"
                   value={customDays}
                   onChange={(e) => {
-                    const val = Number(e.target.value);
-                    if (val >= 1) setCustomDays(val);
+                    const val = e.target.value;
+
+                    if (val === "") {
+                      setCustomDays("");
+                      return;
+                    }
+
+                    const num = Number(val);
+
+                    if (!isNaN(num) && num >= 1) {
+                      setCustomDays(num);
+                    }
                   }}
-                  onWheel={(e) => (e.target as HTMLInputElement).blur()} // key fix
-                  className="
-    w-full mt-1 bg-white/5 border border-white/10
+                  onWheel={(e) => (e.target as HTMLInputElement).blur()} // 🔥 FIX
+                  className={`
+    w-full mt-1 bg-white/5 border 
+    ${!customDays ? "border-red-500/40" : "border-white/10"}
     rounded-lg px-3 py-2 text-sm text-white
     focus:outline-none focus:ring-1 focus:ring-violet-500
-  "
+  `}
                 />
+
+                {suggestedInterval && (
+                  <div className="mt-2 text-xs text-amber-400 flex items-center justify-between">
+                    <span>
+                      {suggestedInterval === "weekly"
+                        ? "This looks like a weekly schedule."
+                        : "This looks like a monthly schedule."}
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={() => setInterval(suggestedInterval)}
+                      className="ml-3 px-2 py-1 rounded-md text-xs 
+                      bg-white/[0.05] hover:bg-white/[0.1] text-white transition"
+                    >
+                      Switch
+                    </button>
+                  </div>
+                )}
+
               </div>
             )}
 
@@ -909,7 +955,7 @@ export default function InvoiceEditorPage() {
                 <div>
                   • Invoice every{" "}
                   <span className="text-white font-medium">
-                    {getIntervalLabel(interval, customDays)}
+                    {getIntervalLabel(interval, safeCustomDays)}
                   </span>
                 </div>
 
@@ -949,7 +995,7 @@ export default function InvoiceEditorPage() {
 
                 {/* End date error */}
                 {isEndBeforeStart && (
-                  <div className="text-red-400">
+                  <div className="text-red-400 transition-all duration-200">
                     ⚠ End date is before start date
                   </div>
                 )}
@@ -985,8 +1031,38 @@ export default function InvoiceEditorPage() {
               </button>
 
               <button
-                onClick={handleSaveRecurring}
-                className="px-4 py-2 rounded-lg bg-violet-500 hover:bg-violet-600 text-white transition"
+                onClick={() => {
+                  if (isRecurringInvalid) {
+                    // scroll to problem
+                    if (!startDate) {
+                      startPickerRef.current?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "center",
+                      });
+                      setShowStartPicker(true);
+                      return;
+                    }
+
+                    if (isEndBeforeStart) {
+                      endPickerRef.current?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "center",
+                      });
+                      setShowEndPicker(true);
+                      return;
+                    }
+                  }
+
+                  handleSaveRecurring();
+                }}
+                className={`
+                      px-4 py-2 rounded-lg text-white transition
+
+                      ${isRecurringInvalid
+                    ? "bg-white/10 text-white/40 cursor-not-allowed"
+                    : "bg-violet-500 hover:bg-violet-600"
+                  }
+                `}
               >
                 Save recurring
               </button>
