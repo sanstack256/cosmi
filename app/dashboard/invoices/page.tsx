@@ -7,6 +7,7 @@ import { useAuth } from "@/app/providers/AuthProvider";
 import { Crown } from "lucide-react";
 import { db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { Repeat } from "lucide-react";
 
 
 type PaymentStatus = "unpaid" | "paid" | "overdue";
@@ -115,28 +116,28 @@ export default function InvoicesPage() {
 
 
   useEffect(() => {
-  if (!user?.uid) return;
+    if (!user?.uid) return;
 
-  const q = query(
-    collection(db, "recurringInvoices"),
-    where("userId", "==", user.uid)
-  );
+    const q = query(
+      collection(db, "recurringInvoices"),
+      where("userId", "==", user.uid)
+    );
 
-  const unsubscribe = onSnapshot(q, (snapshot) => {
-    const map: Record<string, boolean> = {};
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const map: Record<string, boolean> = {};
 
-    snapshot.docs.forEach((doc) => {
-      const data = doc.data();
-      if (data.invoiceId) {
-        map[data.invoiceId] = true;
-      }
+      snapshot.docs.forEach((doc) => {
+        const data = doc.data();
+        if (data.invoiceId) {
+          map[data.invoiceId] = true;
+        }
+      });
+
+      setRecurringMap(map);
     });
 
-    setRecurringMap(map);
-  });
-
-  return () => unsubscribe();
-}, [user]);
+    return () => unsubscribe();
+  }, [user]);
 
 
 
@@ -218,19 +219,8 @@ export default function InvoicesPage() {
   }
 
   filteredInvoices.sort((a, b) => {
-    let valA: any = a[sortKey];
-    let valB: any = b[sortKey];
-
-    if (sortKey === "amount") {
-      valA = parseAmount(valA);
-      valB = parseAmount(valB);
-    } else {
-      valA = new Date(valA).getTime();
-      valB = new Date(valB).getTime();
-    }
-
-    return sortOrder === "asc" ? valA - valB : valB - valA;
-  });
+  return new Date(b.date).getTime() - new Date(a.date).getTime();
+});
 
   const getStatusStyle = (status: string) => {
     switch (status) {
@@ -321,7 +311,7 @@ export default function InvoicesPage() {
                   router.push(`/dashboard/invoices/${invoice.id}`)
                 }
               >
-                <td className="px-6 py-4">
+                <td className="px-6 py-4 flex items-center gap-2">
                   <span className="px-3 py-1 rounded-md bg-violet-500/10 text-violet-300 text-xs font-semibold">
                     {invoice.lifecycle === "draft"
                       ? "Draft"
@@ -329,6 +319,15 @@ export default function InvoicesPage() {
                         ? `${invoice.invoiceNumber} (Cancelled)`
                         : invoice.invoiceNumber}
                   </span>
+
+                  {/* ✅ RECURRING BADGE */}
+                  {recurringMap[invoice.id] && (
+                    <span className="flex items-center gap-1 px-2 py-0.5 text-[10px] rounded-full 
+bg-violet-500/10 text-violet-300 border border-violet-500/20 shadow-[0_0_10px_rgba(124,58,237,0.15)]">
+                      <Repeat size={10} />
+                      Recurring
+                    </span>
+                  )}
                 </td>
 
 
