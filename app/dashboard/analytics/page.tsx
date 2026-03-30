@@ -257,11 +257,19 @@ export default function AnalyticsPage() {
                                 data={filledRevenueData}
                                 margin={{
                                     top: 10,
-                                    right: 10,
-                                    left: -10,
-                                    bottom: 0,
+                                    right: 16,
+                                    left: 20,
+                                    bottom: 14,
                                 }}
                             >
+                                <defs>
+                                    <linearGradient id="leftFade" x1="0" y1="0" x2="1" y2="0">
+                                        <stop offset="0%" stopColor="#0a0a0f" stopOpacity={1} />
+                                        <stop offset="100%" stopColor="#0a0a0f" stopOpacity={0} />
+                                    </linearGradient>
+                                </defs>
+
+
                                 <defs>
                                     <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
                                         <stop offset="0%" stopColor="#4ade80" stopOpacity={0.95} />
@@ -282,11 +290,33 @@ export default function AnalyticsPage() {
                                     stroke="#64748b"
                                     tickLine={false}
                                     axisLine={false}
-                                    fontSize={12}
-                                    tick={{ fill: "#64748b" }}
                                     interval={0}
-                                />
+                                    minTickGap={0}
+                                    padding={{ left: 20, right: 16 }}
+                                    tick={(props) => {
+                                        const { x, y, payload, index } = props;
 
+                                        const yPos = (typeof y === "number" ? y : 0) + 6;
+
+                                        return (
+                                            <text
+                                                x={x}
+                                                y={yPos}
+                                                textAnchor={
+                                                    index === 0
+                                                        ? "start"
+                                                        : index === filledRevenueData.length - 1
+                                                            ? "end"
+                                                            : "middle"
+                                                }
+                                                fontSize={12}
+                                                fill={index === 0 ? "#475569" : "#94a3b8"}
+                                            >
+                                                {payload.value}
+                                            </text>
+                                        );
+                                    }}
+                                />
                                 <Tooltip
                                     labelFormatter={(label) => label}
 
@@ -313,7 +343,7 @@ export default function AnalyticsPage() {
 
                                 {/* GLOW */}
                                 <Area
-                                    type="monotone"
+                                    type="linear"
                                     dataKey="revenue"
                                     stroke="#22c55e"
                                     strokeWidth={6}
@@ -325,13 +355,17 @@ export default function AnalyticsPage() {
 
                                 {/* MAIN */}
                                 <Area
-                                    type="monotone"
+                                    type="linear"
                                     name="revenue"
                                     dataKey="revenue"
                                     stroke="#22c55e"
                                     strokeWidth={2.5}
                                     strokeLinecap="round"
-                                    dot={false}
+                                    dot={{
+                                        r: 3,
+                                        fill: "#22c55e",
+                                        strokeWidth: 0
+                                    }}
                                     activeDot={{
                                         r: 6,
                                         stroke: "#4ade80",
