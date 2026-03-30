@@ -14,6 +14,7 @@ import {
   Bell,
   Search,
   Building2,
+  BarChart3,
 } from "lucide-react";
 
 import UserMenu from "@/app/components/UserMenu";
@@ -118,6 +119,15 @@ export default function DashboardLayout({
             </SidebarItem>
 
             <SidebarItem
+              href="/dashboard/analytics"
+              icon={<BarChart3 className="h-4 w-4" />}
+              active={pathname?.startsWith("/dashboard/analytics")}
+              collapsed={sidebarCollapsed}
+            >
+              Analytics
+            </SidebarItem>
+
+            <SidebarItem
               href="/dashboard/settings"
               icon={<Settings className="h-4 w-4" />}
               active={pathname?.startsWith("/dashboard/settings")}
@@ -212,8 +222,8 @@ function SidebarItem({
       <Link
         href={href}
         className={`w-full flex items-center justify-center py-3 rounded-xl text-xs ${active
-            ? "bg-violet-500/14 text-violet-100"
-            : "text-slate-300 hover:bg-white/5"
+          ? "bg-violet-500/14 text-violet-100"
+          : "text-slate-300 hover:bg-white/5"
           }`}
       >
         {icon}
@@ -225,8 +235,8 @@ function SidebarItem({
     <Link
       href={href}
       className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs ${active
-          ? "bg-gradient-to-r from-violet-600/20 to-fuchsia-600/20 text-white border border-violet-500/40 shadow-[0_0_20px_rgba(124,58,237,0.3)]"
-          : "text-slate-300 hover:bg-white/5"
+        ? "bg-gradient-to-r from-violet-600/20 to-fuchsia-600/20 text-white border border-violet-500/40 shadow-[0_0_20px_rgba(124,58,237,0.3)]"
+        : "text-slate-300 hover:bg-white/5"
         }`}
     >
       {icon}
