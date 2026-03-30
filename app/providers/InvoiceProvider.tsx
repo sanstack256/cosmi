@@ -325,6 +325,11 @@ export function InvoiceProvider({ children }: { children: React.ReactNode }) {
       updatedAt: serverTimestamp(),
     };
 
+    // 🚫 Prevent manual paymentStatus override
+    if ("paymentStatus" in updates) {
+      delete updates.paymentStatus;
+    }
+
     /* 🔔 Detect payment received */
     if (invoice.paymentStatus === "paid") {
       updates.activity = arrayUnion({

@@ -2,7 +2,7 @@
 
 import React from "react";
 import { format as formatDateFns } from "date-fns";
-import { getCurrencySymbol } from "@/lib/currency";
+
 
 /* ------------------------------------------
    Types
@@ -25,13 +25,7 @@ type LineItem = {
    Helpers
 ------------------------------------------- */
 
-function formatCurrencyINR(value: number) {
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(value);
-}
+
 
 function safeFormatDate(date: string) {
   if (!date) return "";
@@ -43,10 +37,15 @@ function safeFormatDate(date: string) {
 }
 
 
-function formatNumber(value: number, currency?: string) {
-  return value.toLocaleString(
-    currency === "USD" ? "en-US" : "en-IN"
-  );
+function formatCurrency(value: number, currency?: string) {
+  return new Intl.NumberFormat(
+    currency === "USD" ? "en-US" : "en-IN",
+    {
+      style: "currency",
+      currency: currency || "INR",
+      maximumFractionDigits: 2,
+    }
+  ).format(value);
 }
 
 /* ------------------------------------------
@@ -66,6 +65,7 @@ type Props = {
   notes: string;
   company?: Company;
   plan?: string;
+  payments?: any[];
   discount?: number;
   currency?: string;
   status?: string;
@@ -87,6 +87,7 @@ export default function InvoicePreview({
   discount,
   status,
   currency,
+  payments,
 }: Props) {
 
 
@@ -95,7 +96,6 @@ export default function InvoicePreview({
   const safeTotal = Number(total || 0);
   const safeDiscount = Number(discount || 0);
 
-  const currencySymbol = getCurrencySymbol(currency);
 
   return (
     <div className="w-full flex items-center justify-center">
@@ -155,18 +155,7 @@ export default function InvoicePreview({
                   <strong>{id}</strong>
                 </div>
 
-                {status && (
-                  <div className="mt-3">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold ${status === "paid"
-                        ? "bg-emerald-100 text-emerald-700"
-                        : "bg-red-100 text-red-700"
-                        }`}
-                    >
-                      {status.toUpperCase()}
-                    </span>
-                  </div>
-                )}
+
 
                 <div>
                   <span className="text-slate-500">Issue Date: </span>
@@ -220,11 +209,11 @@ export default function InvoicePreview({
                     </td>
 
                     <td className="text-right text-slate-900">
-                      {currencySymbol}{formatNumber(rateNumber, currency)}
+                      {formatCurrency(rateNumber, currency)}
                     </td>
 
-                    <td className="text-right font-medium text-slate-900">
-                      {currencySymbol}{formatNumber(amount, currency)}
+                    <td className="text-right text-slate-900">
+                      {formatCurrency(amount, currency)}
                     </td>
                   </tr>
 
@@ -241,25 +230,27 @@ export default function InvoicePreview({
               <div className="w-80 text-sm border border-slate-300 rounded-lg p-4">
                 <div className="flex justify-between py-2 text-slate-800">
                   <span>Subtotal</span>
-                  <span>{currencySymbol}{formatNumber(safeSubtotal, currency)}</span>
+                  <span>{formatCurrency(safeSubtotal, currency)}</span>
                 </div>
 
                 <div className="flex justify-between py-2 text-slate-800">
                   <span>Tax</span>
-                  <span>{currencySymbol}{formatNumber(safeTaxAmount, currency)}</span>
+                  <span>{formatCurrency(safeTaxAmount, currency)}</span>
                 </div>
 
                 {discount ? (
                   <div className="flex justify-between py-2 text-slate-800">
                     <span>Discount</span>
-                    <span>-{currencySymbol}{formatNumber(safeDiscount, currency)}</span>
+                    <span>-{formatCurrency(safeDiscount, currency)}</span>
                   </div>
                 ) : null}
 
                 <div className="flex justify-between pt-4 mt-3 border-t border-slate-400 text-xl font-semibold text-slate-900">
                   <span>Total</span>
-                  <span>{currencySymbol}{formatNumber(safeTotal, currency)}</span>
+                  <span>{formatCurrency(safeTotal, currency)}</span>
                 </div>
+
+
               </div>
             </div>
 
@@ -268,8 +259,8 @@ export default function InvoicePreview({
               <div className="mt-12 text-sm">
                 <div className="font-semibold mb-2 text-slate-800">Notes</div>
                 <div className="border border-slate-300 rounded-md p-4 text-slate-800 leading-relaxed">
-  {notes}
-</div>
+                  {notes}
+                </div>
               </div>
             )}
 

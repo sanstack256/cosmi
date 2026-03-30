@@ -76,14 +76,13 @@ export async function POST(req: Request) {
 
     /* 4️⃣ Add new payment */
 
-    const newPayments = [
-      ...existingPayments,
-      {
-        amount: paymentAmount,
-        method: "razorpay",
-        date: new Date(),
-      },
-    ];
+   const newPayment = {
+  amount: paymentAmount,
+  method: "razorpay",
+  date: new Date(),
+};
+
+const newPayments = [...existingPayments, newPayment];
 
     /* 5️⃣ Calculate totals */
 
@@ -114,6 +113,7 @@ export async function POST(req: Request) {
     await invoiceRef.update({
       payments: newPayments,
       paymentStatus: status,
+      updatedAt: new Date(),
       paidAt: new Date(),
     });
 

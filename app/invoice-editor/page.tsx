@@ -255,7 +255,7 @@ export default function InvoiceEditorPage() {
 
   const formatNumber = (value: number) =>
     formatCurrency(value, currency);
-  
+
   function handlePrint() {
     if (!printRef.current) return;
 
@@ -859,6 +859,8 @@ export default function InvoiceEditorPage() {
             currency={currency}
             plan={plan}
             discount={discount}
+            status={status}
+            payments={currentInvoice?.payments || []}
           />
         </div>
       </div>
@@ -1252,7 +1254,7 @@ shadow-[0_0_60px_rgba(124,58,237,0.25)]"
           >
             {/* TITLE */}
             <div className="text-lg font-semibold text-white mb-2">
-              Recurring nvoices are a Pro feature
+              Recurring invoices are a Pro feature
             </div>
 
             {/* DESCRIPTION */}

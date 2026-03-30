@@ -83,7 +83,7 @@ export async function POST(req: Request) {
     const currency = capture.amount?.currency_code;
     const value = capture.amount?.value;
 
-const paymentAmount = Math.round(Number(value) * 100) / 100;
+    const paymentAmount = Math.round(Number(value) * 100) / 100;
 
     /* 🔥 STRONG SAFETY CHECK */
 
@@ -127,16 +127,13 @@ const paymentAmount = Math.round(Number(value) * 100) / 100;
 
     const existingPayments = invoiceData.payments || [];
 
-    const newPayments = [
-      ...existingPayments,
-      {
-        amount: paymentAmount, // ✅ REAL INR VALUE
-        method: "paypal",
-        date: new Date(),
-      },
-    ];
+    const newPayment = {
+      amount: paymentAmount,
+      method: "paypal",
+      date: new Date(),
+    };
 
-    /* 6️⃣ Calculate totals */
+    const newPayments = [...existingPayments, newPayment];
 
     const totalPaid = newPayments.reduce(
       (sum: number, p: any) => sum + Number(p.amount || 0),
@@ -150,11 +147,9 @@ const paymentAmount = Math.round(Number(value) * 100) / 100;
         0
       ) || 0;
 
-    /* 7️⃣ Determine status */
-
     let status = "unpaid";
 
-if (Math.round(totalPaid * 100) >= Math.round(totalAmount * 100)) {
+    if (totalPaid >= totalAmount) {
       status = "paid";
     } else if (totalPaid > 0) {
       status = "partial";
@@ -165,6 +160,7 @@ if (Math.round(totalPaid * 100) >= Math.round(totalAmount * 100)) {
     await updateDoc(docRef, {
       payments: newPayments,
       paymentStatus: status,
+      updatedAt: new Date(),
       paidAt: new Date(),
     });
 
