@@ -33,15 +33,13 @@ export default function DashboardLayout({
   return (
     <RequireAuth>
       <div className="relative min-h-screen bg-[#040407] text-slate-100 flex overflow-hidden">
-        {/* Ambient glow */}
-        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-violet-600/10 blur-[200px] pointer-events-none" />
-        <div className="absolute top-1/3 -right-40 w-[500px] h-[500px] bg-fuchsia-600/10 blur-[200px] pointer-events-none" />
+
 
         {/* SIDEBAR */}
         <aside
           className={`hidden md:flex flex-col relative backdrop-blur-xl
           bg-gradient-to-b from-[#0b0b18] via-[#0d0d1f] to-black
-          border-r border-violet-500/10
+          border-r border-white/10
           transition-all duration-300 ${sidebarCollapsed ? "w-20" : "w-64"
             }`}
         >
@@ -152,7 +150,7 @@ export default function DashboardLayout({
           {/* TOP BAR */}
           <header className="relative px-6 md:px-5 py-3 flex items-center gap-4
           bg-gradient-to-r from-[#0b0b18] via-[#0d0d1f] to-black
-          border-b border-violet-500/10
+          border-b border-white/10
           backdrop-blur-xl z-50">
             <div className="absolute bottom-0 left-0 w-full h-[2px]
               bg-gradient-to-r from-violet-500/30 via-fuchsia-500/30 to-transparent"
