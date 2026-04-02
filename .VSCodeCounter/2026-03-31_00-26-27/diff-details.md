@@ -1,17 +1,16 @@
 # Diff Details
 
-Date : 2026-03-29 22:44:02
+Date : 2026-03-31 00:26:27
 
 Directory /Users/nssanjeev/Documents/cosmi
 
-Total : 2 files,  129 codes, -1 comments, 31 blanks, all 159 lines
+Total : 1 files,  60 codes, 2 comments, 13 blanks, all 75 lines
 
 [Summary](results.md) / [Details](details.md) / [Diff Summary](diff.md) / Diff Details
 
 ## Files
 | filename | language | code | comment | blank | total |
 | :--- | :--- | ---: | ---: | ---: | ---: |
-| [app/components/ui/CosmiCalendar.tsx](/app/components/ui/CosmiCalendar.tsx) | TypeScript JSX | 2 | 0 | 1 | 3 |
-| [app/invoice-editor/page.tsx](/app/invoice-editor/page.tsx) | TypeScript JSX | 127 | -1 | 30 | 156 |
+| [app/dashboard/analytics/page.tsx](/app/dashboard/analytics/page.tsx) | TypeScript JSX | 60 | 2 | 13 | 75 |
 
 [Summary](results.md) / [Details](details.md) / [Diff Summary](diff.md) / Diff Details

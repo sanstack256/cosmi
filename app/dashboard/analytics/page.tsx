@@ -177,6 +177,28 @@ export default function AnalyticsPage() {
     }, [revenueData]);
 
 
+    const last = filledRevenueData[filledRevenueData.length - 1];
+    const prev = filledRevenueData[filledRevenueData.length - 2];
+
+    let growth = 0;
+    let growthLabel = "—";
+
+    if (last && prev && prev.revenue > 0) {
+        growth = ((last.revenue - prev.revenue) / prev.revenue) * 100;
+
+        if (growth > 0) {
+            growthLabel = `+${Math.round(growth)}%`;
+        } else if (growth < 0) {
+            growthLabel = `${Math.round(growth)}%`;
+        } else {
+            growthLabel = "0%";
+        }
+    } else if (last && prev && prev.revenue === 0 && last.revenue > 0) {
+        growthLabel = "+100%"; // starting growth
+    }
+
+
+
     // ================= LOADING =================
     if (loading) {
         return (
@@ -216,16 +238,86 @@ export default function AnalyticsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* REVENUE CARD */}
                 <div className="lg:col-span-2 rounded-xl border border-white/10 bg-[#0a0a0f] shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_10px_40px_rgba(0,0,0,0.6)] p-5">
-                    <div className="text-sm text-slate-400 mb-4">
+                    <div className="flex items-center gap-2 text-sm text-slate-400 mb-4">
                         Revenue Trend
+
+                        <div className="group relative cursor-pointer">
+                            <div className="
+                            w-6 h-6 
+                            flex items-center justify-center 
+                            rounded-full 
+                            bg-white/5 
+                            text-sm text-slate-300
+
+                            shadow-[0_0_0_1px_rgba(255,255,255,0.04)]
+                            
+                            hover:bg-white/10 
+                            hover:text-white 
+                            hover:border-white/20
+                            hover:shadow-[0_0_12px_rgba(74,222,128,0.25)]
+                            
+                            transition
+                        ">
+                                ⓘ
+                            </div>
+                            {/* Tooltip */}
+                            <div className="absolute left-1/2 -translate-x-1/2 top-8 w-64 
+                                  opacity-0 translate-y-2 scale-95 
+                                  group-hover:opacity-100 group-hover:translate-y-0 group-hover:scale-100
+                                  transition-all duration-200 ease-out pointer-events-none z-50
+                                ">
+                                <div className="
+                                    relative
+                                    rounded-xl
+                                    bg-[#0a0a0f]/95
+                                    backdrop-blur-xl
+                                    border border-white/10
+                                    p-4
+                                    text-sm text-slate-300
+                                    shadow-[0_20px_60px_rgba(0,0,0,0.6)]
+                                  ">
+
+                                    {/* subtle top glow line */}
+                                    <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-400/40 to-transparent" />
+
+                                    {/* content */}
+                                    <div className="space-y-2">
+                                        <p className="text-slate-200 font-medium">
+                                            Revenue over time
+                                        </p>
+
+                                        <p className="text-slate-400 text-xs leading-relaxed">
+                                            Based on your issued invoices. Higher points indicate increased earnings.
+                                        </p>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     {/* HEADER ABOVE CHART */}
                     <div className="flex items-center justify-between mb-4">
                         <div>
-                            <div className="text-2xl font-semibold">
-                                {getCurrencySymbol(selectedCurrency)}
-                                {formatCurrency(totalRevenue, selectedCurrency)}
+                            <div className="flex items-center gap-3">
+                                <div className="text-2xl font-semibold">
+                                    {getCurrencySymbol(selectedCurrency)}
+                                    {formatCurrency(totalRevenue, selectedCurrency)}
+                                </div>
+
+                                <div
+                                    className={`
+      text-xs font-medium px-2 py-1 rounded-md
+      ${growth > 0
+                                            ? "bg-emerald-500/10 text-emerald-400"
+                                            : growth < 0
+                                                ? "bg-red-500/10 text-red-400"
+                                                : "bg-slate-500/10 text-slate-400"
+                                        }
+    `}
+                                >
+                                    {growthLabel}
+                                </div>
                             </div>
                             <div className="text-xs text-slate-400">
                                 Total revenue (last 6 months)
@@ -251,15 +343,17 @@ export default function AnalyticsPage() {
                     </div>
 
                     {/* CHART */}
-                    <div className="h-[220px]">
+<div className="h-[220px] focus:outline-none [&_*]:focus:outline-none select-none">
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart
+                                tabIndex={-1}
+                                style={{ outline: "none" }}
                                 data={filledRevenueData}
                                 margin={{
-                                    top: 10,
-                                    right: 16,
-                                    left: 20,
-                                    bottom: 14,
+                                    top: 20,
+                                    right: 20,
+                                    left: 10,
+                                    bottom: 10,
                                 }}
                             >
                                 <defs>
@@ -287,6 +381,7 @@ export default function AnalyticsPage() {
 
                                 <XAxis
                                     dataKey="month"
+                                    height={40}
                                     stroke="#64748b"
                                     tickLine={false}
                                     axisLine={false}
@@ -296,7 +391,7 @@ export default function AnalyticsPage() {
                                     tick={(props) => {
                                         const { x, y, payload, index } = props;
 
-                                        const yPos = (typeof y === "number" ? y : 0) + 6;
+                                        const yPos = (typeof y === "number" ? y : 0) + 14;
 
                                         return (
                                             <text
@@ -334,11 +429,7 @@ export default function AnalyticsPage() {
                                         color: "#4ade80",
                                         fontWeight: 500,
                                     }}
-                                    cursor={{
-                                        stroke: "#22c55e",
-                                        strokeWidth: 1,
-                                        strokeDasharray: "3 3",
-                                    }}
+                                    cursor={false}
                                 />
 
                                 {/* GLOW */}

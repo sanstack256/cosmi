@@ -1,25 +1,24 @@
 # Diff Summary
 
-Date : 2026-03-29 22:44:02
+Date : 2026-03-31 00:05:34
 
 Directory /Users/nssanjeev/Documents/cosmi
 
-Total : 2 files,  129 codes, -1 comments, 31 blanks, all 159 lines
+Total : 1 files,  69 codes, 1 comments, 12 blanks, all 82 lines
 
 [Summary](results.md) / [Details](details.md) / Diff Summary / [Diff Details](diff-details.md)
 
 ## Languages
 | language | files | code | comment | blank | total |
 | :--- | ---: | ---: | ---: | ---: | ---: |
-| TypeScript JSX | 2 | 129 | -1 | 31 | 159 |
+| TypeScript JSX | 1 | 69 | 1 | 12 | 82 |
 
 ## Directories
 | path | files | code | comment | blank | total |
 | :--- | ---: | ---: | ---: | ---: | ---: |
-| . | 2 | 129 | -1 | 31 | 159 |
-| app | 2 | 129 | -1 | 31 | 159 |
-| app/components | 1 | 2 | 0 | 1 | 3 |
-| app/components/ui | 1 | 2 | 0 | 1 | 3 |
-| app/invoice-editor | 1 | 127 | -1 | 30 | 156 |
+| . | 1 | 69 | 1 | 12 | 82 |
+| app | 1 | 69 | 1 | 12 | 82 |
+| app/dashboard | 1 | 69 | 1 | 12 | 82 |
+| app/dashboard/analytics | 1 | 69 | 1 | 12 | 82 |
 
 [Summary](results.md) / [Details](details.md) / Diff Summary / [Diff Details](diff-details.md)
