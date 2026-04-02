@@ -271,7 +271,13 @@ export default function DashboardPage() {
 
 
   const revenueChartData = React.useMemo(() => {
+
+
     const now = new Date();
+    const currentMonth = now.getMonth() + 1;
+    const currentYear = now.getFullYear();
+
+
     let monthsToShow = 6;
 
     if (revenueRange === "12m") monthsToShow = 12;
@@ -297,8 +303,11 @@ export default function DashboardPage() {
 
     // Add invoice values
     invoices.forEach((inv) => {
-      const date = new Date(inv.date);
-      if (isNaN(date.getTime())) return;
+
+      const date = inv.createdAt?.toDate
+        ? inv.createdAt.toDate()
+        : new Date(inv.createdAt || inv.date);
+
       if (isNaN(date.getTime())) return;
 
       const month = date.getMonth() + 1;
@@ -316,24 +325,49 @@ export default function DashboardPage() {
 
 
     // ✅ Trim empty months (Stripe-style)
-    const firstNonZeroIndex = buckets.findIndex((b) => b.value > 0);
+    // STEP 1: Remove future / empty current month
+    const cleanedBuckets = buckets.filter((b) => {
+      const isCurrent =
+        b.month === currentMonth && b.year === currentYear;
+
+      // ❌ Remove current month if no data
+      if (isCurrent && b.value === 0) return false;
+
+      return true;
+    });
+
+    // STEP 2: Trim leading empty months (optional but good UX)
+    const firstNonZeroIndex = cleanedBuckets.findIndex((b) => b.value > 0);
 
     const trimmedBuckets =
       firstNonZeroIndex === -1
-        ? buckets
-        : buckets.slice(Math.max(0, firstNonZeroIndex - 1));
+        ? cleanedBuckets
+        : cleanedBuckets.slice(Math.max(0, firstNonZeroIndex - 1));
 
 
     // Format labels
-    return trimmedBuckets.map((b) => ({
-      label: new Date(b.year, b.month - 1).toLocaleString("en-IN", {
-        month: "short",
-      }),
+    return trimmedBuckets.map((b, index) => {
+      const isCurrent =
+        b.month === currentMonth && b.year === currentYear;
 
-      value: b.value,
-    }));
+      let displayValue = b.value;
+
+      // ✅ Stripe logic (NO DIP)
+      if (isCurrent && index > 0) {
+        const prev = trimmedBuckets[index - 1];
+        displayValue = Math.max(b.value, prev.value * 0.985);
+      }
+
+      return {
+        label: new Date(b.year, b.month - 1).toLocaleString("en-IN", {
+          month: "short",
+        }),
+        value: displayValue,
+        isCurrent,
+        realValue: b.value, //  important for tooltip
+      };
+    });
   }, [invoices, revenueRange]);
-
 
 
 
@@ -358,8 +392,31 @@ export default function DashboardPage() {
   };
 
 
-  const growth = calculateGrowthPercentage(revenueChartData);
+  const completedData = revenueChartData.filter((d) => !d.isCurrent);
+  const growth = calculateGrowthPercentage(completedData);
 
+  const CustomCursor = ({ points }: any) => {
+    if (!points || !points.length) return null;
+
+    const { x, y } = points[0];
+
+    return (
+      <line
+        x1={x}
+        x2={x}
+        y1={0}
+        y2="100%"
+        stroke="#a78bfa"
+        strokeWidth={1}
+        strokeOpacity={0.25}
+        strokeDasharray="4 6"
+        style={{
+          transition: "transform 0.15s cubic-bezier(0.22, 1, 0.36, 1)",
+          pointerEvents: "none",
+        }}
+      />
+    );
+  };
 
 
   return (
@@ -470,12 +527,14 @@ export default function DashboardPage() {
             <div className="grid gap-6 lg:grid-cols-2 items-stretch">
 
               {/* Chart */}
-              <div className="relative rounded-3xl p-8 bg-gradient-to-br from-[#0b0b18] to-[#14142f] border border-violet-500/20 shadow-[0_0_50px_rgba(124,58,237,0.15)] overflow-hidden">
+              <div className="relative rounded-3xl px-8 pt-6 pb-6 bg-gradient-to-br from-[#0b0b18] to-[#14142f] border border-violet-500/20 shadow-[0_0_50px_rgba(124,58,237,0.15)] overflow-hidden">
 
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <p className="text-xs text-slate-400">Revenue</p>
-                    <h2 className="text-sm font-semibold">
+                    <p className="text-[11px] uppercase tracking-wide text-slate-500">
+                      Revenue
+                    </p>
+                    <h2 className="text-lg font-semibold tracking-tight text-white mt-1">
                       {revenueRange === "6m"
                         ? "Last 6 months"
                         : revenueRange === "12m"
@@ -486,7 +545,7 @@ export default function DashboardPage() {
                     <p className="text-xs mt-1">
                       {growth === "new" && (
                         <span className="text-emerald-400">
-                          Revenue picked up this period
+                          Revenue activity increased
                         </span>
                       )}
 
@@ -511,7 +570,14 @@ export default function DashboardPage() {
                   </select>
                 </div>
 
-                <div className="h-64 w-full">
+                <div className="h-[260px] w-full">
+
+                  <div className="absolute inset-0 pointer-events-none">
+                    <div className="absolute left-1/3 top-0 h-full w-[200px] bg-violet-500/10 blur-[120px]" />
+                    <div className="absolute right-1/4 top-0 h-full w-[150px] bg-indigo-500/10 blur-[100px]" />
+                  </div>
+
+
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart
                       data={revenueChartData}
@@ -519,13 +585,16 @@ export default function DashboardPage() {
                     >
                       <defs>
                         <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.8} />
-                          <stop offset="100%" stopColor="#6366f1" stopOpacity={0.05} />
+                          <stop offset="0%" stopColor="#8b5cf6" stopOpacity={1} />
+                          <stop offset="30%" stopColor="#8b5cf6" stopOpacity={0.45} />
+                          <stop offset="65%" stopColor="#6366f1" stopOpacity={0.18} />
+                          <stop offset="100%" stopColor="#6366f1" stopOpacity={0.02} />
                         </linearGradient>
                       </defs>
 
                       <CartesianGrid
-                        stroke="rgba(255,255,255,0.05)"
+                        stroke="rgba(255,255,255,0.04)"
+                        strokeDasharray="3 6"
                         vertical={false}
                       />
 
@@ -537,61 +606,105 @@ export default function DashboardPage() {
                         axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
                         interval={0}
                         padding={{ left: 10, right: 10 }}
+                        tick={{ fill: "#94a3b8", opacity: 0.8 }}
                         minTickGap={20}
                       />
 
 
 
                       <Tooltip
-                        cursor={{ stroke: "#8b5cf6", strokeWidth: 1 }}
+                        cursor={<CustomCursor />}
                         contentStyle={{
-                          backgroundColor: "#0f0f1a",
-                          border: "1px solid rgba(124,58,237,0.4)",
-                          borderRadius: "14px",
+                          backgroundColor: "rgba(15,15,26,0.85)",
+                          backdropFilter: "blur(12px)",
+                          border: "1px solid rgba(124,58,237,0.25)",
+                          borderRadius: "12px",
                           fontSize: "12px",
+                          boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
                         }}
-                        formatter={(value: any) =>
-                          `₹${Number(value).toLocaleString("en-IN")}`
-                        }
+                        formatter={(value: any, name, props: any) => {
+                          const isCurrent = props.payload?.isCurrent;
+                          const real = props.payload?.realValue ?? value;
+
+                          return `${isCurrent ? "So far: " : ""}₹${Number(real).toLocaleString("en-IN")}`;
+                        }}
                       />
+
 
                       <Area
                         type="monotone"
                         dataKey="value"
                         stroke="#8b5cf6"
-                        strokeWidth={3}
+                        strokeWidth={6}
+                        fill="none"
+                        opacity={0.08}
+                        dot={false}
+                        tooltipType="none"
+                      />
+
+
+                      <Area
+                        type="monotone"
+                        animationDuration={700}
+                        animationEasing="ease-out"
+                        dataKey="value"
+                        stroke="#a78bfa"
+                        strokeWidth={3.2}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                         fill="url(#areaGradient)"
                         dot={false}
-                        activeDot={{ r: 6 }}
-                        animationDuration={900}
+                        activeDot={(props: any) => {
+                          if (props.payload?.isCurrent) {
+                            return (
+                              <circle
+                                cx={props.cx}
+                                cy={props.cy}
+                                r={7}
+                                fill="#a78bfa"
+                                stroke="#0b0b18"
+                                strokeWidth={3}
+
+                              />
+
+
+                            );
+                          }
+                          return null;
+                        }}
                       />
+
+
+
                     </AreaChart>
 
                   </ResponsiveContainer>
-
                 </div>
-                <div className="mt-4 text-xs text-slate-400">
-                  {growth === "new" && (
-                    <span className="text-emerald-400">
-                      First revenue recorded in this period
-                    </span>
-                  )}
 
-                  {typeof growth === "number" && growth > 0 && (
-                    <span className="text-emerald-400">
-                      ↑ {growth}% increase
-                    </span>
-                  )}
+                <div className="mt-5 flex flex-col gap-1">
+                  <span className="text-[11px] text-slate-500">
+                    Current period is still in progress
+                  </span>
 
-                  {typeof growth === "number" && growth < 0 && (
-                    <span className="text-rose-400">
-                      ↓ {Math.abs(growth)}% decrease
-                    </span>
-                  )}
+                  <div className="text-xs">
+                    {growth === "new" && (
+                      <span className="text-emerald-400">
+                        First revenue recorded
+                      </span>
+                    )}
 
-                  {typeof growth === "number" && growth === 0 && (
-                    <span>No change this period</span>
-                  )}
+                    {typeof growth === "number" && growth > 0 && (
+                      <span className="text-emerald-400">
+                        ↑ {growth}% growth
+                      </span>
+                    )}
+
+                    {typeof growth === "number" && growth < 0 && (
+                      <span className="text-rose-400">
+                        ↓ {Math.abs(growth)}% decline
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
