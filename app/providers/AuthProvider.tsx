@@ -41,6 +41,9 @@ type AuthCtx = {
   isPro: boolean;
   isBusiness: boolean;
   planLoaded: boolean;
+  displayCurrency: "INR" | "USD";
+
+  setDisplayCurrency: (c: "INR" | "USD") => void;
 
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
@@ -63,6 +66,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [plan, setPlan] = useState<PlanType>("free");
   const [planLoaded, setPlanLoaded] = useState(false);
+  const [displayCurrency, setDisplayCurrency] = useState<"INR" | "USD">("INR");
+
+
+  async function updateDisplayCurrency(c: "INR" | "USD") {
+  if (!user) return;
+
+  // prevent unnecessary writes
+  if (c === displayCurrency) return;
+
+  setDisplayCurrency(c);
+
+  try {
+    await setDoc(
+      doc(db, "users", user.uid),
+      {
+        company: {
+          currency: c,
+        },
+      },
+      { merge: true }
+    );
+  } catch (err) {
+    console.error("Failed to update currency:", err);
+  }
+}
+
 
   /* 🔐 Auth state */
   useEffect(() => {
@@ -141,6 +170,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loadUserData();
   }, [user]);
 
+
+  useEffect(() => {
+    if (!userData) return;
+
+    const currency =
+      userData?.company?.currency === "USD" ? "USD" : "INR";
+
+    setDisplayCurrency(currency);
+    setDisplayCurrency(currency);
+  }, [userData]);
+
+
+
   /* ---------------- Actions ---------------- */
 
   async function signInWithEmail(email: string, password: string) {
@@ -193,15 +235,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isPro,
         isBusiness,
         planLoaded,
+        displayCurrency,
 
         signInWithEmail,
         signInWithGoogle,
         signOut,
         getIdToken,
         sendPasswordReset,
+        setDisplayCurrency: updateDisplayCurrency,
+
       };
     },
-    [user, loading, plan, planLoaded, userData]
+    [user, loading, plan, planLoaded, userData, displayCurrency]
   );
 
   return (

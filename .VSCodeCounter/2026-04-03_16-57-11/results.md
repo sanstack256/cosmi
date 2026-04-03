@@ -1,10 +1,10 @@
 # Summary
 
-Date : 2026-03-30 23:25:47
+Date : 2026-04-03 16:57:11
 
 Directory /Users/nssanjeev/Documents/cosmi
 
-Total : 78 files,  19813 codes, 542 comments, 2263 blanks, all 22618 lines
+Total : 78 files,  20152 codes, 553 comments, 2378 blanks, all 23083 lines
 
 Summary / [Details](details.md) / [Diff Summary](diff.md) / [Diff Details](diff-details.md)
 
@@ -12,8 +12,8 @@ Summary / [Details](details.md) / [Diff Summary](diff.md) / [Diff Details](diff-
 | language | files | code | comment | blank | total |
 | :--- | ---: | ---: | ---: | ---: | ---: |
 | JSON | 2 | 10,080 | 0 | 2 | 10,082 |
-| TypeScript JSX | 44 | 8,721 | 488 | 2,022 | 11,231 |
-| TypeScript | 20 | 623 | 36 | 168 | 827 |
+| TypeScript JSX | 44 | 9,055 | 499 | 2,137 | 11,691 |
+| TypeScript | 20 | 628 | 36 | 168 | 832 |
 | PostCSS | 1 | 267 | 15 | 48 | 330 |
 | JavaScript | 4 | 52 | 3 | 8 | 63 |
 | JSON with Comments | 1 | 42 | 0 | 1 | 43 |
@@ -23,9 +23,9 @@ Summary / [Details](details.md) / [Diff Summary](diff.md) / [Diff Details](diff-
 ## Directories
 | path | files | code | comment | blank | total |
 | :--- | ---: | ---: | ---: | ---: | ---: |
-| . | 78 | 19,813 | 542 | 2,263 | 22,618 |
+| . | 78 | 20,152 | 553 | 2,378 | 23,083 |
 | . (Files) | 10 | 10,213 | 6 | 31 | 10,250 |
-| app | 53 | 9,462 | 527 | 2,203 | 12,192 |
+| app | 53 | 9,801 | 538 | 2,318 | 12,657 |
 | app (Files) | 6 | 613 | 39 | 99 | 751 |
 | app/api | 7 | 463 | 24 | 132 | 619 |
 | app/api/create-public-link | 1 | 50 | 2 | 12 | 64 |
@@ -42,9 +42,9 @@ Summary / [Details](details.md) / [Diff Summary](diff.md) / [Diff Details](diff-
 | app/components (Files) | 6 | 358 | 33 | 52 | 443 |
 | app/components/hero | 1 | 47 | 6 | 6 | 59 |
 | app/components/ui | 1 | 139 | 6 | 28 | 173 |
-| app/dashboard | 7 | 2,556 | 109 | 596 | 3,261 |
-| app/dashboard (Files) | 2 | 899 | 48 | 196 | 1,143 |
-| app/dashboard/analytics | 1 | 291 | 15 | 44 | 350 |
+| app/dashboard | 7 | 2,811 | 118 | 677 | 3,606 |
+| app/dashboard (Files) | 2 | 1,025 | 54 | 252 | 1,331 |
+| app/dashboard/analytics | 1 | 420 | 18 | 69 | 507 |
 | app/dashboard/clients | 2 | 356 | 12 | 101 | 469 |
 | app/dashboard/clients (Files) | 1 | 325 | 12 | 90 | 427 |
 | app/dashboard/clients/[id] | 1 | 31 | 0 | 11 | 42 |
@@ -64,13 +64,13 @@ Summary / [Details](details.md) / [Diff Summary](diff.md) / [Diff Details](diff-
 | app/profile | 5 | 738 | 41 | 147 | 926 |
 | app/profile (Files) | 1 | 311 | 14 | 62 | 387 |
 | app/profile/components | 4 | 427 | 27 | 85 | 539 |
-| app/providers | 4 | 549 | 59 | 175 | 783 |
+| app/providers | 4 | 628 | 61 | 209 | 898 |
 | app/signin | 1 | 184 | 11 | 24 | 219 |
 | app/signout | 1 | 19 | 1 | 5 | 25 |
 | app/signup | 1 | 160 | 5 | 29 | 194 |
 | app/test-auth | 1 | 12 | 0 | 4 | 16 |
 | app/test-firestore | 1 | 33 | 0 | 9 | 42 |
-| app/utils | 1 | 11 | 0 | 1 | 12 |
+| app/utils | 1 | 16 | 0 | 1 | 17 |
 | lib | 9 | 116 | 9 | 27 | 152 |
 | public | 5 | 5 | 0 | 0 | 5 |
 | types | 1 | 17 | 0 | 2 | 19 |

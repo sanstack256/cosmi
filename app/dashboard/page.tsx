@@ -5,7 +5,7 @@ import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useInvoices, Invoice } from "../providers/InvoiceProvider";
-import dynamic from "next/dynamic"; // <- added
+import dynamic from "next/dynamic";
 import { useAuth } from "../providers/AuthProvider";
 import { formatCurrency } from "@/app/utils/currency";
 
@@ -100,21 +100,9 @@ function isThisMonth(date?: any) {
 export default function DashboardPage() {
   const router = useRouter();
   const { invoices, issueInvoice } = useInvoices();
-  const { plan, userData } = useAuth();
 
+  const { plan, userData, displayCurrency, setDisplayCurrency } = useAuth();
 
-  if (!userData) {
-    return (
-      <div className="flex items-center justify-center h-screen text-slate-500 text-sm">
-        Loading dashboard...
-      </div>
-    );
-  }
-
-
-
-  const baseCurrency: "INR" | "USD" =
-    userData?.company?.currency || "INR";
 
   const invoiceCountThisMonth = useMemo(() => {
     const now = new Date();
@@ -151,23 +139,25 @@ export default function DashboardPage() {
     let paidCount = 0;
     const clientSet = new Set<string>();
 
-    invoices.forEach((inv) => {
+    invoices
+      .filter((inv) => inv.currency === displayCurrency)
+      .forEach((inv) => {
 
-      const amt = inv.normalizedAmount ?? parseAmountToNumber(inv.amount);
+        const amt = inv.normalizedAmount ?? parseAmountToNumber(inv.amount);
 
 
 
-      totalRevenue += amt;
-      clientSet.add(inv.client);
+        totalRevenue += amt;
+        clientSet.add(inv.client);
 
-      if (getInvoiceStatus(inv) === "Pending") {
-        pendingCount++;
-        pendingAmount += amt;
-      }
-      else if (getInvoiceStatus(inv) === "Paid") {
-        paidCount++;
-      }
-    });
+        if (getInvoiceStatus(inv) === "Pending") {
+          pendingCount++;
+          pendingAmount += amt;
+        }
+        else if (getInvoiceStatus(inv) === "Paid") {
+          paidCount++;
+        }
+      });
 
     return {
       totalRevenue,
@@ -176,7 +166,9 @@ export default function DashboardPage() {
       paidCount,
       activeClients: clientSet.size,
     };
-  }, [invoices]);
+  }, [invoices, displayCurrency]);
+
+
 
   /* Filtered invoices */
   const filteredInvoices = useMemo(() => {
@@ -213,7 +205,7 @@ export default function DashboardPage() {
       taxAmount: 0,
       total: parseAmountToNumber(inv.amount),
       notes: (inv as any).meta?.notes ?? "",
-      currency: inv.currency || baseCurrency, // IMPORTANT
+      currency: inv.currency || displayCurrency, // IMPORTANT
     });
 
     exportToPDFUsingIframe(printable);
@@ -324,27 +316,28 @@ export default function DashboardPage() {
     }
 
     // Add invoice values
-    invoices.forEach((inv) => {
+    invoices
+      .filter((inv) => inv.currency === displayCurrency)
+      .forEach((inv) => {
 
+        const date = inv.createdAt?.toDate
+          ? inv.createdAt.toDate()
+          : new Date(inv.createdAt || inv.date);
 
-      const date = inv.createdAt?.toDate
-        ? inv.createdAt.toDate()
-        : new Date(inv.createdAt || inv.date);
+        if (isNaN(date.getTime())) return;
 
-      if (isNaN(date.getTime())) return;
+        const month = date.getMonth() + 1;
+        const year = date.getFullYear();
 
-      const month = date.getMonth() + 1;
-      const year = date.getFullYear();
+        const bucket = buckets.find(
+          (b) => b.month === month && b.year === year
+        );
 
-      const bucket = buckets.find(
-        (b) => b.month === month && b.year === year
-      );
-
-      if (bucket) {
-        const numericAmount = inv.normalizedAmount ?? parseAmountToNumber(inv.amount);
-        bucket.value += numericAmount;
-      }
-    });
+        if (bucket) {
+          const numericAmount = inv.normalizedAmount ?? parseAmountToNumber(inv.amount);
+          bucket.value += numericAmount;
+        }
+      });
 
 
     // ✅ Trim empty months (Stripe-style)
@@ -390,7 +383,7 @@ export default function DashboardPage() {
         realValue: b.value, //  important for tooltip
       };
     });
-  }, [invoices, revenueRange]);
+  }, [invoices, revenueRange, displayCurrency]);
 
 
 
@@ -442,6 +435,18 @@ export default function DashboardPage() {
       />
     );
   };
+
+
+
+  if (!userData) {
+    return (
+      <div className="flex items-center justify-center h-screen text-slate-500 text-sm">
+        Loading dashboard...
+      </div>
+    );
+  }
+
+
 
 
   return (
@@ -516,7 +521,7 @@ export default function DashboardPage() {
 
                   <StatCard
                     label="Total Revenue"
-                    value={formatCurrency(stats.totalRevenue, baseCurrency)}
+                    value={formatCurrency(stats.totalRevenue, displayCurrency)}
                     subLabel="From all invoices"
                     trend="+ Live"
                   />
@@ -525,7 +530,7 @@ export default function DashboardPage() {
                     value={String(stats.pendingCount)}
                     subLabel={
                       stats.pendingAmount
-                        ? `${formatCurrency(stats.pendingAmount, baseCurrency)} pending`
+                        ? `${formatCurrency(stats.pendingAmount, displayCurrency)} pending`
                         : "No pending amount"
                     }
                     trend="Updated"
@@ -571,7 +576,7 @@ export default function DashboardPage() {
                     {/* 🔥 HERO METRIC */}
                     <div className="mt-3 flex items-baseline gap-3">
                       <span className="text-2xl font-semibold text-white">
-                        {formatCurrency(currentRevenue, baseCurrency)}
+                        {formatCurrency(currentRevenue, displayCurrency)}
                       </span>
 
                       {typeof growth === "number" && growth > 0 && (
@@ -594,6 +599,30 @@ export default function DashboardPage() {
                         : "Total revenue in selected period"}
                     </p>
 
+                  </div>
+
+
+
+                  <div className="flex gap-2 mr-3">
+                    <button
+                      onClick={() => setDisplayCurrency("INR")}
+                      className={`px-3 py-1 rounded-lg text-xs border ${displayCurrency === "INR"
+                        ? "bg-violet-600 text-white border-violet-500"
+                        : "border-white/10 text-slate-400 hover:bg-white/5"
+                        }`}
+                    >
+                      INR
+                    </button>
+
+                    <button
+                      onClick={() => setDisplayCurrency("USD")}
+                      className={`px-3 py-1 rounded-lg text-xs border ${displayCurrency === "USD"
+                        ? "bg-violet-600 text-white border-violet-500"
+                        : "border-white/10 text-slate-400 hover:bg-white/5"
+                        }`}
+                    >
+                      USD
+                    </button>
                   </div>
 
 
@@ -664,7 +693,7 @@ export default function DashboardPage() {
                           const isCurrent = props.payload?.isCurrent;
                           const real = props.payload?.realValue ?? value;
 
-                          return `${isCurrent ? "So far: " : ""}${formatCurrency(Number(real), baseCurrency)}`
+                          return `${isCurrent ? "So far: " : ""}${formatCurrency(Number(real), displayCurrency)}`
                         }}
                       />
 
@@ -799,7 +828,12 @@ export default function DashboardPage() {
                             {inv.client}
                           </td>
 
-                          <td className="py-2 pr-4">{inv.amount}</td>
+                          <td className="py-2 pr-4">
+                            {formatCurrency(
+                              inv.normalizedAmount ?? parseAmountToNumber(inv.amount),
+                              inv.currency || displayCurrency
+                            )}
+                          </td>
                           <td className="py-2 pr-4">
                             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] ${statusColors[getInvoiceStatus(inv)]}`}>
                               {getInvoiceStatus(inv)}
