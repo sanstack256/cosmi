@@ -1,10 +1,10 @@
 # Details
 
-Date : 2026-03-30 20:01:11
+Date : 2026-04-02 22:19:55
 
 Directory /Users/nssanjeev/Documents/cosmi
 
-Total : 77 files,  19515 codes, 528 comments, 2217 blanks, all 22260 lines
+Total : 78 files,  20034 codes, 551 comments, 2318 blanks, all 22903 lines
 
 [Summary](results.md) / Details / [Diff Summary](diff.md) / [Diff Details](diff-details.md)
 
@@ -29,12 +29,13 @@ Total : 77 files,  19515 codes, 528 comments, 2217 blanks, all 22260 lines
 | [app/components/UserMenu.tsx](/app/components/UserMenu.tsx) | TypeScript JSX | 107 | 5 | 17 | 129 |
 | [app/components/hero/HeroVisual.tsx](/app/components/hero/HeroVisual.tsx) | TypeScript JSX | 47 | 6 | 6 | 59 |
 | [app/components/ui/CosmiCalendar.tsx](/app/components/ui/CosmiCalendar.tsx) | TypeScript JSX | 139 | 6 | 28 | 173 |
+| [app/dashboard/analytics/page.tsx](/app/dashboard/analytics/page.tsx) | TypeScript JSX | 420 | 18 | 69 | 507 |
 | [app/dashboard/clients/\[id\]/page.tsx](/app/dashboard/clients/%5Bid%5D/page.tsx) | TypeScript JSX | 31 | 0 | 11 | 42 |
 | [app/dashboard/clients/page.tsx](/app/dashboard/clients/page.tsx) | TypeScript JSX | 325 | 12 | 90 | 427 |
 | [app/dashboard/invoices/\[id\]/page.tsx](/app/dashboard/invoices/%5Bid%5D/page.tsx) | TypeScript JSX | 454 | 24 | 128 | 606 |
 | [app/dashboard/invoices/page.tsx](/app/dashboard/invoices/page.tsx) | TypeScript JSX | 556 | 10 | 127 | 693 |
-| [app/dashboard/layout.tsx](/app/dashboard/layout.tsx) | TypeScript JSX | 208 | 10 | 28 | 246 |
-| [app/dashboard/page.tsx](/app/dashboard/page.tsx) | TypeScript JSX | 684 | 39 | 166 | 889 |
+| [app/dashboard/layout.tsx](/app/dashboard/layout.tsx) | TypeScript JSX | 215 | 9 | 30 | 254 |
+| [app/dashboard/page.tsx](/app/dashboard/page.tsx) | TypeScript JSX | 776 | 45 | 196 | 1,017 |
 | [app/globals.css](/app/globals.css) | PostCSS | 267 | 15 | 48 | 330 |
 | [app/head.tsx](/app/head.tsx) | TypeScript JSX | 14 | 4 | 4 | 22 |
 | [app/invoice-editor/components/invoice/InvoiceForm.tsx](/app/invoice-editor/components/invoice/InvoiceForm.tsx) | TypeScript JSX | 818 | 42 | 213 | 1,073 |

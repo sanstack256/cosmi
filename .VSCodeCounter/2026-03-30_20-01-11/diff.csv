@@ -1,8 +1,0 @@
-"filename", "language", "TypeScript", "TypeScript JSX", "comment", "blank", "total"
-"/Users/nssanjeev/Documents/cosmi/app/api/paypal-capture/route.ts", "TypeScript", -1, 0, -2, -1, -4
-"/Users/nssanjeev/Documents/cosmi/app/api/paypal-checkout/route.ts", "TypeScript", 11, 0, 2, -5, 8
-"/Users/nssanjeev/Documents/cosmi/app/api/razorpay-checkout/success/route.ts", "TypeScript", -1, 0, 0, 1, 0
-"/Users/nssanjeev/Documents/cosmi/app/invoice-editor/components/invoice/InvoicePreview.tsx", "TypeScript JSX", 0, -14, 0, 5, -9
-"/Users/nssanjeev/Documents/cosmi/app/invoice-editor/page.tsx", "TypeScript JSX", 0, 2, 0, 0, 2
-"/Users/nssanjeev/Documents/cosmi/app/providers/InvoiceProvider.tsx", "TypeScript JSX", 0, 3, 1, 1, 5
-"Total", "-", 9, -9, 1, 1, 2

@@ -7,6 +7,9 @@ import { useRouter } from "next/navigation";
 import { useInvoices, Invoice } from "../providers/InvoiceProvider";
 import dynamic from "next/dynamic"; // <- added
 import { useAuth } from "../providers/AuthProvider";
+import { formatCurrency } from "@/app/utils/currency";
+
+
 type InvoiceStatus = "Paid" | "Pending" | "Overdue" | "Draft";
 
 
@@ -77,13 +80,6 @@ function parseAmountToNumber(amount: string): number {
   return Number.isNaN(num) ? 0 : num;
 }
 
-function formatCurrencyINR(value: number): string {
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(value);
-}
 
 function isThisMonth(date?: any) {
   if (!date) return false;
@@ -104,7 +100,21 @@ function isThisMonth(date?: any) {
 export default function DashboardPage() {
   const router = useRouter();
   const { invoices, issueInvoice } = useInvoices();
-  const { plan } = useAuth();
+  const { plan, userData } = useAuth();
+
+
+  if (!userData) {
+    return (
+      <div className="flex items-center justify-center h-screen text-slate-500 text-sm">
+        Loading dashboard...
+      </div>
+    );
+  }
+
+
+
+  const baseCurrency: "INR" | "USD" =
+    userData?.company?.currency || "INR";
 
   const invoiceCountThisMonth = useMemo(() => {
     const now = new Date();
@@ -119,6 +129,8 @@ export default function DashboardPage() {
       );
     }).length;
   }, [invoices]);
+
+
 
 
   const [search, setSearch] = useState("");
@@ -140,7 +152,11 @@ export default function DashboardPage() {
     const clientSet = new Set<string>();
 
     invoices.forEach((inv) => {
-      const amt = parseAmountToNumber(inv.amount);
+
+      const amt = inv.normalizedAmount ?? parseAmountToNumber(inv.amount);
+
+
+
       totalRevenue += amt;
       clientSet.add(inv.client);
 
@@ -183,6 +199,9 @@ export default function DashboardPage() {
     return filteredInvoices.slice(0, 5);
   }, [filteredInvoices]);
 
+
+
+
   /* ---- NEW: safer PDF export using hidden iframe (improved) ---- */
   function exportInvoiceAsPDF(inv: Invoice) {
     const printable = buildPrintableHTML({
@@ -194,6 +213,7 @@ export default function DashboardPage() {
       taxAmount: 0,
       total: parseAmountToNumber(inv.amount),
       notes: (inv as any).meta?.notes ?? "",
+      currency: inv.currency || baseCurrency, // IMPORTANT
     });
 
     exportToPDFUsingIframe(printable);
@@ -267,7 +287,9 @@ export default function DashboardPage() {
     window.location.href = mailto;
   }
 
+
   /* UI */
+
 
 
   const revenueChartData = React.useMemo(() => {
@@ -304,6 +326,7 @@ export default function DashboardPage() {
     // Add invoice values
     invoices.forEach((inv) => {
 
+
       const date = inv.createdAt?.toDate
         ? inv.createdAt.toDate()
         : new Date(inv.createdAt || inv.date);
@@ -318,7 +341,7 @@ export default function DashboardPage() {
       );
 
       if (bucket) {
-        const numericAmount = parseAmountToNumber(inv.amount);
+        const numericAmount = inv.normalizedAmount ?? parseAmountToNumber(inv.amount);
         bucket.value += numericAmount;
       }
     });
@@ -390,6 +413,8 @@ export default function DashboardPage() {
 
     return Number(growth.toFixed(1));
   };
+
+  const currentRevenue = revenueChartData.at(-1)?.realValue ?? 0;
 
 
   const completedData = revenueChartData.filter((d) => !d.isCurrent);
@@ -491,7 +516,7 @@ export default function DashboardPage() {
 
                   <StatCard
                     label="Total Revenue"
-                    value={formatCurrencyINR(stats.totalRevenue)}
+                    value={formatCurrency(stats.totalRevenue, baseCurrency)}
                     subLabel="From all invoices"
                     trend="+ Live"
                   />
@@ -500,7 +525,7 @@ export default function DashboardPage() {
                     value={String(stats.pendingCount)}
                     subLabel={
                       stats.pendingAmount
-                        ? `${formatCurrencyINR(stats.pendingAmount)} pending`
+                        ? `${formatCurrency(stats.pendingAmount, baseCurrency)} pending`
                         : "No pending amount"
                     }
                     trend="Updated"
@@ -534,7 +559,8 @@ export default function DashboardPage() {
                     <p className="text-[11px] uppercase tracking-wide text-slate-500">
                       Revenue
                     </p>
-                    <h2 className="text-lg font-semibold tracking-tight text-white mt-1">
+
+                    <h2 className="text-xl font-semibold tracking-tight text-white mt-1">
                       {revenueRange === "6m"
                         ? "Last 6 months"
                         : revenueRange === "12m"
@@ -542,20 +568,32 @@ export default function DashboardPage() {
                           : "This month"}
                     </h2>
 
-                    <p className="text-xs mt-1">
-                      {growth === "new" && (
-                        <span className="text-emerald-400">
-                          Revenue activity increased
+                    {/* 🔥 HERO METRIC */}
+                    <div className="mt-3 flex items-baseline gap-3">
+                      <span className="text-2xl font-semibold text-white">
+                        {formatCurrency(currentRevenue, baseCurrency)}
+                      </span>
+
+                      {typeof growth === "number" && growth > 0 && (
+                        <span className="text-emerald-400 text-sm">
+                          ↑ {growth}%
                         </span>
                       )}
 
-                      {typeof growth === "number" && (
-                        <span className={growth >= 0 ? "text-emerald-400" : "text-rose-400"}>
-                          {growth >= 0 ? "+" : ""}
-                          {growth}% vs previous period
+                      {typeof growth === "number" && growth < 0 && (
+                        <span className="text-rose-400 text-sm">
+                          ↓ {Math.abs(growth)}%
                         </span>
                       )}
+                    </div>
+
+                    {/* SUBTEXT */}
+                    <p className="text-xs text-slate-500 mt-1">
+                      {revenueRange === "1m"
+                        ? "Revenue this month"
+                        : "Total revenue in selected period"}
                     </p>
+
                   </div>
 
 
@@ -626,7 +664,7 @@ export default function DashboardPage() {
                           const isCurrent = props.payload?.isCurrent;
                           const real = props.payload?.realValue ?? value;
 
-                          return `${isCurrent ? "So far: " : ""}₹${Number(real).toLocaleString("en-IN")}`;
+                          return `${isCurrent ? "So far: " : ""}${formatCurrency(Number(real), baseCurrency)}`
                         }}
                       />
 
@@ -885,6 +923,7 @@ function buildPrintableHTML({
   taxAmount,
   total,
   notes,
+  currency,
 }: {
   id: string;
   client: string;
@@ -894,6 +933,7 @@ function buildPrintableHTML({
   taxAmount: number;
   total: number;
   notes: string;
+  currency: "INR" | "USD";
 }) {
   let formattedDate = date;
   try {
@@ -913,8 +953,8 @@ function buildPrintableHTML({
       <tr>
         <td class="desc">${escapeHtml(li.desc)}</td>
         <td class="qty">${li.qty}</td>
-        <td class="rate">${escapeHtml(formatCurrencyINR(li.rate))}</td>
-        <td class="amount">${escapeHtml(formatCurrencyINR(li.qty * li.rate))}</td>
+        <td class="rate">${formatCurrency(li.rate, currency)}</td>
+        <td class="amount">${formatCurrency(li.qty * li.rate, currency)}</td>
       </tr>`
     )
     .join("");
@@ -979,9 +1019,10 @@ function buildPrintableHTML({
     </table>
 
     <div class="totals">
-      <div>Subtotal: <strong>${escapeHtml(formatCurrencyINR(subtotal))}</strong></div>
-      <div>Tax: <strong>${escapeHtml(formatCurrencyINR(taxAmount))}</strong></div>
-      <div class="grand-total">Total: ${escapeHtml(formatCurrencyINR(total))}</div>
+      <div>Subtotal: <strong>${formatCurrency(subtotal, currency)}</strong></div>
+      <div>Tax: <strong>${formatCurrency(taxAmount, currency)}
+}</strong></div>
+      <div class="grand-total">Total: ${formatCurrency(total, currency)}</div>
     </div>
 
     ${notesHtml}

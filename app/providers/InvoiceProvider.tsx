@@ -92,6 +92,9 @@ export type Invoice = {
 
   currency?: "INR" | "USD";
 
+  normalizedAmount?: number;
+  normalizedCurrency?: string;
+
 };
 
 export type Client = {
@@ -155,7 +158,7 @@ function pad(num: number) {
 ------------------------------- */
 
 export function InvoiceProvider({ children }: { children: React.ReactNode }) {
-  const { user, isPro } = useAuth();
+  const { user, isPro, userData } = useAuth();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
 
@@ -208,13 +211,28 @@ export function InvoiceProvider({ children }: { children: React.ReactNode }) {
 
   /* ➕ Create Draft */
 
-  async function addInvoice(invoice: Omit<Invoice, "id">) {
+  async function addInvoice(
+    invoice: Omit<Invoice, "id" | "createdAt">
+  ): Promise<{ id: string }> {
     if (!user) throw new Error("Not authenticated");
 
+    const baseCurrency = userData?.company?.currency;
 
+    console.log("BASE CURRENCY:", baseCurrency);
+    console.log("FULL USER DATA:", userData);
+
+    if (!baseCurrency) {
+      throw new Error("Currency not ready yet")
+    }
+
+
+    const rawAmount = parseAmount(invoice.amount);
+    const fromCurrency = invoice.currency || baseCurrency;
 
     const invoicesRef = collection(db, "users", user.uid, "invoices");
     const newInvoiceRef = doc(invoicesRef);
+
+
 
 
     console.log("Creating invoice with reminders:", {
@@ -228,8 +246,28 @@ export function InvoiceProvider({ children }: { children: React.ReactNode }) {
       }
     });
 
+
+    async function getExchangeRate(from: string, to: string) {
+      if (from === to) return 1;
+
+      const res = await fetch(
+        `https://api.exchangerate.host/convert?from=${from}&to=${to}`
+      );
+
+      const data = await res.json();
+
+      return data.result;
+    }
+
+    const rate = await getExchangeRate(fromCurrency, baseCurrency);
+    const normalizedAmount = Math.round(rawAmount * rate);
+
+
     const payload = {
       ...invoice,
+
+      normalizedAmount,
+      normalizedCurrency: baseCurrency,
 
       lifecycle: "draft",
       paymentStatus: invoice.paymentStatus ?? "unpaid",

@@ -6,7 +6,12 @@ export function formatCurrency(
   value: number,
   currency: "INR" | "USD"
 ) {
-  return value.toLocaleString(
-    currency === "USD" ? "en-US" : "en-IN"
-  );
+  return new Intl.NumberFormat(
+    currency === "USD" ? "en-US" : "en-IN",
+    {
+      style: "currency",
+      currency,
+      maximumFractionDigits: 0,
+    }
+  ).format(value);
 }

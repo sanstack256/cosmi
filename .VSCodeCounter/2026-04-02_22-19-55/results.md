@@ -1,10 +1,10 @@
 # Summary
 
-Date : 2026-03-30 20:01:11
+Date : 2026-04-02 22:19:55
 
 Directory /Users/nssanjeev/Documents/cosmi
 
-Total : 77 files,  19515 codes, 528 comments, 2217 blanks, all 22260 lines
+Total : 78 files,  20034 codes, 551 comments, 2318 blanks, all 22903 lines
 
 Summary / [Details](details.md) / [Diff Summary](diff.md) / [Diff Details](diff-details.md)
 
@@ -12,7 +12,7 @@ Summary / [Details](details.md) / [Diff Summary](diff.md) / [Diff Details](diff-
 | language | files | code | comment | blank | total |
 | :--- | ---: | ---: | ---: | ---: | ---: |
 | JSON | 2 | 10,080 | 0 | 2 | 10,082 |
-| TypeScript JSX | 43 | 8,423 | 474 | 1,976 | 10,873 |
+| TypeScript JSX | 44 | 8,942 | 497 | 2,077 | 11,516 |
 | TypeScript | 20 | 623 | 36 | 168 | 827 |
 | PostCSS | 1 | 267 | 15 | 48 | 330 |
 | JavaScript | 4 | 52 | 3 | 8 | 63 |
@@ -23,9 +23,9 @@ Summary / [Details](details.md) / [Diff Summary](diff.md) / [Diff Details](diff-
 ## Directories
 | path | files | code | comment | blank | total |
 | :--- | ---: | ---: | ---: | ---: | ---: |
-| . | 77 | 19,515 | 528 | 2,217 | 22,260 |
+| . | 78 | 20,034 | 551 | 2,318 | 22,903 |
 | . (Files) | 10 | 10,213 | 6 | 31 | 10,250 |
-| app | 52 | 9,164 | 513 | 2,157 | 11,834 |
+| app | 53 | 9,683 | 536 | 2,258 | 12,477 |
 | app (Files) | 6 | 613 | 39 | 99 | 751 |
 | app/api | 7 | 463 | 24 | 132 | 619 |
 | app/api/create-public-link | 1 | 50 | 2 | 12 | 64 |
@@ -42,8 +42,9 @@ Summary / [Details](details.md) / [Diff Summary](diff.md) / [Diff Details](diff-
 | app/components (Files) | 6 | 358 | 33 | 52 | 443 |
 | app/components/hero | 1 | 47 | 6 | 6 | 59 |
 | app/components/ui | 1 | 139 | 6 | 28 | 173 |
-| app/dashboard | 6 | 2,258 | 95 | 550 | 2,903 |
-| app/dashboard (Files) | 2 | 892 | 49 | 194 | 1,135 |
+| app/dashboard | 7 | 2,777 | 118 | 651 | 3,546 |
+| app/dashboard (Files) | 2 | 991 | 54 | 226 | 1,271 |
+| app/dashboard/analytics | 1 | 420 | 18 | 69 | 507 |
 | app/dashboard/clients | 2 | 356 | 12 | 101 | 469 |
 | app/dashboard/clients (Files) | 1 | 325 | 12 | 90 | 427 |
 | app/dashboard/clients/[id] | 1 | 31 | 0 | 11 | 42 |

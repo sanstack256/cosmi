@@ -35,6 +35,7 @@ type PlanType = "free" | "pro" | "business";
 type AuthCtx = {
   user: User | null;
   loading: boolean;
+  userData: any;
 
   plan: PlanType;
   isPro: boolean;
@@ -58,6 +59,7 @@ const googleProvider = new GoogleAuthProvider();
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [plan, setPlan] = useState<PlanType>("free");
   const [planLoaded, setPlanLoaded] = useState(false);
@@ -110,6 +112,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loadPlan();
   }, [user]);
 
+  //Load user data from firestore
+  useEffect(() => {
+    if (!user) {
+      setUserData(null);
+      return;
+    }
+
+    const currentUser = user;
+
+
+    async function loadUserData() {
+      try {
+        const ref = doc(db, "users", currentUser.uid);
+        const snap = await getDoc(ref);
+
+        if (snap.exists()) {
+          setUserData(snap.data());
+        } else {
+          setUserData(null);
+        }
+      } catch (err) {
+        console.error("User data load failed:", err);
+        setUserData(null);
+      }
+    }
+
+    loadUserData();
+  }, [user]);
+
   /* ---------------- Actions ---------------- */
 
   async function signInWithEmail(email: string, password: string) {
@@ -156,6 +187,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return {
         user,
         loading,
+        userData,
 
         plan,
         isPro,
@@ -169,7 +201,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         sendPasswordReset,
       };
     },
-    [user, loading, plan, planLoaded]
+    [user, loading, plan, planLoaded, userData]
   );
 
   return (
