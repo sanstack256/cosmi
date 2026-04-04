@@ -20,6 +20,7 @@ export type Company = {
   address?: string;
   gstin?: string;
   logoURL?: string;
+  currency?: "INR" | "USD";
 };
 
 export type LineItem = {
@@ -53,6 +54,7 @@ export function useInvoiceEditor() {
 
   const { showToast } = useToast();
 
+
   const hasInitializedDuplicate = useRef(false);
 
   const { user, isPro } = useAuth();
@@ -62,6 +64,8 @@ export function useInvoiceEditor() {
   /* ---------- Company ---------- */
 
   const [company, setCompany] = useState<Company>({});
+  const baseCurrency: "INR" | "USD" | null =
+    (company as any)?.currency || null;
   const [loadingCompany, setLoadingCompany] = useState(true);
   const [hasCompanyProfile, setHasCompanyProfile] = useState(false);
 
@@ -75,8 +79,8 @@ export function useInvoiceEditor() {
   const [client, setClient] = useState("");
   const [clientEmail, setClientEmail] = useState("");
   const [currency, setCurrency] = useState<"INR" | "USD">("INR")
-  const [paymentStatus, setPaymentStatus] =
-    useState<Invoice["paymentStatus"]>("unpaid");
+
+
 
   const [date, setDate] = useState(
     new Date().toISOString().slice(0, 10)
@@ -104,7 +108,7 @@ export function useInvoiceEditor() {
 
     setClient(editingInvoice.client);
     setClientEmail((editingInvoice as any).clientEmail || "");
-    setPaymentStatus(editingInvoice.paymentStatus || "unpaid");
+
 
     if (editingInvoice.currency) {
       setCurrency(editingInvoice.currency);
@@ -141,14 +145,14 @@ export function useInvoiceEditor() {
     const source = invoices.find((i) => i.id === duplicateId);
     if (!source) return;
 
-    // 🚨 prevent double execution (Strict Mode fix)
+    // prevent double execution (Strict Mode fix)
     if (hasInitializedDuplicate.current) return;
     hasInitializedDuplicate.current = true;
 
-    // 🔥 populate fields
+    // populate fields
     setClient(source.client || "");
     setClientEmail((source as any).clientEmail || "");
-    setPaymentStatus(source.paymentStatus || "unpaid");
+
 
     if (source.currency) {
       setCurrency(source.currency);
@@ -196,7 +200,15 @@ export function useInvoiceEditor() {
         const snap = await getDoc(ref);
 
         if (snap.exists() && snap.data().company) {
-          setCompany(snap.data().company);
+
+          const companyData = snap.data().company;
+
+          setCompany({
+            ...companyData,
+            currency: companyData.currency || "INR", //  DEFAULT
+          });
+
+
           setHasCompanyProfile(true);
         } else {
           setHasCompanyProfile(false);
@@ -293,10 +305,12 @@ export function useInvoiceEditor() {
   }
 
   async function saveInvoice(
+
+
     showToast: (msg: string) => void
   ): Promise<any | null> {
     try {
-
+      console.log("COMPANY:", company);
       console.log("CLIENT EMAIL STATE:", clientEmail);
 
 
@@ -306,16 +320,13 @@ export function useInvoiceEditor() {
 
 
 
-
-
       const invoiceData: any = {
         client,
         clientEmail: clientEmail?.trim() || null,
-        amount: formatCurrencyINR(total),
-        paymentStatus,
+        amount: total,
         date: date,
         dueDate,
-        currency,
+        currency: currency || company.currency || "INR",
 
         remindersSent: {
           d7: false,
@@ -355,9 +366,11 @@ export function useInvoiceEditor() {
       }
 
       // 3. First time → create new draft
-      const created = await addInvoice(invoiceData) as any;
+      let created;
 
-      const invoiceId = created?.id || created?.docId || created;
+      created = await addInvoice(invoiceData);
+
+      const invoiceId = created?.id;
 
       if (!invoiceId) {
         console.error("Invoice ID missing:", created);
@@ -406,8 +419,6 @@ export function useInvoiceEditor() {
     setClient,
     clientEmail,
     setClientEmail,
-    status: paymentStatus,
-    setStatus: setPaymentStatus,
     date,
     setDate,
     dueDate,

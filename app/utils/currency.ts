@@ -6,6 +6,8 @@ export function formatCurrency(
   value: number,
   currency: "INR" | "USD"
 ) {
+  if (!Number.isFinite(value)) return "—"; // prevents NaN UI
+
   return new Intl.NumberFormat(
     currency === "USD" ? "en-US" : "en-IN",
     {
@@ -15,3 +17,5 @@ export function formatCurrency(
     }
   ).format(value);
 }
+
+ 

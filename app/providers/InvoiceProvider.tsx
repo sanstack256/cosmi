@@ -28,6 +28,50 @@ function parseAmount(value: any): number {
   return Number(String(value).replace(/[^0-9.-]+/g, "")) || 0;
 }
 
+
+
+function ensureFinancialIntegrity(inv: unknown): Invoice | null {
+  if (!inv || typeof inv !== "object") return null;
+
+  const i = inv as Invoice;
+
+  // ✅ Currency must exist
+  if (!i.currency) {
+    console.error("Missing currency:", i.id);
+    return null;
+  }
+
+  // ✅ FIX legacy normalizedAmount
+  if (
+    typeof i.normalizedAmount !== "number" ||
+    !Number.isFinite(i.normalizedAmount) ||
+    i.normalizedAmount <= 0
+  ) {
+    const fallback = Math.round(parseAmount(i.amount) * 100);
+
+    if (!fallback || !Number.isFinite(fallback)) {
+      console.error("Invalid normalizedAmount:", {
+        id: i.id,
+        value: i.normalizedAmount,
+      });
+      return null;
+    }
+
+    i.normalizedAmount = fallback;
+  }
+
+  // ✅ FIX legacy exchangeRate
+  if (
+    typeof i.exchangeRate !== "number" ||
+    !Number.isFinite(i.exchangeRate) ||
+    i.exchangeRate <= 0
+  ) {
+    i.exchangeRate = 1;
+  }
+
+  return i;
+}
+
 /* ------------------------------
    Invoice Type
 ------------------------------- */
@@ -40,19 +84,19 @@ export type InvoiceLifecycle =
 export type PaymentStatus =
   | "unpaid"
   | "paid"
-  | "partial"
-  | "overdue";
+
 
 export type Invoice = {
   id: string;
   invoiceNumber?: string;
   client: string;
-  amount: string;
+  amount: number;
   lifecycle: InvoiceLifecycle;
   paymentStatus: PaymentStatus;
   createdAt?: any;
   updatedAt?: any;
   issuedAt?: any;
+  exchangeRate?: number;
   cancelledAt?: any;
   date: string;
   dueDate: string;
@@ -178,10 +222,14 @@ export function InvoiceProvider({ children }: { children: React.ReactNode }) {
     );
 
     const unsub = onSnapshot(q, (snap) => {
-      const list: Invoice[] = snap.docs.map((d) => ({
-        ...(d.data() as Omit<Invoice, "id">),
-        id: d.id,
-      }));
+      const list: Invoice[] = snap.docs
+        .map((d) => ({
+          ...(d.data() as Omit<Invoice, "id">),
+          id: d.id,
+        }))
+        .map(ensureFinancialIntegrity)
+        .filter((inv): inv is Invoice => inv !== null);
+
       setInvoices(list);
     });
 
@@ -216,17 +264,28 @@ export function InvoiceProvider({ children }: { children: React.ReactNode }) {
   ): Promise<{ id: string }> {
     if (!user) throw new Error("Not authenticated");
 
-    const baseCurrency = userData?.company?.currency;
+    const baseCurrency: "INR" | "USD" =
+      (user as any)?.company?.currency || "INR";
 
     console.log("BASE CURRENCY:", baseCurrency);
     console.log("FULL USER DATA:", userData);
 
     if (!baseCurrency) {
-      throw new Error("Currency not ready yet")
+      console.warn("Missing currency, defaulting to INR");
+    }
+
+    if (!invoice.client) throw new Error("Client required");
+    if (!invoice.date) throw new Error("Date required");
+    if (!invoice.dueDate) throw new Error("Due date required");
+
+    const rawAmount = parseAmount(invoice.amount);
+    const cleanedAmount = Number(rawAmount.toFixed(2));
+
+    if (!Number.isFinite(rawAmount) || rawAmount <= 0) {
+      throw new Error("Invalid amount");
     }
 
 
-    const rawAmount = parseAmount(invoice.amount);
     const fromCurrency = invoice.currency || baseCurrency;
 
     const invoicesRef = collection(db, "users", user.uid, "invoices");
@@ -250,27 +309,59 @@ export function InvoiceProvider({ children }: { children: React.ReactNode }) {
     async function getExchangeRate(from: string, to: string) {
       if (from === to) return 1;
 
-      const res = await fetch(
-        `https://api.exchangerate.host/convert?from=${from}&to=${to}`
-      );
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 5000);
 
-      const data = await res.json();
+        const res = await fetch(
+          `https://api.exchangerate.host/convert?from=${from}&to=${to}`,
+          { signal: controller.signal }
+        );
 
-      return data.result;
+        clearTimeout(timeout);
+
+        const data = await res.json();
+        const rate = Number(data?.result);
+
+        if (!rate || !Number.isFinite(rate) || rate <= 0) {
+          throw new Error("Invalid rate");
+        }
+
+        return rate;
+      } catch (err) {
+        console.error("Exchange rate failed:", err);
+        console.warn("Exchange rate failed, using fallback");
+        return 1;
+      }
     }
 
-    const rate = await getExchangeRate(fromCurrency, baseCurrency);
-    const normalizedAmount = Math.round(rawAmount * rate);
+    let rate = 1;
+
+    try {
+      rate = await getExchangeRate(fromCurrency, baseCurrency);
+    } catch (err) {
+      console.warn("Exchange fallback triggered:", err);
+      rate = 1;
+    }
+
+
+
+    const normalizedAmount = Math.round((cleanedAmount * rate) * 100);
+
+    if (!normalizedAmount || !Number.isFinite(normalizedAmount) || normalizedAmount <= 0) {
+      throw new Error("Invalid normalized amount");
+    }
 
 
     const payload = {
       ...invoice,
 
       normalizedAmount,
+      exchangeRate: rate,
       normalizedCurrency: baseCurrency,
 
       lifecycle: "draft",
-      paymentStatus: invoice.paymentStatus ?? "unpaid",
+      paymentStatus: "unpaid",
       payments: [],
       invoiceNumber: null,
 
@@ -363,10 +454,11 @@ export function InvoiceProvider({ children }: { children: React.ReactNode }) {
       updatedAt: serverTimestamp(),
     };
 
-    // 🚫 Prevent manual paymentStatus override
-    if ("paymentStatus" in updates) {
-      delete updates.paymentStatus;
-    }
+    // 🚫 NEVER allow financial mutation
+    delete updates.normalizedAmount;
+    delete updates.exchangeRate;
+    delete updates.normalizedCurrency;
+    delete updates.paymentStatus;
 
     /* 🔔 Detect payment received */
     if (invoice.paymentStatus === "paid") {
@@ -395,10 +487,16 @@ export function InvoiceProvider({ children }: { children: React.ReactNode }) {
 
     const existingPayments = invoice.payments || [];
 
+    const safeAmount = Math.round(Number(amount) * 100);
+
+    if (!Number.isFinite(safeAmount) || safeAmount <= 0) {
+      throw new Error("Invalid payment amount");
+    }
+
     const newPayments = [
       ...existingPayments,
       {
-        amount,
+        amount: safeAmount,
         date: new Date(),
         method,
         note
@@ -410,14 +508,20 @@ export function InvoiceProvider({ children }: { children: React.ReactNode }) {
       0
     );
 
-    const invoiceAmount = parseAmount(invoice.amount);
+    const invoiceAmount = invoice.normalizedAmount;
+
+    if (
+      typeof invoiceAmount !== "number" ||
+      !Number.isFinite(invoiceAmount) ||
+      invoiceAmount <= 0
+    ) {
+      throw new Error("Invalid invoice amount");
+    }
 
     let status: PaymentStatus = "unpaid";
 
     if (totalPaid >= invoiceAmount) {
       status = "paid";
-    } else if (totalPaid > 0) {
-      status = "partial";
     }
 
     await updateDoc(ref, {

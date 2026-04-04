@@ -68,7 +68,6 @@ type Props = {
   payments?: any[];
   discount?: number;
   currency?: string;
-  status?: string;
 };
 
 export default function InvoicePreview({
@@ -85,7 +84,6 @@ export default function InvoicePreview({
   company,
   plan,
   discount,
-  status,
   currency,
   payments,
 }: Props) {
@@ -95,6 +93,30 @@ export default function InvoicePreview({
   const safeTaxAmount = Number(taxAmount || 0);
   const safeTotal = Number(total || 0);
   const safeDiscount = Number(discount || 0);
+
+  const totalPaid = (payments || []).reduce(
+    (sum, p) => sum + Number(p.amount || 0),
+    0
+  );
+
+  const remaining = Math.max(safeTotal - totalPaid, 0);
+
+  const now = new Date();
+  const isOverdue = dueDate ? new Date(dueDate) < now : false;
+
+  let computedStatus = "pending";
+
+  if (safeTotal === 0) {
+    computedStatus = "draft";
+  } else if (remaining === 0) {
+    computedStatus = "paid";
+  } else if (isOverdue) {
+    computedStatus = totalPaid > 0 ? "partial" : "overdue";
+  } else if (totalPaid > 0) {
+    computedStatus = "partial";
+  } else {
+    computedStatus = "pending";
+  }
 
 
   return (
@@ -172,6 +194,23 @@ export default function InvoicePreview({
               </div>
             </div>
           </header>
+
+          <div className="mt-6">
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-semibold border
+      ${computedStatus === "paid"
+                  ? "bg-emerald-100 text-emerald-700 border-emerald-200"
+                  : computedStatus === "partial"
+                    ? "bg-amber-100 text-amber-700 border-amber-200"
+                    : computedStatus === "overdue"
+                      ? "bg-rose-100 text-rose-700 border-rose-200"
+                      : "bg-slate-100 text-slate-600 border-slate-200"
+                }
+    `}
+            >
+              {computedStatus.toUpperCase()}
+            </span>
+          </div>
 
           {/* ===== TABLE ===== */}
           <table className="w-full mt-12 text-sm border-collapse">

@@ -9,24 +9,6 @@ import dynamic from "next/dynamic";
 import { useAuth } from "../providers/AuthProvider";
 import { formatCurrency } from "@/app/utils/currency";
 
-
-type InvoiceStatus = "Paid" | "Pending" | "Overdue" | "Draft";
-
-
-
-const cardBase =
-  "rounded-3xl bg-[#0b0b18]/80 backdrop-blur-xl border border-white/5 shadow-[0_0_40px_rgba(124,58,237,0.08)] transition-all duration-300";
-
-const cardHover =
-  "hover:-translate-y-1 hover:shadow-[0_0_60px_rgba(124,58,237,0.15)]";
-
-
-
-const SignOutButton = dynamic(() => import("../components/SignOutButton"), { ssr: false }); // <- added
-
-
-
-
 import {
   Bell,
   Plus,
@@ -47,16 +29,62 @@ import {
 
 
 
+type InvoiceStatus = "Paid" | "Pending" | "Overdue" | "Draft";
+
+
+
+const cardBase =
+  "rounded-3xl bg-[#0b0b18]/80 backdrop-blur-xl border border-white/5 shadow-[0_0_40px_rgba(124,58,237,0.08)] transition-all duration-300";
+
+const cardHover =
+  "hover:-translate-y-1 hover:shadow-[0_0_60px_rgba(124,58,237,0.15)]";
+
+
+
+const SignOutButton = dynamic(() => import("../components/SignOutButton"), { ssr: false }); // <- added  
+
+
+
+
+
 /* ----------------------------------------
    Helpers / small constants
 ----------------------------------------- */
 
-function getInvoiceStatus(inv: Invoice): InvoiceStatus {
+function isValidRevenueInvoice(inv: Invoice) {
+  if (!inv) return false;
+
+  if (inv.lifecycle === "draft") return false;
+  if (inv.lifecycle === "cancelled") return false;
+  if ((inv as any).deleted === true) return false;
+
+  // allow legacy invoices for now
+  return true;
+}
+
+
+function computeInvoiceStatus(inv: Invoice): InvoiceStatus {
   if (inv.lifecycle === "draft") return "Draft";
 
-  if (inv.paymentStatus === "paid") return "Paid";
+  const total = (inv.normalizedAmount || 0) / 100;
 
-  if (inv.paymentStatus === "overdue") return "Overdue";
+  const totalPaid = (inv.payments || []).reduce(
+    (sum: number, p: any) => sum + Number(p.amount || 0),
+    0
+  );
+
+  const remaining = Math.max(total - totalPaid, 0);
+
+  const now = new Date();
+  const dueDate = inv.dueDate ? new Date(inv.dueDate) : null;
+  const isOverdue =
+    dueDate && !isNaN(dueDate.getTime()) && dueDate < now;
+
+  if (remaining === 0 && total > 0) return "Paid";
+
+  if (isOverdue) return "Overdue";
+
+  if (totalPaid > 0) return "Pending"; // or "Partial" if you want later
 
   return "Pending";
 }
@@ -68,17 +96,7 @@ const statusColors: Record<InvoiceStatus, string> = {
   Draft: "bg-gray-500/10 text-gray-400",
 };
 
-const revenueDataByRange: Record<"6m" | "12m" | "1m", number[]> = {
-  "6m": [30, 55, 45, 80, 65, 95],
-  "12m": [20, 35, 40, 55, 50, 60, 65, 70, 80, 75, 90, 95],
-  "1m": [40, 55, 60, 70],
-};
 
-function parseAmountToNumber(amount: string): number {
-  const cleaned = amount.replace(/[^\d.-]/g, "");
-  const num = Number(cleaned);
-  return Number.isNaN(num) ? 0 : num;
-}
 
 
 function isThisMonth(date?: any) {
@@ -101,7 +119,8 @@ export default function DashboardPage() {
   const router = useRouter();
   const { invoices, issueInvoice } = useInvoices();
 
-  const { plan, userData, displayCurrency, setDisplayCurrency } = useAuth();
+  const { plan, userData, accountCurrency } = useAuth();
+
 
 
   const invoiceCountThisMonth = useMemo(() => {
@@ -137,27 +156,28 @@ export default function DashboardPage() {
     let pendingCount = 0;
     let pendingAmount = 0;
     let paidCount = 0;
+    let overdueCount = 0;
     const clientSet = new Set<string>();
 
-    invoices
-      .filter((inv) => inv.currency === displayCurrency)
-      .forEach((inv) => {
+    invoices.forEach((inv) => {
+      if (!isValidRevenueInvoice(inv)) return;
 
-        const amt = inv.normalizedAmount ?? parseAmountToNumber(inv.amount);
+      const amt = (inv.normalizedAmount || 0) / 100;
 
+      clientSet.add(inv.client);
 
+      const status = computeInvoiceStatus(inv);
 
+      if (status === "Paid") {
         totalRevenue += amt;
-        clientSet.add(inv.client);
-
-        if (getInvoiceStatus(inv) === "Pending") {
-          pendingCount++;
-          pendingAmount += amt;
-        }
-        else if (getInvoiceStatus(inv) === "Paid") {
-          paidCount++;
-        }
-      });
+        paidCount++;
+      } else if (status === "Overdue") {
+        overdueCount++;
+      } else {
+        pendingCount++;
+        pendingAmount += amt;
+      }
+    });
 
     return {
       totalRevenue,
@@ -165,8 +185,9 @@ export default function DashboardPage() {
       pendingAmount,
       paidCount,
       activeClients: clientSet.size,
+      overdueCount,
     };
-  }, [invoices, displayCurrency]);
+  }, [invoices]);
 
 
 
@@ -182,7 +203,7 @@ export default function DashboardPage() {
       const matchesStatus =
         statusFilter === "All"
           ? true
-          : getInvoiceStatus(inv) === statusFilter;
+          : computeInvoiceStatus(inv) === statusFilter;
       return matchesSearch && matchesStatus;
     });
   }, [invoices, search, statusFilter]);
@@ -196,16 +217,18 @@ export default function DashboardPage() {
 
   /* ---- NEW: safer PDF export using hidden iframe (improved) ---- */
   function exportInvoiceAsPDF(inv: Invoice) {
+    const numericAmount = (inv.normalizedAmount || 0) / 100;
+
     const printable = buildPrintableHTML({
       id: inv.id,
       client: inv.client,
       date: inv.date,
       lineItems: (inv as any).meta?.lineItems ?? [],
-      subtotal: parseAmountToNumber(inv.amount),
+      subtotal: numericAmount,
       taxAmount: 0,
-      total: parseAmountToNumber(inv.amount),
+      total: numericAmount,
       notes: (inv as any).meta?.notes ?? "",
-      currency: inv.currency || displayCurrency, // IMPORTANT
+      currency: accountCurrency,
     });
 
     exportToPDFUsingIframe(printable);
@@ -316,28 +339,29 @@ export default function DashboardPage() {
     }
 
     // Add invoice values
-    invoices
-      .filter((inv) => inv.currency === displayCurrency)
-      .forEach((inv) => {
+    invoices.forEach((inv) => {
 
-        const date = inv.createdAt?.toDate
-          ? inv.createdAt.toDate()
-          : new Date(inv.createdAt || inv.date);
+      if (!isValidRevenueInvoice(inv)) return;
 
-        if (isNaN(date.getTime())) return;
+      const date = inv.createdAt?.toDate
+        ? inv.createdAt.toDate()
+        : new Date(inv.createdAt || inv.date);
 
-        const month = date.getMonth() + 1;
-        const year = date.getFullYear();
+      if (isNaN(date.getTime())) return;
 
-        const bucket = buckets.find(
-          (b) => b.month === month && b.year === year
-        );
+      const month = date.getMonth() + 1;
+      const year = date.getFullYear();
 
-        if (bucket) {
-          const numericAmount = inv.normalizedAmount ?? parseAmountToNumber(inv.amount);
-          bucket.value += numericAmount;
-        }
-      });
+      const bucket = buckets.find(
+        (b) => b.month === month && b.year === year
+      );
+
+      if (bucket) {
+        const numericAmount = (inv.normalizedAmount || 0) / 100;
+
+        bucket.value += numericAmount;
+      }
+    });
 
 
     // ✅ Trim empty months (Stripe-style)
@@ -357,7 +381,7 @@ export default function DashboardPage() {
 
     const trimmedBuckets =
       firstNonZeroIndex === -1
-        ? cleanedBuckets
+        ? buckets //  fallback to original data
         : cleanedBuckets.slice(Math.max(0, firstNonZeroIndex - 1));
 
 
@@ -383,7 +407,7 @@ export default function DashboardPage() {
         realValue: b.value, //  important for tooltip
       };
     });
-  }, [invoices, revenueRange, displayCurrency]);
+  }, [invoices, revenueRange, accountCurrency]);
 
 
 
@@ -393,21 +417,21 @@ export default function DashboardPage() {
     const last = Number(data[data.length - 1].value || 0);
     const prev = Number(data[data.length - 2].value || 0);
 
-    // 🚀 No previous revenue
+    // No previous revenue
     if (prev === 0 && last > 0) return "new";
 
-    // 🚀 Too small baseline
-    if (prev < 1000) return "new";
+    // Too small baseline
+    if (prev < 10) return "new";
 
     const growth = ((last - prev) / prev) * 100;
 
-    // 🚀 EXTREME spike → treat as new (Stripe behavior)
+    // EXTREME spike → treat as new (Stripe behavior)
     if (growth > 300) return "new";
 
     return Number(growth.toFixed(1));
   };
 
-  const currentRevenue = revenueChartData.at(-1)?.realValue ?? 0;
+  const currentRevenue = revenueChartData.at(-1)?.value ?? 0;
 
 
   const completedData = revenueChartData.filter((d) => !d.isCurrent);
@@ -521,7 +545,7 @@ export default function DashboardPage() {
 
                   <StatCard
                     label="Total Revenue"
-                    value={formatCurrency(stats.totalRevenue, displayCurrency)}
+                    value={formatCurrency(stats.totalRevenue, accountCurrency)}
                     subLabel="From all invoices"
                     trend="+ Live"
                   />
@@ -530,7 +554,7 @@ export default function DashboardPage() {
                     value={String(stats.pendingCount)}
                     subLabel={
                       stats.pendingAmount
-                        ? `${formatCurrency(stats.pendingAmount, displayCurrency)} pending`
+                        ? `${formatCurrency(stats.pendingAmount, accountCurrency)} pending`
                         : "No pending amount"
                     }
                     trend="Updated"
@@ -547,6 +571,14 @@ export default function DashboardPage() {
                     subLabel="Unique billed"
                     trend="Growing"
                   />
+
+                  <StatCard
+                    label="Overdue"
+                    value={String(stats.overdueCount)}
+                    subLabel="Require attention"
+                    trend="Critical"
+                  />
+
                 </div>
               </div>
 
@@ -576,7 +608,7 @@ export default function DashboardPage() {
                     {/* 🔥 HERO METRIC */}
                     <div className="mt-3 flex items-baseline gap-3">
                       <span className="text-2xl font-semibold text-white">
-                        {formatCurrency(currentRevenue, displayCurrency)}
+                        {formatCurrency(currentRevenue, accountCurrency)}
                       </span>
 
                       {typeof growth === "number" && growth > 0 && (
@@ -601,29 +633,6 @@ export default function DashboardPage() {
 
                   </div>
 
-
-
-                  <div className="flex gap-2 mr-3">
-                    <button
-                      onClick={() => setDisplayCurrency("INR")}
-                      className={`px-3 py-1 rounded-lg text-xs border ${displayCurrency === "INR"
-                        ? "bg-violet-600 text-white border-violet-500"
-                        : "border-white/10 text-slate-400 hover:bg-white/5"
-                        }`}
-                    >
-                      INR
-                    </button>
-
-                    <button
-                      onClick={() => setDisplayCurrency("USD")}
-                      className={`px-3 py-1 rounded-lg text-xs border ${displayCurrency === "USD"
-                        ? "bg-violet-600 text-white border-violet-500"
-                        : "border-white/10 text-slate-400 hover:bg-white/5"
-                        }`}
-                    >
-                      USD
-                    </button>
-                  </div>
 
 
                   <select
@@ -693,7 +702,7 @@ export default function DashboardPage() {
                           const isCurrent = props.payload?.isCurrent;
                           const real = props.payload?.realValue ?? value;
 
-                          return `${isCurrent ? "So far: " : ""}${formatCurrency(Number(real), displayCurrency)}`
+                          return `${isCurrent ? "So far: " : ""}${formatCurrency(Number(real) / 100, accountCurrency)}`
                         }}
                       />
 
@@ -830,13 +839,14 @@ export default function DashboardPage() {
 
                           <td className="py-2 pr-4">
                             {formatCurrency(
-                              inv.normalizedAmount ?? parseAmountToNumber(inv.amount),
-                              inv.currency || displayCurrency
-                            )}
+                              (inv.normalizedAmount || 0) / 100,
+                              accountCurrency
+                            )
+                            }
                           </td>
                           <td className="py-2 pr-4">
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] ${statusColors[getInvoiceStatus(inv)]}`}>
-                              {getInvoiceStatus(inv)}
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] ${statusColors[computeInvoiceStatus(inv)]}`}>
+                              {computeInvoiceStatus(inv)}
                             </span>
                           </td>
                           <td className="py-2 text-slate-400 text-[11px]">{inv.date}</td>
@@ -1054,8 +1064,7 @@ function buildPrintableHTML({
 
     <div class="totals">
       <div>Subtotal: <strong>${formatCurrency(subtotal, currency)}</strong></div>
-      <div>Tax: <strong>${formatCurrency(taxAmount, currency)}
-}</strong></div>
+      <div>Tax: <strong>${formatCurrency(taxAmount, currency)}</strong></div>
       <div class="grand-total">Total: ${formatCurrency(total, currency)}</div>
     </div>
 

@@ -3,7 +3,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import InvoiceForm from "@/app/invoice-editor/components/invoice/InvoiceForm";
 import InvoicePreview from "@/app/invoice-editor/components/invoice/InvoicePreview";
-import { formatCurrencyINR } from "@/app/invoice-editor/hooks/useInvoiceEditor";
 import { useInvoiceEditor } from "./hooks/useInvoiceEditor";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useInvoices } from "@/app/providers/InvoiceProvider";
@@ -110,8 +109,6 @@ export default function InvoiceEditorPage() {
     clientEmail,
     setClientEmail,
 
-    status,
-    setStatus,
     date,
     setDate,
 
@@ -180,7 +177,6 @@ export default function InvoiceEditorPage() {
 
   const { showToast } = useToast();
 
-  const [paymentStatus, setPaymentStatus] = useState("unpaid");
 
   const [showStartPicker, setShowStartPicker] = useState(false);
 
@@ -251,10 +247,11 @@ export default function InvoiceEditorPage() {
 
   const { user, plan } = useAuth();
 
-  const currencySymbol = getCurrencySymbol(currency);
+  const currencySafe = (currency || "INR") as "INR" | "USD";
 
+  const currencySymbol = getCurrencySymbol(currencySafe);
   const formatNumber = (value: number) =>
-    formatCurrency(value, currency);
+    formatCurrency(value, currencySafe);
 
   function handlePrint() {
     if (!printRef.current) return;
@@ -373,7 +370,7 @@ export default function InvoiceEditorPage() {
 
       <p>Your invoice has been generated.</p>
 
-<p><strong>Total:</strong> ${currencySymbol}${formatNumber(total)}</p>
+<p><strong>Total:</strong> ${formatCurrency(total, currencySafe)}</p>
 
       <p>
         <a href="https://cosmi.vercel.app/invoice/${idToUse}">
@@ -671,7 +668,6 @@ export default function InvoiceEditorPage() {
           template: {
             client,
             clientEmail,
-            paymentStatus,
             lineItems,
             notes,
             taxRate,
@@ -733,8 +729,6 @@ export default function InvoiceEditorPage() {
           setClient={setClient}
           clientEmail={clientEmail}
           setClientEmail={setClientEmail}
-          status={status}
-          setStatus={setStatus}
           date={date}
           setDate={setDate}
           dueDate={dueDate}
@@ -751,7 +745,7 @@ export default function InvoiceEditorPage() {
           updateLine={updateLine}
           addLine={addLine}
           removeLine={removeLine}
-          subtotalFormatted={formatCurrencyINR(subtotal)}
+          subtotalFormatted={formatCurrency(subtotal, currencySafe)}
           onSave={handleSave}
           saving={saving}
           currency={currency}
@@ -859,7 +853,6 @@ export default function InvoiceEditorPage() {
             currency={currency}
             plan={plan}
             discount={discount}
-            status={status}
             payments={currentInvoice?.payments || []}
           />
         </div>

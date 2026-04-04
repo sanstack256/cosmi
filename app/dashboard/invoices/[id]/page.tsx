@@ -6,6 +6,10 @@ import { ArrowLeft } from "lucide-react";
 import { Invoice } from "@/app/providers/InvoiceProvider";
 import { useState } from "react";
 import { useToast } from "@/app/providers/ToastProvider";
+import { formatCurrency, getCurrencySymbol } from "@/app/utils/currency";
+
+
+
 
 
 /* ----------------------------------
@@ -83,12 +87,7 @@ function getStatusBadge(invoice: Invoice) {
     };
   }
 
-  if (invoice.paymentStatus === "partial") {
-    return {
-      label: "PARTIAL",
-      style: "bg-blue-500/10 text-blue-400 border border-blue-500/30",
-    };
-  }
+
 
   if (invoice.paymentStatus === "paid") {
     return {
@@ -97,12 +96,7 @@ function getStatusBadge(invoice: Invoice) {
     };
   }
 
-  if (invoice.paymentStatus === "overdue") {
-    return {
-      label: "OVERDUE",
-      style: "bg-rose-500/10 text-rose-400 border border-rose-500/30",
-    };
-  }
+
 
   return {
     label: "UNPAID",
@@ -112,7 +106,8 @@ function getStatusBadge(invoice: Invoice) {
 
 export default function InvoicePreviewPage() {
   const { showToast } = useToast();
-  const { id } = useParams();
+  const params = useParams();
+  const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const [showPaymentModal, setShowPaymentModal] = useState(false)
   const [paymentAmount, setPaymentAmount] = useState("")
   const [paymentMethod, setPaymentMethod] = useState("bank")
@@ -120,6 +115,7 @@ export default function InvoicePreviewPage() {
   const [error, setError] = useState("")
   const router = useRouter();
   const { invoices, recordPayment } = useInvoices();
+
 
 
   const invoice = invoices.find((i) => i.id === id);
@@ -132,17 +128,15 @@ export default function InvoicePreviewPage() {
     );
   }
 
-  const currency = invoice.currency;
-  const symbol = currency === "USD" ? "$" : "₹";
+  const currencySafe = (invoice.currency || "INR") as "INR" | "USD";
+  const symbol = getCurrencySymbol(currencySafe);
   const totalPaid =
-    invoice?.payments?.reduce(
-      (sum, p) => sum + p.amount,
+    (invoice?.payments?.reduce(
+      (sum, p) => sum + (Number(p.amount) || 0),
       0
-    ) || 0;
+    ) || 0) / 100;
 
-  const totalAmount = Number(
-    String(invoice?.amount || "0").replace(/[^0-9.-]+/g, "")
-  );
+  const totalAmount = (invoice.normalizedAmount || 0) / 100;
 
   const outstanding = Math.max(totalAmount - totalPaid, 0);
   const percentPaid = totalAmount > 0 ? Math.round((totalPaid / totalAmount) * 100) : 0;
@@ -151,17 +145,24 @@ export default function InvoicePreviewPage() {
 
   const paymentMarkers =
     invoice?.payments?.map((p) => {
-      runningTotal += p.amount
-      return (runningTotal / totalAmount) * 100
+      runningTotal += (p.amount || 0) / 100
+      return totalAmount > 0 ? (runningTotal / totalAmount) * 100 : 0;
     }) || []
 
 
   async function handleRecordPayment() {
 
     if (!invoice) return;
-    const amount = Number(paymentAmount);
+    const parsed = Number(paymentAmount);
 
-    if (amount > outstanding) {
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+      setError("Enter a valid amount");
+      return;
+    }
+
+    const amount = Math.round(parsed * 100);
+
+    if (amount > outstanding * 100) {
       setError("Payment exceeds outstanding balance");
       return;
     }
@@ -183,13 +184,6 @@ export default function InvoicePreviewPage() {
     showToast("Payment recorded successfully", "success");
   }
 
-  if (!invoice) {
-    return (
-      <div className="text-center text-slate-400 py-20">
-        Invoice not found.
-      </div>
-    );
-  }
 
   const isOverdue =
     invoice.lifecycle !== "cancelled" &&
@@ -203,11 +197,6 @@ export default function InvoicePreviewPage() {
     )
     : 0;
 
-  function formatMoney(value: number) {
-    return value.toLocaleString(
-      currency === "USD" ? "en-US" : "en-IN"
-    );
-  }
 
   return (
     <div className="min-h-full flex flex-col items-center">
@@ -236,10 +225,10 @@ export default function InvoicePreviewPage() {
                 setError("");
 
                 // 🚀 Currency-based flow (safe fallback for now)
-                if (currency === "INR") {
+                if (currencySafe === "INR") {
                   console.log("Razorpay flow");
                   setShowPaymentModal(true);
-                } else if (currency === "USD") {
+                } else if (currencySafe === "USD") {
                   console.log("PayPal flow");
                   setShowPaymentModal(true);
                 }
@@ -336,7 +325,7 @@ export default function InvoicePreviewPage() {
           <tbody>
             <tr className="border-b">
               <td className="py-4">Services Rendered</td>
-              <td className="text-right py-4">{invoice.amount}</td>
+              <td className="text-right py-4">{formatCurrency(totalAmount, currencySafe)}</td>
             </tr>
           </tbody>
         </table>
@@ -348,27 +337,27 @@ export default function InvoicePreviewPage() {
 
             <div className="flex justify-between">
               <span>Subtotal</span>
-              <span>{symbol} {formatMoney(totalAmount)}</span>
+              <span>{formatCurrency(totalAmount, currencySafe)}</span>
             </div>
 
             <div className="flex justify-between">
               <span>Paid</span>
               <span className="text-emerald-600">
-                {symbol} {formatMoney(totalPaid)}
+                {formatCurrency(totalPaid, currencySafe)}
               </span>
             </div>
 
             <div className="flex justify-between">
               <span>Outstanding</span>
               <span className="text-amber-600">
-                {symbol} {formatMoney(outstanding)}
+                {formatCurrency(outstanding, currencySafe)}
               </span>
             </div>
 
 
             <div className="flex justify-between font-semibold text-lg pt-2 border-t">
               <span>Total</span>
-              <span>{symbol} {formatMoney(totalAmount)}</span>
+              <span>{formatCurrency(totalAmount, currencySafe)}</span>
             </div>
 
           </div>
@@ -417,7 +406,7 @@ export default function InvoicePreviewPage() {
                 {/* tooltip */}
                 <div className="absolute bottom-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition bg-[#0f1020] text-xs text-white px-3 py-2 rounded-lg shadow-lg whitespace-nowrap">
 
-                  {symbol} {formatMoney(amount)}
+                  {formatCurrency((amount || 0) / 100, currencySafe)}
 
                 </div>
 
@@ -474,7 +463,7 @@ export default function InvoicePreviewPage() {
 
                   <div className="text-right">
                     <div className="text-emerald-400">
-                      {symbol} {formatMoney(p.amount)}
+                      {formatCurrency((p.amount || 0) / 100, currencySafe)}
                     </div>
 
                     <div className="text-xs text-slate-500">
@@ -559,7 +548,7 @@ export default function InvoicePreviewPage() {
 
                 <input
                   type="text"
-                  inputMode="numeric"
+                  inputMode="decimal"
                   placeholder="Amount"
                   value={paymentAmount}
                   onChange={(e) => {

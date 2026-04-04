@@ -33,6 +33,8 @@ type Invoice = {
     paymentStatus?: string;
 
     currency?: string;
+    normalizedAmount?: number;
+    exchangeRate?: number;
 
     meta?: {
         lineItems?: { qty: number; rate: number }[];
@@ -141,24 +143,28 @@ export default function PublicInvoicePage() {
 
                 // 🔒 AUTO CLOSE CHECK (CORRECT LOCATION)
 
-                const lineItems = (invoiceSnap.data()?.meta?.lineItems || []) as {
-                    qty: number;
-                    rate: number;
-                }[];
-
-                const subtotal = lineItems.reduce(
-                    (sum: number, item: any) => sum + item.qty * Number(item.rate || 0),
-                    0
-                );
-
                 const payments = invoiceData.payments || [];
 
                 const totalPaid = payments.reduce(
-                    (sum: number, p: any) => sum + p.amount,
+                    (sum: number, p: any) => sum + Math.round(p.amount),
                     0
                 );
 
-                const remaining = Math.max(subtotal - totalPaid, 0);
+                let total: number;
+
+                const data = invoiceSnap.data() as any;
+
+                if (Number.isFinite(data.normalizedAmount)) {
+                    total = data.normalizedAmount;
+                } else {
+                    total = (data.meta?.lineItems || []).reduce(
+                        (sum: number, item: any) => sum + item.qty * Number(item.rate || 0),
+                        0
+                    );
+                }
+
+                const remaining = Math.max(total - totalPaid, 0);
+
 
                 // 🔐 AUTO CLOSE CONDITION
                 if (publicData.autoCloseOnFullPayment && remaining === 0) {
@@ -191,21 +197,25 @@ export default function PublicInvoicePage() {
     React.useEffect(() => {
         if (!invoice) return;
 
-        const lineItems = invoice.meta?.lineItems || [];
-
-        const subtotal = lineItems.reduce(
-            (sum: number, item: any) => sum + item.qty * Number(item.rate || 0),
-            0
-        );
-
         const payments = invoice.payments || [];
 
         const totalPaid = payments.reduce(
-            (sum: number, p: any) => sum + p.amount,
+            (sum: number, p: any) => sum + Math.round(p.amount),
             0
         );
 
-        const remaining = Math.max(subtotal - totalPaid, 0);
+        let total: number;
+
+        if (Number.isFinite(invoice.normalizedAmount)) {
+            total = invoice.normalizedAmount as number;
+        } else {
+            total = (invoice.meta?.lineItems || []).reduce(
+                (sum: number, item: any) => sum + item.qty * Number(item.rate || 0),
+                0
+            );
+        }
+
+        const remaining = Math.max(Math.round(total - totalPaid), 0);
 
         // ✅ Only set if empty (first load)
         setPayAmount("");
@@ -314,27 +324,39 @@ export default function PublicInvoicePage() {
         rate: Number(item.rate || 0),
     }));
 
-    const subtotal = lineItems.reduce(
-        (sum: number, item: any) => sum + item.qty * Number(item.rate || 0),
-        0
-    );
 
-    const taxAmount = 0;
-    const total = subtotal + taxAmount;
+    let total: number;
+
+    if (Number.isFinite(invoice.normalizedAmount)) {
+        total = invoice.normalizedAmount as number;
+    } else {
+        total = (invoice.meta?.lineItems || []).reduce(
+            (sum: number, item: any) => sum + item.qty * Number(item.rate || 0),
+            0
+        );
+    }
+
 
     const payments = invoice.payments || [];
 
     const totalPaid = payments.reduce(
-        (sum: number, p: any) => sum + p.amount,
+        (sum: number, p: any) => sum + Math.round(p.amount),
         0
     );
 
 
     const remaining = Math.max(total - totalPaid, 0);
     const isFullyPaid = remaining === 0;
-    const progress = total > 0 ? (totalPaid / total) * 100 : 0;
+    const progress =
+        total > 0
+            ? Math.min(100, Math.round((totalPaid / total) * 100))
+            : 0;
 
-    const numericAmount = Math.floor(Number(payAmount || 0));
+    const numericAmount = (() => {
+        const parsed = Number(payAmount);
+        if (!Number.isFinite(parsed)) return 0;
+        return Math.floor(parsed);
+    })();
 
     const isValidAmount =
         numericAmount > 0 && numericAmount <= remaining;
@@ -443,8 +465,8 @@ export default function PublicInvoicePage() {
                                 clientAddress={invoice.clientAddress || ""}
                                 status={invoice.paymentStatus || "unpaid"}
                                 lineItems={lineItems || []}
-                                subtotal={subtotal}
-                                taxAmount={taxAmount}
+                                subtotal={total}
+                                taxAmount={0}
                                 total={total}
                                 currency={invoice.currency || "INR"}
                                 notes={invoice.meta?.notes || ""}

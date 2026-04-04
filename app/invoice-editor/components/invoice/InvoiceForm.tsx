@@ -24,9 +24,6 @@ type Props = {
   clientEmail: string;
   setClientEmail: (v: string) => void;
 
-  status: Invoice["paymentStatus"];
-  setStatus: (v: Invoice["paymentStatus"]) => void;
-
   date: string;
   setDate: (v: string) => void;
 
@@ -107,8 +104,6 @@ export default function InvoiceForm({
   setClient,
   clientEmail,
   setClientEmail,
-  status,
-  setStatus,
   date,
   setDate,
   dateRef,
@@ -157,7 +152,7 @@ export default function InvoiceForm({
   setLineItems,
 }: Props) {
 
-  
+
   const router = useRouter();
   const { clients, invoices } = useInvoices();
 
@@ -191,7 +186,6 @@ export default function InvoiceForm({
     : "";
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const statusRef = useRef<HTMLSelectElement>(null);
   const firstDescRef = useRef<HTMLInputElement>(null);
 
 
@@ -694,25 +688,6 @@ export default function InvoiceForm({
                   {dueContext}
                 </div>
               )}
-            </div>
-
-            {/* Status */}
-            <div className="space-y-1 mt-1">
-              <div className="space-y-1">
-                <label className="text-xs text-slate-400">Status</label>
-                <select
-                  value={status}
-                  onChange={(e) =>
-                    setStatus(e.target.value as Invoice["paymentStatus"])
-                  }
-                  className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white"
-                >
-                  <option value="unpaid">Unpaid</option>
-                  <option value="paid">Paid</option>
-                  <option value="partial">Partial</option>
-                  <option value="overdue">Overdue</option>
-                </select>
-              </div>
             </div>
 
 

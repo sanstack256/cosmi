@@ -8,22 +8,34 @@ import { Crown } from "lucide-react";
 import { db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { Repeat } from "lucide-react";
+import { formatCurrency } from "@/app/utils/currency";
 
 
-type PaymentStatus = "unpaid" | "paid" | "overdue";
+type PaymentStatus = "unpaid" | "paid";
 
+function getDerivedStatus(
+  inv: Invoice
+): "paid" | "pending" | "overdue" | "draft" {
+  if (inv.lifecycle === "draft") return "draft";
 
-function parseAmount(value: any): number {
-  if (!value) return 0;
-  if (typeof value === "number") return value;
-  return Number(String(value).replace(/[^0-9.-]+/g, "")) || 0;
+  if (inv.paymentStatus === "paid") return "paid";
+
+  const dueDate = new Date(inv.dueDate);
+  const now = new Date();
+
+  if (!isNaN(dueDate.getTime()) && dueDate < now) {
+    return "overdue";
+  }
+
+  return "pending";
 }
+
 
 export default function InvoicesPage() {
   const router = useRouter();
   const { invoices, cancelInvoice, updateInvoice, removeInvoice } = useInvoices();
   const searchParams = useSearchParams();
-  const { plan, user } = useAuth();
+  const { plan, user, userData } = useAuth();
 
   const isPro = plan === "pro";
 
@@ -96,23 +108,6 @@ export default function InvoicesPage() {
     router.push(`?${newParams.toString()}`);
   }
 
-  /* 🔥 Auto-overdue (only issued invoices) */
-  useEffect(() => {
-    invoices.forEach((inv) => {
-
-      if (
-        inv.lifecycle === "issued" &&
-        inv.paymentStatus !== "paid" &&
-        inv.paymentStatus !== "partial" &&
-        inv.paymentStatus !== "overdue" &&
-        inv.dueDate &&
-        new Date(inv.dueDate) < new Date()
-      ) {
-        updateInvoice(inv.id, { paymentStatus: "overdue" });
-      }
-
-    });
-  }, [invoices]);
 
 
   useEffect(() => {
@@ -157,18 +152,33 @@ export default function InvoicesPage() {
 
   /* ---------- Stats ---------- */
 
+  const baseCurrency = userData?.currency || "INR";
+
   const stats = invoices.reduce(
     (acc, inv) => {
-      const amount = parseAmount(inv.amount);
-      acc.totalRevenue += amount;
+      const currency = (inv.currency || "INR") as "INR" | "USD";
+      const normalized = inv.normalizedAmount || 0;
+      const rate = inv.exchangeRate || 1;
 
-      if (inv.paymentStatus === "unpaid") {
-        acc.pendingAmount += amount;
-        acc.pendingCount += 1;
+      const amount =
+        currency === baseCurrency
+          ? normalized / 100
+          : normalized / rate / 100;
+
+      if (inv.paymentStatus === "paid") {
+        acc.totalRevenue += amount;
+        acc.paidCount += 1;
+      } else if (inv.paymentStatus === "unpaid") {
+        const dueDate = new Date(inv.dueDate);
+        const now = new Date();
+
+        if (!isNaN(dueDate.getTime()) && dueDate < now) {
+          acc.overdueCount += 1;
+        } else {
+          acc.pendingAmount += amount;
+          acc.pendingCount += 1;
+        }
       }
-
-      if (inv.paymentStatus === "paid") acc.paidCount += 1;
-      if (inv.paymentStatus === "overdue") acc.overdueCount += 1;
 
       return acc;
     },
@@ -197,15 +207,18 @@ export default function InvoicesPage() {
   if (statusFilter === "unpaid") {
     filteredInvoices = invoices.filter(
       (inv) =>
-        inv.paymentStatus === "unpaid" ||
-        inv.paymentStatus === "partial"
+        inv.paymentStatus === "unpaid"
     );
   }
-
   if (statusFilter === "overdue") {
-    filteredInvoices = invoices.filter(
-      (inv) => inv.paymentStatus === "overdue"
-    );
+    filteredInvoices = invoices.filter((inv) => {
+      if (inv.paymentStatus !== "unpaid") return false;
+
+      const dueDate = new Date(inv.dueDate);
+      const now = new Date();
+
+      return !isNaN(dueDate.getTime()) && dueDate < now;
+    });
   }
 
   if (statusFilter === "paid") {
@@ -243,8 +256,8 @@ export default function InvoicesPage() {
     }
 
     if (sortKey === "amount") {
-      valA = parseAmount(a.amount);
-      valB = parseAmount(b.amount);
+      valA = a.normalizedAmount || 0;
+      valB = b.normalizedAmount || 0;
     }
 
     return sortOrder === "asc" ? valA - valB : valB - valA;
@@ -253,18 +266,19 @@ export default function InvoicesPage() {
 
   const getStatusStyle = (status: string) => {
     switch (status) {
-      case "partial":
-        return "bg-yellow-500/10 text-yellow-300 shadow-[0_0_12px_rgba(234,179,8,0.15)]";
       case "paid":
-        return "bg-emerald-500/10 text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.15)]";
-      case "unpaid":
-        return "bg-amber-500/10 text-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.15)]";
+        return "bg-emerald-500/10 text-emerald-400";
+      case "pending":
+        return "bg-amber-500/10 text-amber-400";
       case "overdue":
-        return "bg-rose-500/10 text-rose-400 shadow-[0_0_12px_rgba(244,63,94,0.15)]";
+        return "bg-rose-500/10 text-rose-400";
+      case "draft":
+        return "bg-gray-500/10 text-gray-400";
       default:
         return "";
     }
   };
+
 
   return (
     <div className="text-white">
@@ -298,13 +312,16 @@ export default function InvoicesPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <PremiumCard
           label="Total Revenue"
-          value={`₹ ${stats.totalRevenue.toLocaleString("en-IN")}`}
+          value={formatCurrency(stats.totalRevenue, userData?.currency || "INR")}
           accent="violet"
         />
         <PremiumCard
           label="Pending"
           value={`${stats.pendingCount}`}
-          sub={`₹ ${stats.pendingAmount.toLocaleString("en-IN")} pending`}
+          sub={`${formatCurrency(
+            stats.pendingAmount,
+            userData?.currency || "INR"
+          )} pending`}
           accent="amber"
         />
         <PremiumCard
@@ -423,10 +440,26 @@ bg-violet-500/10 text-violet-300 border border-violet-500/20 shadow-[0_0_10px_rg
                 <td className="px-6 py-4">{invoice.client}</td>
                 <td className="px-6 py-4">{invoice.date}</td>
                 <td className="px-6 py-4">
-                  ₹{" "}
-                  {parseAmount(invoice.amount).toLocaleString(
-                    "en-IN"
-                  )}
+                  {(() => {
+
+                    const currency = (invoice.currency || "INR") as "INR" | "USD";
+                    const baseCurrency = userData?.currency || "INR";
+
+                    const normalized = invoice.normalizedAmount || 0;
+                    const rate = invoice.exchangeRate || 1;
+
+                    
+                    if (!invoice.exchangeRate && currency !== baseCurrency) {
+                      console.warn("Missing exchange rate for invoice:", invoice.id);
+                    }
+
+                    const value =
+                      currency === baseCurrency
+                        ? normalized / 100
+                        : normalized / rate / 100;
+
+                    return formatCurrency(value, baseCurrency);
+                  })()}
                 </td>
 
                 <td
@@ -442,22 +475,11 @@ bg-violet-500/10 text-violet-300 border border-violet-500/20 shadow-[0_0_10px_rg
                       Cancelled
                     </span>
                   ) : (
-                    <select
-                      value={invoice.paymentStatus}
-                      onChange={(e) =>
-                        updateInvoice(invoice.id, {
-                          paymentStatus: e.target.value as PaymentStatus,
-                        })
-                      }
-                      className={`px-3 py-1 rounded-full text-xs font-semibold bg-black/30 border border-white/10 ${getStatusStyle(
-                        invoice.paymentStatus
-                      )}`}
-                    >
-                      <option value="unpaid">Unpaid</option>
-                      <option value="partial">Partial</option>
-                      <option value="paid">Paid</option>
-                      <option value="overdue">Overdue</option>
-                    </select>
+
+
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusStyle(getDerivedStatus(invoice))}`}>
+                      {getDerivedStatus(invoice)}
+                    </span>
                   )}
                 </td>
 

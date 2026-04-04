@@ -81,11 +81,19 @@ export default function ClientsPage() {
 
             let health = "good";
 
-            const hasOverdue = clientInvoices.some(
-                (inv) =>
-                    inv.lifecycle === "issued" &&
-                    inv.paymentStatus === "overdue"
-            );
+            const hasOverdue = clientInvoices.some((inv) => {
+                if (inv.lifecycle !== "issued") return false;
+
+                const totalPaid =
+                    inv.payments?.reduce((p, pay) => p + pay.amount, 0) || 0;
+
+                const isPaid = totalPaid >= parseAmount(inv.amount);
+
+                const isOverdue =
+                    new Date(inv.dueDate) < new Date() && !isPaid;
+
+                return isOverdue;
+            });
 
             if (hasOverdue) {
                 health = "risk";
