@@ -18,4 +18,15 @@ export function formatCurrency(
   ).format(value);
 }
 
+export function getLocale(currency: "INR" | "USD") {
+  switch (currency) {
+    case "USD":
+      return "en-US";
+    case "INR":
+      return "en-IN";
+    default:
+      return "en-US"; // safe fallback
+  }
+}
+
  

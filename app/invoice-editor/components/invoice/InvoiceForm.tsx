@@ -8,7 +8,7 @@ import { LineItem } from "@/app/invoice-editor/hooks/useInvoiceEditor";
 import { useInvoices } from "@/app/providers/InvoiceProvider";
 import { useRef, useEffect } from "react";
 import { Calendar } from "lucide-react";
-import { getCurrencySymbol, formatCurrency } from "@/app/utils/currency";
+import { getCurrencySymbol, getLocale } from "@/app/utils/currency";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { Crown } from "lucide-react";
 
@@ -42,6 +42,10 @@ type Props = {
 
   discount: number;
   setDiscount: (v: number) => void;
+
+  subtotal: number;
+  taxAmount: number;
+  total: number;
 
   notes: string;
   setNotes: (v: string) => void;
@@ -137,8 +141,10 @@ export default function InvoiceForm({
   removeLine,
 
   subtotalFormatted,
+  total,
   onSave,
   saving,
+  taxAmount,
 
   idToUse,
   onSendEmail,
@@ -245,15 +251,6 @@ export default function InvoiceForm({
   }
 
 
-  const subtotal = lineItems.reduce((sum, li) => {
-    const rate = Number(li.rate || 0);
-    return sum + li.qty * rate;
-  }, 0);
-
-  const taxAmount = Math.round((subtotal * taxRate) / 100);
-  const total = subtotal + taxAmount - discount;
-
-
   function getDueContext() {
     if (!date || !dueDate) return null;
 
@@ -313,7 +310,7 @@ export default function InvoiceForm({
 
           {/* LEFT: Invoice Info */}
           <div>
-            <div className="text-xs text-white/40 uppercase tracking-widest">
+            <div className="text-xs text-white/50 font-medium uppercase tracking-widest">
               Invoice
             </div>
 
@@ -351,7 +348,7 @@ export default function InvoiceForm({
               title={isIssued ? "Locked after issuing invoice" : ""}
               value={currency}
               onChange={(e) => setCurrency(e.target.value as "INR" | "USD")}
-              className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white"
+              className="w-full rounded-lg bg-white/5 border border-white/10 hover:bg-white/[0.03] px-3 py-2 text-sm text-white"
             >
               <option value="INR">INR (₹)</option>
               <option value="USD">USD ($)</option>
@@ -369,7 +366,7 @@ export default function InvoiceForm({
               : "border-white/5"}
   `}
         >
-          <h3 className="text-xs uppercase tracking-widest text-white/40 mb-4">
+          <h3 className="text-[11px] uppercase tracking-[0.2em] text-white/30 font-medium mb-4">
             Billing Details
           </h3>
 
@@ -497,7 +494,7 @@ export default function InvoiceForm({
             )}
 
             {isPro && showResults && search && (
-              <div className="absolute z-20 mt-2 w-full bg-[#0f0f18] border border-white/10 rounded-xl shadow-lg max-h-48 overflow-y-auto">
+              <div className="absolute z-20 mt-2 w-full bg-[#0f0f18] border border-white/10 hover:bg-white/[0.03] rounded-xl shadow-lg max-h-48 overflow-y-auto">
 
                 {filteredClients.map((c) => (
                   <div
@@ -575,7 +572,7 @@ export default function InvoiceForm({
                 className={`w-full rounded-lg bg-white/5 px-3 py-2 text-sm text-white transition focus:outline-none
   ${errors.clientEmail
                     ? "border border-rose-500/60 ring-2 ring-rose-500/30"
-                    : "border border-white/10 focus:ring-2 focus:ring-violet-500/40 focus:ring-offset-0"}
+                    : "border border-white/10 hover:bg-white/[0.03] focus:ring-2 focus:ring-violet-500/40 focus:ring-offset-0"}
 `}
               />
 
@@ -599,14 +596,14 @@ export default function InvoiceForm({
                 value={clientAddress}
                 onChange={(e) => setClientAddress(e.target.value)}
                 rows={2}
-                className={`w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:ring-2 focus:outline-none focus:ring-violet-500/50 transition ${lockStyle}`}
+                className={`w-full rounded-lg bg-white/5 border border-white/10 hover:bg-white/[0.03] px-3 py-2 text-sm text-white focus:ring-2 focus:outline-none focus:ring-violet-500/50 transition ${lockStyle}`}
               />
             </div>
 
           </div>
 
 
-          <h3 className="text-xs uppercase tracking-widest text-white/40 mt-6 mb-4">
+          <h3 className="text-[11px] uppercase tracking-[0.18em] text-white/30 font-medium font-medium mt-6 mb-4">
             Invoice Details
           </h3>
           <div className="grid grid-cols-2 gap-4">
@@ -634,7 +631,7 @@ export default function InvoiceForm({
                   className={`w-full rounded-lg bg-white/5 px-3 py-2 pr-10 text-sm text-white appearance-none transition focus:outline-none
   ${errors.date
                       ? "border border-rose-500/60 ring-2 ring-rose-500/30"
-                      : "border border-white/10 focus:ring-2 focus:ring-violet-500/40 focus:ring-offset-0"}
+                      : "border border-white/10 hover:bg-white/[0.03] focus:ring-2 focus:ring-violet-500/40 focus:ring-offset-0"}
   ${lockStyle}
 `}
                 />
@@ -645,7 +642,7 @@ export default function InvoiceForm({
                   </div>
                 )}
 
-                <Calendar className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
+                <Calendar className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50 font-medium" />
               </div>
             </div>
 
@@ -670,7 +667,7 @@ export default function InvoiceForm({
                   className={`w-full rounded-lg bg-white/5 px-3 py-2 pr-10 text-sm text-white appearance-none transition focus:outline-none
   ${errors.dueDate
                       ? "border border-rose-500/60 ring-2 ring-rose-500/30"
-                      : "border border-white/10 focus:ring-2 focus:ring-violet-500/40 focus:ring-offset-0"}
+                      : "border border-white/10 hover:bg-white/[0.03] focus:ring-2 focus:ring-violet-500/40 focus:ring-offset-0"}
 `}
                 />
 
@@ -680,11 +677,11 @@ export default function InvoiceForm({
                   </div>
                 )}
 
-                <Calendar className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
+                <Calendar className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50 font-medium" />
               </div>
 
               {dueContext && (
-                <div className="text-[11px] text-white/40 mt-1">
+                <div className="text-[11px] text-white/50 font-medium mt-1">
                   {dueContext}
                 </div>
               )}
@@ -694,14 +691,14 @@ export default function InvoiceForm({
           </div>
         </div>
       </div>
-      <div className={`bg-[#0f0f18] border rounded-2xl p-5 space-y-4 transition
+      <div className={`mt-6 bg-[#0f0f18] border rounded-2xl p-5 space-y-4 transition
         ${errors.lineItems || highlightSection === "lineItems"
           ? "border-rose-500/50 ring-1 ring-rose-500/30"
           : "border-white/5"}`}>
 
         {/* LINE ITEMS */}
         <div className="space-y-3">
-          <div className="text-xs uppercase tracking-widest text-white/50">
+          <div className="text-[11px] uppercase tracking-[0.18em] text-white/30 font-medium">
             Line Items <span className="text-red-400">*</span>
           </div>
 
@@ -713,7 +710,7 @@ export default function InvoiceForm({
         </div>
 
         {/* Column headers */}
-        <div className="grid grid-cols-12 gap-2 px-2 text-xs text-white/40 mb-2">
+        <div className="grid grid-cols-12 gap-2 px-2 text-xs text-white/50 font-medium mb-2">
           <div className="col-span-5">Description</div>
           <div className="col-span-2 text-center">Qty</div>
           <div className="col-span-2 text-right">Rate</div>
@@ -723,7 +720,7 @@ export default function InvoiceForm({
 
         <div className="space-y-3">
           {lineItems.length === 0 && (
-            <div className="text-sm text-white/40 text-center py-8 border border-dashed border-white/10 rounded-xl bg-white/[0.02]">
+            <div className="text-sm text-white/50 font-medium text-center py-8 border border-dashed border-white/10 rounded-xl bg-white/[0.02]">
               No items yet. Add your first service or product.
             </div>
           )}
@@ -735,7 +732,7 @@ export default function InvoiceForm({
             return (
               <div
                 key={idx}
-                className="grid grid-cols-12 gap-2 items-center bg-white/5 border border-white/5 rounded-xl px-2 py-2 hover:border-white/10 focus-within:border-violet-500/30 transition-all duration-200 hover:scale-[1.01]"
+                className="grid grid-cols-12 gap-2 items-center bg-transparent border border-white/10 hover:bg-white/[0.03] rounded-xl px-3 py-2 transition-all duration-200 hover:border-white/20 focus-within:border-violet-500/40"
               >
                 {/* Description */}
                 <input
@@ -749,7 +746,7 @@ export default function InvoiceForm({
                     updateLine(idx, { desc: e.target.value });
                     if (errors.lineItems) setErrors(prev => ({ ...prev, lineItems: false }));
                   }}
-                  className="col-span-5 w-full rounded-md bg-transparent px-2 py-1 text-sm text-white focus:outline-none focus:ring-1 focus:ring-violet-500"
+                  className="col-span-5 w-full px-3 py-2 rounded-lg bg-transparent border border-white/10 hover:bg-white/[0.03] text-sm text-white focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500"
                 />
 
                 {/* Quantity */}
@@ -764,7 +761,7 @@ export default function InvoiceForm({
                     updateLine(idx, { qty: Number(e.target.value) || 1 });
                     if (errors.lineItems) setErrors(prev => ({ ...prev, lineItems: false }));
                   }}
-                  className="col-span-2 w-full text-center rounded-md bg-transparent px-2 py-1 text-sm text-white focus:outline-none focus:ring-1 focus:ring-violet-500"
+                  className="col-span-2 w-full px-3 py-2 rounded-lg bg-transparent border border-white/10 hover:bg-white/[0.03] text-sm text-white focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500"
                 />
 
                 {/* Rate */}
@@ -803,12 +800,12 @@ export default function InvoiceForm({
                     updateLine(idx, { rate: e.target.value });
                     if (errors.lineItems) setErrors(prev => ({ ...prev, lineItems: false }));
                   }}
-                  className="col-span-2 w-full text-right rounded-md bg-transparent px-2 py-1 text-sm text-white focus:outline-none focus:ring-1 focus:ring-violet-500 "
+                  className="col-span-2 w-full px-3 py-2 rounded-lg bg-transparent border border-white/10 hover:bg-white/[0.03] text-sm text-white focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500"
                 />
 
                 {/* Amount (READ ONLY) */}
                 <div className="col-span-2 text-right text-sm text-white/80 font-medium px-2">
-                  {currencySymbol}{amount.toLocaleString(currency === "USD" ? "en-US" : "en-IN")}
+                  {currencySymbol}{amount.toLocaleString(getLocale(currency))}
                 </div>
 
                 {/* Remove */}
@@ -829,7 +826,7 @@ export default function InvoiceForm({
           disabled={isIssued}
           title={isIssued ? "Locked after issuing invoice" : ""}
           onClick={addLine}
-          className="mt-4 px-4 py-2 rounded-lg bg-violet-500 hover:bg-violet-600 text-black text-sm font-semibold transition no-print"
+          className="mt-4 px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold transition-all duration-150 active:scale-[0.98] shadow-[0_0_20px_rgba(124,58,237,0.25)]"
         >
           + Add line item
         </button>
@@ -849,7 +846,7 @@ export default function InvoiceForm({
                 placeholder="0"
                 onKeyDown={focusNext}
                 onChange={(e) => setTaxRate(Number(e.target.value))}
-                className={`w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none ${lockStyle}`} />
+                className={`w-full rounded-lg bg-white/5 border border-white/10 hover:bg-white/[0.03] px-3 py-2 text-sm text-white focus:outline-none ${lockStyle}`} />
             </div>
 
             <div className="space-y-1">
@@ -863,7 +860,7 @@ export default function InvoiceForm({
                 placeholder="0"
                 onKeyDown={focusNext}
                 onChange={(e) => setDiscount(Number(e.target.value))}
-                className={`w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none ${lockStyle}`}
+                className={`w-full rounded-lg bg-white/5 border border-white/10 hover:bg-white/[0.03] px-3 py-2 text-sm text-white focus:outline-none ${lockStyle}`}
               />
             </div>
 
@@ -877,14 +874,14 @@ export default function InvoiceForm({
               onKeyDown={focusNext}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
-              className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-violet-500/40 focus:ring-offset-0 transition focus:outline-none"
+              className="w-full rounded-lg bg-white/5 border border-white/10 hover:bg-white/[0.03] px-3 py-2 text-sm text-white focus:ring-2 focus:ring-violet-500/40 focus:ring-offset-0 transition focus:outline-none"
             />
           </div>
 
           <div className="mt-8 space-y-6 no-print">
 
             {/* ===== TOTALS CARD ===== */}
-            <div className="ml-auto w-full max-w-sm rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-3">
+            <div className="ml-auto w-full max-w-sm rounded-2xl border border-violet-500/20 bg-gradient-to-br from-[#0b0b12] to-[#111124] p-6 space-y-4 shadow-[0_0_40px_rgba(124,58,237,0.15)]">
 
               {/* Subtotal */}
               <div className="flex justify-between text-sm text-white/70">
@@ -898,7 +895,7 @@ export default function InvoiceForm({
                   <span>Tax ({taxRate}%)</span>
                   <span>
                     {currencySymbol}
-                    {taxAmount.toLocaleString(currency === "USD" ? "en-US" : "en-IN")}
+                    {Number(taxAmount || 0).toLocaleString(getLocale(currency))}
                   </span>
                 </div>
               )}
@@ -919,14 +916,14 @@ export default function InvoiceForm({
               {/* Total */}
               <div className="flex justify-between items-center">
                 <span className="text-sm text-white/60">Total</span>
-                <span className="text-3xl font-bold tracking-tight text-white">
+                <span className="text-4xl font-semibold tracking-tight text-white drop-shadow-[0_0_20px_rgba(124,58,237,0.25)]">
                   {currencySymbol}
-                  {total.toLocaleString(currency === "USD" ? "en-US" : "en-IN")}
+                  {total.toLocaleString(getLocale(currency))}
                 </span>
               </div>
 
               {(taxRate > 0 || discount > 0) && (
-                <div className="text-[11px] text-white/40 mt-1 text-right">
+                <div className="text-[11px] text-white/50 font-medium mt-1 text-right">
                   {taxRate > 0 && `+${taxRate}% tax `}
                   {discount > 0 && `• -${currencySymbol}${discount}`}
                 </div>
@@ -1003,7 +1000,7 @@ export default function InvoiceForm({
           />
 
           {/* MODAL */}
-          <div className="relative w-full max-w-md rounded-2xl border border-white/10 bg-[#0b0b12] p-6 shadow-2xl">
+          <div className="relative w-full max-w-md rounded-2xl border border-white/10 hover:bg-white/[0.03] bg-transparent p-6 shadow-2xl">
 
             <div className="text-lg font-semibold text-white mb-2">
               Save clients & auto-fill invoices

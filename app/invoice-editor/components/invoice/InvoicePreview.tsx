@@ -95,9 +95,9 @@ export default function InvoicePreview({
   const safeDiscount = Number(discount || 0);
 
   const totalPaid = (payments || []).reduce(
-    (sum, p) => sum + Number(p.amount || 0),
-    0
-  );
+  (sum, p) => sum + Number(p.amount || 0),
+  0
+);
 
   const remaining = Math.max(safeTotal - totalPaid, 0);
 

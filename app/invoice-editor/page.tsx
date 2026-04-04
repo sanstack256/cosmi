@@ -427,6 +427,10 @@ export default function InvoiceEditorPage() {
   }
 
   async function handleIssue() {
+    if (!currency) {
+      showToast("Currency is required");
+      return;
+    }
     if (saving) return;
     console.log("ISSUE CLICKED");
 
@@ -466,7 +470,6 @@ export default function InvoiceEditorPage() {
 
     // ❌ 3. Stop if any error
     if (Object.values(newErrors).some(Boolean)) {
-      showToast("Please fill all required fields");
 
       // Prevent client onBlur from interfering
       isValidating.current = true;
@@ -511,7 +514,7 @@ export default function InvoiceEditorPage() {
     // ALWAYS SAVE FIRST (single source of truth)
     try {
       setSaving(true);
-      const saved = await saveInvoice(showToast);
+      const saved = await saveInvoice();
 
       if (shouldUpsellClient) {
         showToast("Save clients & autofill with Pro");
@@ -550,45 +553,83 @@ export default function InvoiceEditorPage() {
   }
 
   async function handleSave() {
+    if (!currency) {
+      showToast("Currency is required");
+      return;
+    }
     if (saving) return;
 
-    if (!client.trim()) {
-      showToast("Client name is required");
-      return;
-    }
+    let newErrors = {
+      client: false,
+      clientEmail: false,
+      date: false,
+      dueDate: false,
+      lineItems: false,
+    };
 
-    if (!date) {
-      showToast("Invoice date is required");
-      return;
-    }
-
-    if (!dueDate) {
-      showToast("Due date is required");
-      return;
-    }
+    if (!client.trim()) newErrors.client = true;
+    if (!clientEmail.trim()) newErrors.clientEmail = true;
+    if (!date) newErrors.date = true;
+    if (!dueDate) newErrors.dueDate = true;
 
     if (!lineItems.length) {
-      showToast("Add at least one line item");
-      return;
+      newErrors.lineItems = true;
+    } else {
+      const hasInvalidItem = lineItems.some(
+        (item) =>
+          !item.desc.trim() ||
+          Number(item.qty) <= 0 ||
+          Number(item.rate || 0) <= 0
+      );
+
+      if (hasInvalidItem) newErrors.lineItems = true;
+    }
+
+    setErrors(newErrors);
+
+    if (Object.values(newErrors).some(Boolean)) {
+      isValidating.current = true;
+
+      setTimeout(() => {
+        let targetRef: React.RefObject<HTMLElement | null> | null = null;
+
+        if (newErrors.client) targetRef = clientRef;
+        else if (newErrors.clientEmail) targetRef = emailRef;
+        else if (newErrors.date) targetRef = dateRef;
+        else if (newErrors.dueDate) targetRef = dueDateRef;
+        else if (newErrors.lineItems) {
+          setHighlightSection("lineItems");
+          lineItemsRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+          setTimeout(() => setHighlightSection(null), 3000);
+          isValidating.current = false;
+          return;
+        }
+
+        if (targetRef?.current) {
+          targetRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+
+          setTimeout(() => {
+            targetRef.current?.focus();
+          }, 300);
+        } else {
+          isValidating.current = false;
+        }
+      });
+
+      return; // CRITICAL — STOP SAVE
     }
 
 
-
-    const hasInvalidItem = lineItems.some(
-      (item) =>
-        !item.desc.trim() ||
-        Number(item.qty) <= 0 ||
-        Number(item.rate || 0) <= 0
-    );
-
-    if (hasInvalidItem) {
-      showToast("All line items must have description, qty & rate");
-      return;
-    }
 
     try {
       setSaving(true);
-      const result = await saveInvoice(showToast);
+      const result = await saveInvoice();
 
       if (shouldUpsellClient) {
         showToast("Save clients & autofill with Pro");
@@ -596,6 +637,7 @@ export default function InvoiceEditorPage() {
       }
     } finally {
       setSaving(false);
+      showToast("Invoice saved");
     }
   }
 
@@ -606,7 +648,7 @@ export default function InvoiceEditorPage() {
     let finalInvoiceId = invoiceId;
 
     if (!finalInvoiceId) {
-      const saved = await saveInvoice(showToast);
+      const saved = await saveInvoice();
       finalInvoiceId = saved?.id;
     }
 
@@ -757,6 +799,9 @@ export default function InvoiceEditorPage() {
           setErrors={setErrors}
           isValidating={isValidating}
           setLineItems={setLineItems}
+          total={total}
+          subtotal={subtotal}
+          taxAmount={taxAmount}
         />
 
       </div>

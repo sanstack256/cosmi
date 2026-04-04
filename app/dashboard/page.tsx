@@ -51,6 +51,15 @@ const SignOutButton = dynamic(() => import("../components/SignOutButton"), { ssr
    Helpers / small constants
 ----------------------------------------- */
 
+
+function parseAmount(value: any): number {
+  if (!value) return 0;
+  if (typeof value === "number") return value;
+  return Number(String(value).replace(/[^0-9.-]+/g, "")) || 0;
+}
+
+
+
 function isValidRevenueInvoice(inv: Invoice) {
   if (!inv) return false;
 
@@ -66,12 +75,14 @@ function isValidRevenueInvoice(inv: Invoice) {
 function computeInvoiceStatus(inv: Invoice): InvoiceStatus {
   if (inv.lifecycle === "draft") return "Draft";
 
-  const total = (inv.normalizedAmount || 0) / 100;
+  const total = parseAmount(inv.amount);
 
   const totalPaid = (inv.payments || []).reduce(
     (sum: number, p: any) => sum + Number(p.amount || 0),
     0
-  );
+  ) / 100;
+
+
 
   const remaining = Math.max(total - totalPaid, 0);
 
@@ -162,7 +173,7 @@ export default function DashboardPage() {
     invoices.forEach((inv) => {
       if (!isValidRevenueInvoice(inv)) return;
 
-      const amt = (inv.normalizedAmount || 0) / 100;
+      const amt = parseAmount(inv.amount);
 
       clientSet.add(inv.client);
 
@@ -217,7 +228,7 @@ export default function DashboardPage() {
 
   /* ---- NEW: safer PDF export using hidden iframe (improved) ---- */
   function exportInvoiceAsPDF(inv: Invoice) {
-    const numericAmount = (inv.normalizedAmount || 0) / 100;
+    const numericAmount = parseAmount(inv.amount);
 
     const printable = buildPrintableHTML({
       id: inv.id,
@@ -357,7 +368,7 @@ export default function DashboardPage() {
       );
 
       if (bucket) {
-        const numericAmount = (inv.normalizedAmount || 0) / 100;
+        const numericAmount = parseAmount(inv.amount);
 
         bucket.value += numericAmount;
       }
@@ -839,7 +850,7 @@ export default function DashboardPage() {
 
                           <td className="py-2 pr-4">
                             {formatCurrency(
-                              (inv.normalizedAmount || 0) / 100,
+                              parseAmount(inv.amount),
                               accountCurrency
                             )
                             }

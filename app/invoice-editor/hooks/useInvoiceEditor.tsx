@@ -54,7 +54,6 @@ export function useInvoiceEditor() {
 
   const { showToast } = useToast();
 
-
   const hasInitializedDuplicate = useRef(false);
 
   const { user, isPro } = useAuth();
@@ -114,12 +113,15 @@ export function useInvoiceEditor() {
       setCurrency(editingInvoice.currency);
     }
 
-    try {
-      const parsed = new Date(editingInvoice.dueDate);
-      if (!isNaN(parsed.getTime())) {
-        setDate(parsed.toISOString().slice(0, 10));
-      }
-    } catch { }
+    //  set invoice date
+    if (editingInvoice.date) {
+      setDate(editingInvoice.date);
+    }
+
+    // set due date
+    if (editingInvoice.dueDate) {
+      setDueDate(editingInvoice.dueDate);
+    }
 
     setNotes(editingInvoice.meta?.notes ?? "");
 
@@ -304,11 +306,7 @@ export function useInvoiceEditor() {
     }
   }
 
-  async function saveInvoice(
-
-
-    showToast: (msg: string) => void
-  ): Promise<any | null> {
+  async function saveInvoice(): Promise<{ id: string }> {
     try {
       console.log("COMPANY:", company);
       console.log("CLIENT EMAIL STATE:", clientEmail);
@@ -323,10 +321,10 @@ export function useInvoiceEditor() {
       const invoiceData: any = {
         client,
         clientEmail: clientEmail?.trim() || null,
-        amount: total,
+        amount: Number.isFinite(total) ? total : 0,
         date: date,
         dueDate,
-        currency: currency || company.currency || "INR",
+        currency: currency ?? company.currency ?? "INR",
 
         remindersSent: {
           d7: false,
@@ -349,20 +347,16 @@ export function useInvoiceEditor() {
 
       // 1. If editing existing invoice
       if (editingInvoice) {
-        const updated = await updateInvoice(editingInvoice.id, invoiceData);
-        showToast("Invoice updated");
-        return updated;
+        await updateInvoice(editingInvoice.id, invoiceData);
+        return { id: editingInvoice.id };
       }
 
       // 2. If already created once → update SAME draft
       if (createdInvoiceId) {
-        const updated = await updateInvoice(createdInvoiceId, invoiceData);
+        await updateInvoice(createdInvoiceId, invoiceData);
 
-        // 🔥 ENSURE PUBLIC LINK EXISTS
-        await ensurePublicLink(createdInvoiceId);
 
-        showToast("Invoice updated");
-        return updated;
+        return { id: createdInvoiceId };
       }
 
       // 3. First time → create new draft
@@ -391,14 +385,12 @@ export function useInvoiceEditor() {
         setShouldUpsellClient(true);
       }
 
-      showToast("Invoice saved");
 
-      return { ...created, id: invoiceId };
+      return { id: invoiceId };
 
     } catch (err) {
       console.error("SAVE ERROR:", err);
-      showToast(String(err));
-      return null;
+      throw err;
     }
   }
 
@@ -440,6 +432,7 @@ export function useInvoiceEditor() {
     subtotal,
     taxAmount,
     total,
+
 
     updateLine,
     addLine,

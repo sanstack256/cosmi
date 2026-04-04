@@ -30,47 +30,6 @@ function parseAmount(value: any): number {
 
 
 
-function ensureFinancialIntegrity(inv: unknown): Invoice | null {
-  if (!inv || typeof inv !== "object") return null;
-
-  const i = inv as Invoice;
-
-  // ✅ Currency must exist
-  if (!i.currency) {
-    console.error("Missing currency:", i.id);
-    return null;
-  }
-
-  // ✅ FIX legacy normalizedAmount
-  if (
-    typeof i.normalizedAmount !== "number" ||
-    !Number.isFinite(i.normalizedAmount) ||
-    i.normalizedAmount <= 0
-  ) {
-    const fallback = Math.round(parseAmount(i.amount) * 100);
-
-    if (!fallback || !Number.isFinite(fallback)) {
-      console.error("Invalid normalizedAmount:", {
-        id: i.id,
-        value: i.normalizedAmount,
-      });
-      return null;
-    }
-
-    i.normalizedAmount = fallback;
-  }
-
-  // ✅ FIX legacy exchangeRate
-  if (
-    typeof i.exchangeRate !== "number" ||
-    !Number.isFinite(i.exchangeRate) ||
-    i.exchangeRate <= 0
-  ) {
-    i.exchangeRate = 1;
-  }
-
-  return i;
-}
 
 /* ------------------------------
    Invoice Type
@@ -227,8 +186,7 @@ export function InvoiceProvider({ children }: { children: React.ReactNode }) {
           ...(d.data() as Omit<Invoice, "id">),
           id: d.id,
         }))
-        .map(ensureFinancialIntegrity)
-        .filter((inv): inv is Invoice => inv !== null);
+        .map((inv) => inv as Invoice);
 
       setInvoices(list);
     });
@@ -286,7 +244,6 @@ export function InvoiceProvider({ children }: { children: React.ReactNode }) {
     }
 
 
-    const fromCurrency = invoice.currency || baseCurrency;
 
     const invoicesRef = collection(db, "users", user.uid, "invoices");
     const newInvoiceRef = doc(invoicesRef);
@@ -306,59 +263,9 @@ export function InvoiceProvider({ children }: { children: React.ReactNode }) {
     });
 
 
-    async function getExchangeRate(from: string, to: string) {
-      if (from === to) return 1;
-
-      try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 5000);
-
-        const res = await fetch(
-          `https://api.exchangerate.host/convert?from=${from}&to=${to}`,
-          { signal: controller.signal }
-        );
-
-        clearTimeout(timeout);
-
-        const data = await res.json();
-        const rate = Number(data?.result);
-
-        if (!rate || !Number.isFinite(rate) || rate <= 0) {
-          throw new Error("Invalid rate");
-        }
-
-        return rate;
-      } catch (err) {
-        console.error("Exchange rate failed:", err);
-        console.warn("Exchange rate failed, using fallback");
-        return 1;
-      }
-    }
-
-    let rate = 1;
-
-    try {
-      rate = await getExchangeRate(fromCurrency, baseCurrency);
-    } catch (err) {
-      console.warn("Exchange fallback triggered:", err);
-      rate = 1;
-    }
-
-
-
-    const normalizedAmount = Math.round((cleanedAmount * rate) * 100);
-
-    if (!normalizedAmount || !Number.isFinite(normalizedAmount) || normalizedAmount <= 0) {
-      throw new Error("Invalid normalized amount");
-    }
-
 
     const payload = {
       ...invoice,
-
-      normalizedAmount,
-      exchangeRate: rate,
-      normalizedCurrency: baseCurrency,
 
       lifecycle: "draft",
       paymentStatus: "unpaid",
@@ -508,13 +415,9 @@ export function InvoiceProvider({ children }: { children: React.ReactNode }) {
       0
     );
 
-    const invoiceAmount = invoice.normalizedAmount;
+    const invoiceAmount = Math.round(parseAmount(invoice.amount) * 100);
 
-    if (
-      typeof invoiceAmount !== "number" ||
-      !Number.isFinite(invoiceAmount) ||
-      invoiceAmount <= 0
-    ) {
+    if (!Number.isFinite(invoiceAmount) || invoiceAmount <= 0) {
       throw new Error("Invalid invoice amount");
     }
 
