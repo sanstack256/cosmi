@@ -328,3 +328,12 @@ input[type="number"]::-webkit-inner-spin-button {
 input[type="number"] {
   -moz-appearance: textfield;
 }
+
+@keyframes pulseSoft {
+  0%, 100% {
+    box-shadow: 0 0 30px rgba(124,58,237,0.1);
+  }
+  50% {
+    box-shadow: 0 0 55px rgba(124,58,237,0.25);
+  }
+}

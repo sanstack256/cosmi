@@ -155,6 +155,7 @@ export default function InvoiceEditorPage() {
 
   const printRef = useRef<HTMLDivElement>(null);
   const clientRef = useRef<HTMLInputElement>(null);
+  const currencyRef = useRef<HTMLDivElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
   const dateRef = useRef<HTMLInputElement>(null);
   const dueDateRef = useRef<HTMLInputElement>(null);
@@ -169,13 +170,10 @@ export default function InvoiceEditorPage() {
 
   const [customDays, setCustomDays] = useState<number | "">("");
 
-  const [openUpwards, setOpenUpwards] = useState(false);
-
-  const [endPickerUpwards, setEndPickerUpwards] = useState(false);
-
-  const [startPickerUpwards, setStartPickerUpwards] = useState(false);
 
   const { showToast } = useToast();
+
+  const [justSaved, setJustSaved] = useState(false);
 
 
   const [showStartPicker, setShowStartPicker] = useState(false);
@@ -198,13 +196,22 @@ export default function InvoiceEditorPage() {
   const [highlightSection, setHighlightSection] = useState<string | null>(null);
 
 
+  type ErrorsType = {
+    client: boolean;
+    clientEmail: boolean;
+    date: boolean;
+    dueDate: boolean;
+    lineItems: boolean;
+    currency: boolean;
+  };
 
-  const [errors, setErrors] = useState({
+  const [errors, setErrors] = useState<ErrorsType>({
     client: false,
     clientEmail: false,
     date: false,
     dueDate: false,
     lineItems: false,
+    currency: false,
   });
 
 
@@ -247,7 +254,7 @@ export default function InvoiceEditorPage() {
 
   const { user, plan } = useAuth();
 
-  const currencySafe = (currency || "INR") as "INR" | "USD";
+const currencySafe = (currency || "USD") as "INR" | "USD";
 
   const currencySymbol = getCurrencySymbol(currencySafe);
   const formatNumber = (value: number) =>
@@ -395,6 +402,18 @@ export default function InvoiceEditorPage() {
     }
   }
 
+  useEffect(() => {
+    if (currency) return; // don't override user choice
+
+    const locale = navigator.language;
+
+    if (locale.includes("IN")) {
+      setCurrency("INR");
+    } else {
+      setCurrency("USD");
+    }
+  }, []);
+
 
   /* ------------------------------------------
      Validation Before Save
@@ -427,10 +446,7 @@ export default function InvoiceEditorPage() {
   }
 
   async function handleIssue() {
-    if (!currency) {
-      showToast("Currency is required");
-      return;
-    }
+
     if (saving) return;
     console.log("ISSUE CLICKED");
 
@@ -443,6 +459,7 @@ export default function InvoiceEditorPage() {
       date: false,
       dueDate: false,
       lineItems: false,
+      currency: !currency,
     };
 
     // Field checks
@@ -482,6 +499,15 @@ export default function InvoiceEditorPage() {
         else if (newErrors.clientEmail) targetRef = emailRef;
         else if (newErrors.date) targetRef = dateRef;
         else if (newErrors.dueDate) targetRef = dueDateRef;
+        else if (newErrors.currency) {
+          currencyRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+
+          isValidating.current = false;
+          return;
+        }
         else if (newErrors.lineItems) {
           setHighlightSection("lineItems");
           lineItemsRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -553,10 +579,7 @@ export default function InvoiceEditorPage() {
   }
 
   async function handleSave() {
-    if (!currency) {
-      showToast("Currency is required");
-      return;
-    }
+
     if (saving) return;
 
     let newErrors = {
@@ -565,6 +588,7 @@ export default function InvoiceEditorPage() {
       date: false,
       dueDate: false,
       lineItems: false,
+      currency: !currency,
     };
 
     if (!client.trim()) newErrors.client = true;
@@ -597,6 +621,15 @@ export default function InvoiceEditorPage() {
         else if (newErrors.clientEmail) targetRef = emailRef;
         else if (newErrors.date) targetRef = dateRef;
         else if (newErrors.dueDate) targetRef = dueDateRef;
+        else if (newErrors.currency) {
+          currencyRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+
+          isValidating.current = false;
+          return;
+        }
         else if (newErrors.lineItems) {
           setHighlightSection("lineItems");
           lineItemsRef.current?.scrollIntoView({
@@ -638,6 +671,8 @@ export default function InvoiceEditorPage() {
     } finally {
       setSaving(false);
       showToast("Invoice saved");
+      setJustSaved(true);
+      setTimeout(() => setJustSaved(false), 1500);
     }
   }
 
@@ -797,11 +832,13 @@ export default function InvoiceEditorPage() {
           highlightSection={highlightSection}
           errors={errors}
           setErrors={setErrors}
+          currencyRef={currencyRef}
           isValidating={isValidating}
           setLineItems={setLineItems}
           total={total}
           subtotal={subtotal}
           taxAmount={taxAmount}
+          justSaved={justSaved}
         />
 
       </div>
