@@ -224,9 +224,9 @@ export default function InvoiceForm({
     previousClientCurrency !== currency;
 
 
-const isValidEmail = (email: string) => {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-};
+  const isValidEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
 
 
   const handlePrint = () => {
@@ -629,18 +629,17 @@ const isValidEmail = (email: string) => {
               <div className="absolute z-20 mt-2 w-full bg-[#0f0f18] border border-white/10
 rounded-xl shadow-lg max-h-48 overflow-y-auto
 transition-all duration-150
-hover:bg-white/[0.04]">
+bg-[#0f0f18]">
 
                 {filteredClients.map((c) => (
                   <div
                     key={c.id}
-                    onClick={() => {
+                    onMouseDown={() => {
                       setClient(c.name);
                       setClientEmail(c.email || "");
                       setSearch("");
                       setShowResults(false);
 
-                      // 🔥 also trigger autofill on click
                       if (isPro) {
                         const lastInvoice = invoices
                           .filter(inv => inv.client.toLowerCase() === c.name.toLowerCase())
@@ -664,7 +663,7 @@ hover:bg-white/[0.04]">
                         }
                       }
                     }}
-                    className="px-4 py-2 text-sm hover:bg-white/5 cursor-pointer"
+                    className="px-3 py-2 text-sm text-white hover:bg-white/10 cursor-pointer rounded-md transition"
                   >
                     {c.name}
                   </div>
@@ -677,7 +676,7 @@ hover:bg-white/[0.04]">
                       setSearch("");
                       setShowResults(false);
                     }}
-                    className="px-4 py-2 text-sm text-violet-400 hover:bg-white/5 cursor-pointer border-t border-white/5"
+                    className="px-3 py-2 text-sm text-white hover:bg-white/10 cursor-pointer rounded-md transition"
                   >
                     + Create "{search}"
                   </div>
@@ -699,10 +698,16 @@ hover:bg-white/[0.04]">
                 type="email"
                 value={clientEmail}
                 onChange={(e) => {
-                  setClientEmail(e.target.value);
+                  const value = e.target.value;
+                  setClientEmail(value);
 
-                  if (errors.clientEmail) {
+                  if (errors.clientEmail && isValidEmail(value)) {
                     setErrors(prev => ({ ...prev, clientEmail: false }));
+                  }
+                }}
+                onBlur={() => {
+                  if (!clientEmail || !isValidEmail(clientEmail)) {
+                    setErrors(prev => ({ ...prev, clientEmail: true }));
                   }
                 }}
                 onKeyDown={focusNext}
@@ -716,10 +721,11 @@ hover:bg-white/[0.04]">
 
               {errors.clientEmail && (
                 <div className="text-[11px] text-rose-400 mt-1">
-                  Client email is required
+                  {!clientEmail
+                    ? "Client email is required"
+                    : "Enter a valid email address"}
                 </div>
               )}
-
 
             </div>
 
