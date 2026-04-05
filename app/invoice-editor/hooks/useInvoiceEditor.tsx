@@ -63,10 +63,19 @@ export function useInvoiceEditor() {
   /* ---------- Company ---------- */
 
   const [company, setCompany] = useState<Company>({});
-  const baseCurrency: "INR" | "USD" | null =
-    (company as any)?.currency || null;
+
+
+  const [previousClientCurrency, setPreviousClientCurrency] = useState<"INR" | "USD" | null>(null);
+
+
+  (company as any)?.currency || null;
   const [loadingCompany, setLoadingCompany] = useState(true);
   const [hasCompanyProfile, setHasCompanyProfile] = useState(false);
+  const [userTouchedCurrency, setUserTouchedCurrency] = useState(false);
+
+  const [currencySource, setCurrencySource] = useState<
+    "manual" | "client" | "company" | "edit" | null
+  >(null);
 
   /* ---------- Invoice ---------- */
 
@@ -77,7 +86,8 @@ export function useInvoiceEditor() {
 
   const [client, setClient] = useState("");
   const [clientEmail, setClientEmail] = useState("");
-  const [currency, setCurrency] = useState<"INR" | "USD">("INR")
+
+  const [currency, setCurrency] = useState<"INR" | "USD" | "">("");
 
 
 
@@ -101,6 +111,12 @@ export function useInvoiceEditor() {
   /* ------------------------------------------
      Load invoice when editing
   ------------------------------------------- */
+  useEffect(() => {
+    if (!editingInvoice) {
+      setUserTouchedCurrency(false);
+    }
+  }, [editingInvoice]);
+
 
   useEffect(() => {
     if (!editingInvoice) return;
@@ -111,6 +127,7 @@ export function useInvoiceEditor() {
 
     if (editingInvoice.currency) {
       setCurrency(editingInvoice.currency);
+      setCurrencySource("edit");
     }
 
     //  set invoice date
@@ -158,6 +175,7 @@ export function useInvoiceEditor() {
 
     if (source.currency) {
       setCurrency(source.currency);
+      setCurrencySource("edit"); // treat as existing data
     }
 
     // date → set as today (not copied)
@@ -207,7 +225,7 @@ export function useInvoiceEditor() {
 
           setCompany({
             ...companyData,
-            currency: companyData.currency || "INR", //  DEFAULT
+            currency: companyData.currency || null,
           });
 
 
@@ -316,6 +334,16 @@ export function useInvoiceEditor() {
         (c) => c.name.toLowerCase() === client.toLowerCase()
       );
 
+      if (!existingClient && client.trim()) {
+        try {
+          await addClient({
+            name: client.trim(),
+            email: clientEmail?.trim() || "",
+          });
+        } catch (err) {
+          console.error("Failed to save client:", err);
+        }
+      }
 
 
       const invoiceData: any = {
@@ -324,7 +352,7 @@ export function useInvoiceEditor() {
         amount: Number.isFinite(total) ? total : 0,
         date: date,
         dueDate,
-        currency: currency ?? company.currency ?? "INR",
+        currency: currency || company.currency || "INR",
 
         remindersSent: {
           d7: false,
@@ -426,6 +454,8 @@ export function useInvoiceEditor() {
     lineItems,
     currency,
     setCurrency,
+    currencySource,
+    setCurrencySource,
 
     company,
 
@@ -447,5 +477,10 @@ export function useInvoiceEditor() {
     setShouldUpsellClient,
 
     setLineItems,
+    userTouchedCurrency,
+    setUserTouchedCurrency,
+    setPreviousClientCurrency,
+    previousClientCurrency,
+
   };
 }

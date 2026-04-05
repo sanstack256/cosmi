@@ -68,6 +68,7 @@ type Props = {
   payments?: any[];
   discount?: number;
   currency?: string;
+  status?: string;
 };
 
 export default function InvoicePreview({
@@ -85,6 +86,7 @@ export default function InvoicePreview({
   plan,
   discount,
   currency,
+  status,
   payments,
 }: Props) {
 
@@ -95,28 +97,28 @@ export default function InvoicePreview({
   const safeDiscount = Number(discount || 0);
 
   const totalPaid = (payments || []).reduce(
-  (sum, p) => sum + Number(p.amount || 0),
-  0
-);
+    (sum, p) => sum + Number(p.amount || 0),
+    0
+  );
 
   const remaining = Math.max(safeTotal - totalPaid, 0);
 
   const now = new Date();
   const isOverdue = dueDate ? new Date(dueDate) < now : false;
 
-  let computedStatus = "pending";
-
-  if (safeTotal === 0) {
-    computedStatus = "draft";
-  } else if (remaining === 0) {
-    computedStatus = "paid";
-  } else if (isOverdue) {
-    computedStatus = totalPaid > 0 ? "partial" : "overdue";
-  } else if (totalPaid > 0) {
-    computedStatus = "partial";
-  } else {
-    computedStatus = "pending";
-  }
+  const computedStatus =
+    status ||
+    (safeTotal === 0
+      ? "draft"
+      : remaining === 0
+        ? "paid"
+        : isOverdue
+          ? totalPaid > 0
+            ? "partial"
+            : "overdue"
+          : totalPaid > 0
+            ? "partial"
+            : "pending");
 
 
   return (

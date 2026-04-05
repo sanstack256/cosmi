@@ -133,7 +133,11 @@ export default function InvoiceEditorPage() {
 
     currency,
     setCurrency,
+    setCurrencySource,
+    currencySource,
 
+    userTouchedCurrency,
+    setUserTouchedCurrency,
     updateLine,
     addLine,
     removeLine,
@@ -146,6 +150,8 @@ export default function InvoiceEditorPage() {
     shouldUpsellClient,
     setShouldUpsellClient,
 
+    previousClientCurrency,
+setPreviousClientCurrency,
     setLineItems,
   } = useInvoiceEditor();
 
@@ -254,7 +260,7 @@ export default function InvoiceEditorPage() {
 
   const { user, plan } = useAuth();
 
-const currencySafe = (currency || "USD") as "INR" | "USD";
+  const currencySafe = (currency || "USD") as "INR" | "USD";
 
   const currencySymbol = getCurrencySymbol(currencySafe);
   const formatNumber = (value: number) =>
@@ -402,17 +408,6 @@ const currencySafe = (currency || "USD") as "INR" | "USD";
     }
   }
 
-  useEffect(() => {
-    if (currency) return; // don't override user choice
-
-    const locale = navigator.language;
-
-    if (locale.includes("IN")) {
-      setCurrency("INR");
-    } else {
-      setCurrency("USD");
-    }
-  }, []);
 
 
   /* ------------------------------------------
@@ -532,6 +527,20 @@ const currencySafe = (currency || "USD") as "INR" | "USD";
 
       return;
     }
+
+    if (
+      previousClientCurrency &&
+      currency &&
+      previousClientCurrency !== currency
+    ) {
+      const confirmChange = window.confirm(
+        `This client was previously invoiced in ${previousClientCurrency}. You are using ${currency}. Continue?`
+      );
+
+      if (!confirmChange) return;
+    }
+
+
 
     // ✅ ONLY AFTER VALIDATION → SAVE
 
@@ -839,6 +848,12 @@ const currencySafe = (currency || "USD") as "INR" | "USD";
           subtotal={subtotal}
           taxAmount={taxAmount}
           justSaved={justSaved}
+          currencySource={currencySource}
+          setCurrencySource={setCurrencySource}
+          userTouchedCurrency={userTouchedCurrency}
+          setUserTouchedCurrency={setUserTouchedCurrency}
+          previousClientCurrency={previousClientCurrency}
+          setPreviousClientCurrency={setPreviousClientCurrency}
         />
 
       </div>

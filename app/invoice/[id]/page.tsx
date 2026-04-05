@@ -32,6 +32,7 @@ type Invoice = {
 
     paymentStatus?: string;
 
+
     currency?: string;
     normalizedAmount?: number;
     exchangeRate?: number;
@@ -53,7 +54,7 @@ export default function PublicInvoicePage() {
     const params = useParams();
     const searchParams = useSearchParams();
 
-    const publicId = params?.id as string;
+
     const token = searchParams.get("t");
 
     const rawId = params?.id;
@@ -64,7 +65,7 @@ export default function PublicInvoicePage() {
             : Array.isArray(rawId)
                 ? rawId[0]
                 : "";
-
+    const publicInvoiceId = id;
     const [showAllPayments, setShowAllPayments] = React.useState(false);
     const [invoice, setInvoice] = React.useState<Invoice | null | undefined>(undefined);
     const [method, setMethod] = React.useState<"razorpay" | "paypal">("razorpay");
@@ -405,6 +406,7 @@ export default function PublicInvoicePage() {
                             razorpay_payment_id: response.razorpay_payment_id,
                             razorpay_signature: response.razorpay_signature,
                             invoiceId: invoice?.id!,
+                            publicInvoiceId: publicInvoiceId,
                             userId: invoice?.userId!,
                             amount: numericAmount,
                         }),
@@ -417,7 +419,7 @@ export default function PublicInvoicePage() {
                     }
 
                     toast.success("Payment successful 🎉", {
-                        description: `₹${numericAmount.toLocaleString("en-IN")} received`,
+                        description: `${currencySymbol}${numericAmount.toLocaleString()} received`,
 
                     });
 
@@ -655,6 +657,7 @@ ${processing || !isValidAmount
                                                         body: JSON.stringify({
                                                             orderID: data.orderID,
                                                             invoiceId: invoice.id,
+                                                            publicInvoiceId: publicInvoiceId
                                                         }),
                                                     });
 
@@ -671,7 +674,7 @@ ${processing || !isValidAmount
                                                     await fetch("/api/public-invoice/close", {
                                                         method: "POST",
                                                         headers: { "Content-Type": "application/json" },
-                                                        body: JSON.stringify({ publicId: id }),
+                                                        body: JSON.stringify({ publicId: publicInvoiceId }),
                                                     });
 
                                                     setProcessing(false);

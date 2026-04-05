@@ -41,7 +41,12 @@ type Props = {
 
   currency: "INR" | "USD" | "";
   setCurrency: (v: "INR" | "USD") => void;
-  
+
+  currencySource: "manual" | "client" | "company" | "edit" | null;
+  setCurrencySource: (v: "manual" | "client" | "company" | "edit" | null) => void;
+  previousClientCurrency: "INR" | "USD" | null;
+  setPreviousClientCurrency: (v: "INR" | "USD" | null) => void;
+
 
   discount: number;
   setDiscount: (v: number) => void;
@@ -67,6 +72,9 @@ type Props = {
   justSaved: boolean;
 
   idToUse: string;
+
+  userTouchedCurrency: boolean;
+  setUserTouchedCurrency: (v: boolean) => void;
 
   onSendEmail: () => void;
 
@@ -160,11 +168,18 @@ export default function InvoiceForm({
 
   onIssue,
   highlightSection,
+  userTouchedCurrency,
+  setUserTouchedCurrency,
+  currencySource,
+  setCurrencySource,
 
   errors,
   setErrors,
   isValidating,
   setLineItems,
+  previousClientCurrency,
+setPreviousClientCurrency,
+
 }: Props) {
 
 
@@ -176,8 +191,24 @@ export default function InvoiceForm({
 
   const { isPro } = useAuth();
 
-
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
+  const [showCurrencyModal, setShowCurrencyModal] = useState(false);
+  const [pendingAction, setPendingAction] = useState<"save" | "issue" | null>(null);
+
+  const baseInput =
+    "w-full rounded-xl bg-white/[0.04] px-3 py-2 text-sm text-white transition-all duration-200 outline-none";
+
+  const normalState =
+    "border border-white/10 hover:border-white/20 hover:bg-white/[0.06]";
+
+  const focusState =
+    "focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500 focus:bg-white/[0.07]";
+
+  const errorState =
+    "border border-rose-500/60 ring-2 ring-rose-500/30 bg-rose-500/[0.04]";
+
+
 
 
   const filteredClients = isPro
@@ -185,6 +216,12 @@ export default function InvoiceForm({
       c.name.toLowerCase().includes(search.toLowerCase())
     )
     : [];
+
+
+  const currencyMismatch =
+    previousClientCurrency &&
+    currency &&
+    previousClientCurrency !== currency;
 
 
   const handlePrint = () => {
@@ -195,10 +232,11 @@ export default function InvoiceForm({
 
 
   const isIssued = editingInvoice?.lifecycle === "issued";
-  const lockStyle = isIssued
 
-    ? "opacity-60 cursor-not-allowed bg-white/5"
+  const lockStyle = isIssued
+    ? "opacity-60 cursor-not-allowed bg-white/[0.03] border-white/5"
     : "";
+
   const containerRef = useRef<HTMLDivElement>(null);
 
   const firstDescRef = useRef<HTMLInputElement>(null);
@@ -274,6 +312,13 @@ export default function InvoiceForm({
   }
 
   const dueContext = getDueContext();
+
+
+
+  const derivedCurrencySource =
+    currencySource ||
+    (currency && client && !userTouchedCurrency ? "client" : null);
+
 
 
   return (
@@ -364,19 +409,21 @@ export default function InvoiceForm({
               disabled={isIssued}
               value={currency}
               onChange={(e) => {
-                const value = e.target.value as "INR" | "USD";
-                setCurrency(value);
-
-                if (errors.currency) {
-                  setErrors(prev => ({ ...prev, currency: false }));
-                }
+                setCurrency(e.target.value as "INR" | "USD");
+                setUserTouchedCurrency(true);
+                setCurrencySource("manual");
               }}
-              className={`w-full rounded-lg px-3 py-2 text-sm transition
-    ${!currency
+              className={`
+  w-full rounded-xl px-3 py-2 text-sm transition-all duration-300 outline-none
+  ${!currency
                   ? "text-white/40 border border-amber-500/40 bg-amber-500/5"
-                  : "text-white border border-white/10 bg-white/5 hover:bg-white/[0.03]"
+                  : derivedCurrencySource === "client"
+
+                    ? "text-white border border-amber-500/40 bg-amber-500/10 shadow-[0_0_12px_rgba(245,158,11,0.2)]"
+                    : "text-white border border-white/10 bg-white/[0.04] hover:bg-white/[0.06]"
                 }
-  `}
+  focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500
+`}
             >
               <option value="" disabled>
                 Select currency
@@ -385,13 +432,38 @@ export default function InvoiceForm({
               <option value="USD">USD ($)</option>
             </select>
 
+            {!currency && (
+              <div className="text-[11px] text-amber-400 mt-1">
+                Select a currency before issuing
+              </div>
+            )}
 
-            {currency && (
+            {derivedCurrencySource === "client" && (
+              <div className="flex items-center gap-2 text-[11px] text-amber-300 mt-1 font-medium">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+                Auto-selected from this client’s previous invoice
+              </div>
+            )}
+
+            {derivedCurrencySource === "manual" && (
               <div className="text-[11px] text-emerald-400 mt-1">
                 Currency locked for this invoice
               </div>
             )}
 
+            <button
+              type="button"
+              onClick={() => currencyRef.current?.querySelector("select")?.focus()}
+              className="text-[11px] text-violet-400 hover:text-violet-300 ml-3"
+            >
+              Change
+            </button>
+
+            {currencyMismatch && (
+              <div className="text-[11px] text-amber-400 mt-1">
+                Previously used {previousClientCurrency} for this client
+              </div>
+            )}
 
           </div>
 
@@ -422,9 +494,10 @@ export default function InvoiceForm({
               value={client}
               placeholder="Search or type client name..."
               onChange={(e) => {
-                const value = e.target.value;
 
+                const value = e.target.value;
                 setClient(value);
+
                 setSearch(value);
                 setShowResults(true);
 
@@ -455,12 +528,14 @@ export default function InvoiceForm({
                       })[0];
 
                     if (lastInvoice) {
-                      // ✅ Currency
-                      if (lastInvoice.currency) {
+                      // Currency
+                      if (lastInvoice.currency && !userTouchedCurrency) {
                         setCurrency(lastInvoice.currency);
+                        setCurrencySource("client");
+                        setPreviousClientCurrency(lastInvoice.currency);
                       }
 
-                      // ✅ Line items
+                      // Line items
                       if (lastInvoice.meta?.lineItems?.length) {
                         setLineItems(
                           lastInvoice.meta.lineItems.map((li: any) => ({
@@ -504,13 +579,10 @@ export default function InvoiceForm({
                 }
               }}
 
-              className={`w-full rounded-lg bg-white/5 px-3 py-2 text-sm text-white transition focus:outline-none
-  border
-  ${errors.client
-    ? "border-rose-500 ring-2 ring-rose-500/40"
-    : "border-white/10 focus:ring-2 focus:ring-violet-500/30 focus:shadow-[0_0_0_2px_rgba(124,58,237,0.15)] focus:ring-offset-0"
-  }
-  ${lockStyle}
+              className={`
+  ${baseInput}
+  ${errors.client ? errorState : normalState}
+  ${!errors.client ? focusState : ""}
 `}
             />
 
@@ -556,7 +628,10 @@ hover:bg-white/[0.04]">
                           .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
 
                         if (lastInvoice) {
-                          if (lastInvoice.currency) setCurrency(lastInvoice.currency);
+                          if (lastInvoice.currency && !userTouchedCurrency) {
+                            setCurrency(lastInvoice.currency);
+                            setCurrencySource("client");
+                          }
 
                           if (lastInvoice.meta?.lineItems?.length) {
                             setLineItems(
@@ -613,11 +688,10 @@ hover:bg-white/[0.04]">
                 }}
                 onKeyDown={focusNext}
                 placeholder="client@email.com"
-               className={`w-full rounded-lg bg-white/5 px-3 py-2 text-sm text-white transition focus:outline-none
-  ${errors.clientEmail
-    ? "border border-rose-500/60 ring-2 ring-rose-500/30"
-    : "border border-white/10 hover:bg-white/[0.03] hover:scale-[1.01] focus:ring-2 focus:ring-violet-500/30 focus:shadow-[0_0_0_2px_rgba(124,58,237,0.15)] focus:ring-offset-0"
-  }
+                className={`
+  ${baseInput}
+  ${errors.clientEmail ? errorState : normalState}
+  ${!errors.clientEmail ? focusState : ""}
 `}
               />
 
@@ -641,8 +715,12 @@ hover:bg-white/[0.04]">
                 value={clientAddress}
                 onChange={(e) => setClientAddress(e.target.value)}
                 rows={2}
-                className={`w-full rounded-lg bg-white/5 border border-white/10 hover:bg-white/[0.03] hover:scale-[1.01] px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-violet-500/30
-focus:shadow-[0_0_0_2px_rgba(124,58,237,0.15)] transition ${lockStyle}`}
+                className={`
+  ${baseInput}
+  ${normalState}
+  ${focusState}
+  ${lockStyle}
+`}
               />
             </div>
 
@@ -674,12 +752,10 @@ focus:shadow-[0_0_0_2px_rgba(124,58,237,0.15)] transition ${lockStyle}`}
                     }
                   }}
                   onKeyDown={focusNext}
-                  className={`w-full rounded-lg bg-white/5 px-3 py-2 pr-10 text-sm text-white appearance-none transition focus:outline-none
-  ${errors.date
-    ? "border border-rose-500/60 ring-2 ring-rose-500/30"
-    : "border border-white/10 hover:bg-white/[0.03] hover:scale-[1.01] focus:ring-2 focus:ring-violet-500/30 focus:shadow-[0_0_0_2px_rgba(124,58,237,0.15)] focus:ring-offset-0"
-  }
-  ${lockStyle}
+                  className={`
+  ${baseInput}
+  ${errors.date ? errorState : normalState}
+  ${!errors.date ? focusState : ""}
 `}
                 />
 
@@ -711,11 +787,10 @@ focus:shadow-[0_0_0_2px_rgba(124,58,237,0.15)] transition ${lockStyle}`}
                     }
                   }}
                   onKeyDown={focusNext}
-                  className={`w-full rounded-lg bg-white/5 px-3 py-2 pr-10 text-sm text-white appearance-none transition focus:outline-none
-  ${errors.dueDate
-    ? "border border-rose-500/60 ring-2 ring-rose-500/30"
-    : "border border-white/10 hover:bg-white/[0.03] hover:scale-[1.01] focus:ring-2 focus:ring-violet-500/30 focus:shadow-[0_0_0_2px_rgba(124,58,237,0.15)] focus:ring-offset-0"
-  }
+                  className={`
+  ${baseInput}
+  ${errors.dueDate ? errorState : normalState}
+  ${!errors.dueDate ? focusState : ""}
 `}
                 />
 
@@ -789,8 +864,8 @@ focus:shadow-[0_0_0_2px_rgba(124,58,237,0.15)] transition ${lockStyle}`}
                 key={idx}
                 className="grid grid-cols-12 gap-2 items-center bg-transparent border border-white/10
 hover:bg-white/[0.04]
-hover:scale-[1.015]
-hover:shadow-[0_10px_35px_rgba(0,0,0,0.45)]
+hover:scale-[1.01]
+hover:shadow-[0_8px_25px_rgba(0,0,0,0.35)]
 rounded-xl px-3 py-2
 transition-all duration-200
 hover:border-white/20
@@ -815,8 +890,8 @@ hover:shadow-[0_8px_30px_rgba(0,0,0,0.4)]
 text-sm text-white
 focus:outline-none
 focus:ring-2 focus:ring-violet-500/30
-focus:shadow-[0_0_0_2px_rgba(124,58,237,0.15)]"
-    />
+"
+                />
 
                 {/* Quantity */}
                 <input
@@ -837,8 +912,8 @@ hover:shadow-[0_8px_30px_rgba(0,0,0,0.4)]
 text-sm text-white
 focus:outline-none
 focus:ring-2 focus:ring-violet-500/30
-focus:shadow-[0_0_0_2px_rgba(124,58,237,0.15)]"
-     />
+"
+                />
 
                 {/* Rate */}
                 <input
@@ -937,7 +1012,7 @@ hover:shadow-[0_0_45px_rgba(124,58,237,0.55)]"
                 onKeyDown={focusNext}
                 onChange={(e) => setTaxRate(Number(e.target.value))}
                 className={`w-full rounded-lg bg-white/5 border border-white/10 hover:bg-white/[0.03] hover:scale-[1.01] px-3 py-2 text-sm text-white focus:outline-none ${lockStyle} focus:ring-2 focus:ring-violet-500/30
-focus:shadow-[0_0_0_2px_rgba(124,58,237,0.15)]`} />
+`} />
             </div>
 
             <div className="space-y-1">
@@ -951,9 +1026,12 @@ focus:shadow-[0_0_0_2px_rgba(124,58,237,0.15)]`} />
                 placeholder="0"
                 onKeyDown={focusNext}
                 onChange={(e) => setDiscount(Number(e.target.value))}
-                className={`w-full rounded-lg bg-white/5 border border-white/10 hover:bg-white/[0.03] hover:scale-[1.01] px-3 py-2 text-sm text-white focus:outline-none ${lockStyle}
-focus:ring-2 focus:ring-violet-500/30
-focus:shadow-[0_0_0_2px_rgba(124,58,237,0.15)]`}
+                className={`
+  ${baseInput}
+  ${normalState}
+  ${focusState}
+  ${lockStyle}
+`}
               />
             </div>
 
@@ -968,7 +1046,7 @@ focus:shadow-[0_0_0_2px_rgba(124,58,237,0.15)]`}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
               className="w-full rounded-lg bg-white/5 border border-white/10 hover:bg-white/[0.03] hover:scale-[1.01] px-3 py-2 text-sm text-white focus:ring-2 focus:ring-violet-500/30
-focus:shadow-[0_0_0_2px_rgba(124,58,237,0.15)] focus:ring-offset-0 transition focus:outline-none"
+ focus:ring-offset-0 transition focus:outline-none"
             />
           </div>
 
@@ -1032,14 +1110,25 @@ focus:shadow-[0_0_0_2px_rgba(124,58,237,0.15)] focus:ring-offset-0 transition fo
               <button
                 onClick={() => {
                   if (saving) return;
+
+                  if (
+                    previousClientCurrency &&
+                    currency &&
+                    previousClientCurrency !== currency
+                  ) {
+                    setPendingAction("save");
+                    setShowCurrencyModal(true);
+                    return;
+                  }
+
                   onSave();
                 }}
                 disabled={saving}
                 className={`px-4 py-2 rounded-xl font-semibold transition-all duration-200 ease-out
 ${justSaved
-  ? "bg-emerald-500 text-black shadow-[0_0_25px_rgba(16,185,129,0.45)]"
-  : "bg-white/10 hover:bg-white/20 text-white"
-}
+                    ? "bg-emerald-500 text-black shadow-[0_0_25px_rgba(16,185,129,0.45)]"
+                    : "bg-white/10 hover:bg-white/20 text-white"
+                  }
 hover:scale-[1.02]
 active:scale-[0.97] active:shadow-none
 disabled:opacity-50`}
@@ -1050,7 +1139,19 @@ disabled:opacity-50`}
               {/* Draft only */}
               {!isIssued && (
                 <button
-                  onClick={onIssue}
+                  onClick={() => {
+                    if (
+                      previousClientCurrency &&
+                      currency &&
+                      previousClientCurrency !== currency
+                    ) {
+                      setPendingAction("issue");
+                      setShowCurrencyModal(true);
+                      return;
+                    }
+
+                    onIssue();
+                  }}
                   className="px-4 py-2 rounded-xl font-semibold text-white
 bg-gradient-to-r from-violet-600 to-indigo-600
 hover:from-violet-500 hover:to-indigo-500
@@ -1094,6 +1195,81 @@ transition-all duration-150 ease-out"
 
         </div>
       </div>
+
+
+      {/* Currency Mismatch Modal*/}
+      {showCurrencyModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+
+          {/* BACKDROP */}
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => {
+              setShowCurrencyModal(false);
+              setPendingAction(null);
+            }}
+          />
+
+          {/* MODAL */}
+          <div className="relative w-full max-w-md rounded-2xl 
+    border border-sky-500/20 
+    bg-[#0b0b12] p-6 
+    shadow-[0_0_60px_rgba(56,189,248,0.25)]">
+
+            {/* TITLE */}
+            <div className="text-lg font-semibold text-sky-300 mb-2">
+              Currency Change Detected
+            </div>
+
+            {/* MESSAGE */}
+            <div className="text-sm text-slate-300 mb-5 leading-relaxed">
+              This client was previously invoiced in{" "}
+              <span className="text-white font-medium">
+                {previousClientCurrency}
+              </span>, but this invoice uses{" "}
+              <span className="text-white font-medium">
+                {currency}
+              </span>.
+              <br /><br />
+              Make sure this is intentional before continuing.
+            </div>
+
+            {/* ACTIONS */}
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowCurrencyModal(false);
+                  setPendingAction(null);
+                }}
+                className="px-4 py-2 rounded-lg border border-white/10 
+          text-slate-300 hover:bg-white/5 transition"
+              >
+                Go Back
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowCurrencyModal(false);
+
+                  if (pendingAction === "save") {
+                    onSave();
+                  }
+
+                  if (pendingAction === "issue") {
+                    onIssue();
+                  }
+
+                  setPendingAction(null);
+                }}
+                className="px-4 py-2 rounded-lg 
+          bg-sky-500 hover:bg-sky-600 text-black font-semibold transition"
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
 
       {/* 🚀 PRO UPGRADE MODAL */}
