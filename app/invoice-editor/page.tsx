@@ -150,8 +150,9 @@ export default function InvoiceEditorPage() {
     shouldUpsellClient,
     setShouldUpsellClient,
 
+
     previousClientCurrency,
-setPreviousClientCurrency,
+    setPreviousClientCurrency,
     setLineItems,
   } = useInvoiceEditor();
 
@@ -854,6 +855,7 @@ setPreviousClientCurrency,
           setUserTouchedCurrency={setUserTouchedCurrency}
           previousClientCurrency={previousClientCurrency}
           setPreviousClientCurrency={setPreviousClientCurrency}
+          
         />
 
       </div>

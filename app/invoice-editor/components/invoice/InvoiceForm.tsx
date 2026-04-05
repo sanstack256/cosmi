@@ -73,6 +73,7 @@ type Props = {
 
   idToUse: string;
 
+
   userTouchedCurrency: boolean;
   setUserTouchedCurrency: (v: boolean) => void;
 
@@ -188,6 +189,8 @@ export default function InvoiceForm({
 
   const [search, setSearch] = useState("");
   const [showResults, setShowResults] = useState(false);
+
+  const [activeIndex, setActiveIndex] = useState(-1);
 
   const { isPro } = useAuth();
 
@@ -516,7 +519,7 @@ export default function InvoiceForm({
 
                 const value = e.target.value;
                 setClient(value);
-
+                setActiveIndex(-1);
                 setSearch(value);
                 setShowResults(true);
 
@@ -554,16 +557,6 @@ export default function InvoiceForm({
                         setPreviousClientCurrency(lastInvoice.currency);
                       }
 
-                      // Line items
-                      if (lastInvoice.meta?.lineItems?.length) {
-                        setLineItems(
-                          lastInvoice.meta.lineItems.map((li: any) => ({
-                            desc: li.desc,
-                            qty: li.qty,
-                            rate: String(li.rate ?? ""),
-                          }))
-                        );
-                      }
                     }
                   }
                 }
@@ -576,25 +569,43 @@ export default function InvoiceForm({
                 if (!isValidating.current) setShowResults(false);
               }}
 
-              onKeyDown={async (e) => {
+              onKeyDown={(e) => {
+                if (!showResults || filteredClients.length === 0) return;
+
+                if (e.key === "ArrowDown") {
+                  e.preventDefault();
+                  setActiveIndex((prev) =>
+                    prev < filteredClients.length - 1 ? prev + 1 : 0
+                  );
+                }
+
+                if (e.key === "ArrowUp") {
+                  e.preventDefault();
+                  setActiveIndex((prev) =>
+                    prev > 0 ? prev - 1 : filteredClients.length - 1
+                  );
+                }
+
                 if (e.key === "Enter") {
                   e.preventDefault();
 
-                  const existing = clients.find(
-                    c => c.name.toLowerCase() === search.toLowerCase()
-                  );
+                  if (activeIndex >= 0) {
+                    const selected = filteredClients[activeIndex];
 
-                  if (existing) {
-                    setClient(existing.name);
-                  } else if (search.trim()) {
+                    setClient(selected.name);
+                    setClientEmail(selected.email || "");
+
+                    setSearch("");
+                    setShowResults(false);
+                    setActiveIndex(-1);
+                  } else {
+                    // fallback (typed value)
                     setClient(search);
+                    setSearch("");
+                    setShowResults(false);
                   }
 
-                  setSearch("");
-                  setShowResults(false);
-
                   focusNext(e);
-
                 }
               }}
 
@@ -631,7 +642,7 @@ rounded-xl shadow-lg max-h-48 overflow-y-auto
 transition-all duration-150
 bg-[#0f0f18]">
 
-                {filteredClients.map((c) => (
+                {filteredClients.map((c, idx) => (
                   <div
                     key={c.id}
                     onMouseDown={() => {
@@ -651,19 +662,13 @@ bg-[#0f0f18]">
                             setCurrencySource("client");
                           }
 
-                          if (lastInvoice.meta?.lineItems?.length) {
-                            setLineItems(
-                              lastInvoice.meta.lineItems.map((li: any) => ({
-                                desc: li.desc,
-                                qty: li.qty,
-                                rate: String(li.rate ?? ""),
-                              }))
-                            );
-                          }
+
                         }
                       }
                     }}
-                    className="px-3 py-2 text-sm text-white hover:bg-white/10 cursor-pointer rounded-md transition"
+                    className={`px-3 py-2 text-sm text-white cursor-pointer rounded-md transition
+  ${activeIndex === idx ? "bg-white/15" : "hover:bg-white/10"}
+`}
                   >
                     {c.name}
                   </div>
@@ -676,7 +681,7 @@ bg-[#0f0f18]">
                       setSearch("");
                       setShowResults(false);
                     }}
-                    className="px-3 py-2 text-sm text-white hover:bg-white/10 cursor-pointer rounded-md transition"
+                    className="px-3 py-2 text-sm text-white cursor-pointer rounded-md transition hover:bg-white/10"
                   >
                     + Create "{search}"
                   </div>
