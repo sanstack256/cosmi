@@ -208,7 +208,7 @@ export default function InvoiceForm({
   const errorState =
     "border border-rose-500/60 ring-2 ring-rose-500/30 bg-rose-500/[0.04]";
 
-
+  const [paymentTerms, setPaymentTerms] = useState<"due_on_receipt" | "net_7" | "net_15" | "net_30">("due_on_receipt");
 
 
   const filteredClients = isPro
@@ -222,6 +222,11 @@ export default function InvoiceForm({
     previousClientCurrency &&
     currency &&
     previousClientCurrency !== currency;
+
+
+const isValidEmail = (email: string) => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+};
 
 
   const handlePrint = () => {
@@ -313,7 +318,27 @@ export default function InvoiceForm({
 
   const dueContext = getDueContext();
 
+  function applyPaymentTerms(baseDate: string, term: string) {
+    if (!baseDate) return "";
 
+    const d = new Date(baseDate);
+
+    switch (term) {
+      case "net_7":
+        d.setDate(d.getDate() + 7);
+        break;
+      case "net_15":
+        d.setDate(d.getDate() + 15);
+        break;
+      case "net_30":
+        d.setDate(d.getDate() + 30);
+        break;
+      default:
+        return baseDate;
+    }
+
+    return d.toISOString().split("T")[0];
+  }
 
   const derivedCurrencySource =
     currencySource ||
@@ -451,13 +476,7 @@ export default function InvoiceForm({
               </div>
             )}
 
-            <button
-              type="button"
-              onClick={() => currencyRef.current?.querySelector("select")?.focus()}
-              className="text-[11px] text-violet-400 hover:text-violet-300 ml-3"
-            >
-              Change
-            </button>
+
 
             {currencyMismatch && (
               <div className="text-[11px] text-amber-400 mt-1">
@@ -811,58 +830,89 @@ hover:bg-white/[0.04]">
             </div>
 
 
+
+            {/* PAYMENT TERMS */}
+            <div className="space-y-1 mb-5">
+              <label className="text-xs text-slate-400">
+                Payment Terms
+              </label>
+
+              <select
+                value={paymentTerms}
+                onChange={(e) => {
+                  const term = e.target.value as typeof paymentTerms;
+                  setPaymentTerms(term);
+
+                  if (date) {
+                    const newDue = applyPaymentTerms(date, term);
+                    setDueDate(newDue);
+                  }
+                }}
+                className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-violet-500/40 focus:outline-none"
+              >
+                <option value="due_on_receipt">Due on receipt</option>
+                <option value="net_7">Net 7</option>
+                <option value="net_15">Net 15</option>
+                <option value="net_30">Net 30</option>
+              </select>
+            </div>
+
+
+
+
+
           </div>
         </div>
         <div className="relative my-10">
           <div className="h-[1.5px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
           <div className="absolute inset-0 blur-[4px] bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent" />
         </div>
-      
 
 
-      <div className={`mt-6 bg-transparent border border-white/5 rounded-2xl p-5 backdrop-blur-sm space-y-4 transition
+
+        <div className={`mt-6 bg-transparent border border-white/5 rounded-2xl p-5 backdrop-blur-sm space-y-4 transition
         ${errors.lineItems || highlightSection === "lineItems"
-          ? "border-rose-500/50 ring-1 ring-rose-500/30"
-          : "border-white/5"}`}>
+            ? "border-rose-500/50 ring-1 ring-rose-500/30"
+            : "border-white/5"}`}>
 
 
-        {/* LINE ITEMS */}
-        <div className="space-y-3">
-          <div className="text-[11px] uppercase tracking-[0.18em] text-white/30 font-medium">
-            Line Items <span className="text-red-400">*</span>
+          {/* LINE ITEMS */}
+          <div className="space-y-3">
+            <div className="text-[11px] uppercase tracking-[0.18em] text-white/30 font-medium">
+              Line Items <span className="text-red-400">*</span>
+            </div>
+
+            {errors.lineItems && (
+              <div className="text-[11px] text-rose-400">
+                All line items must have a description, quantity &gt; 0, and rate &gt; 0
+              </div>
+            )}
           </div>
 
-          {errors.lineItems && (
-            <div className="text-[11px] text-rose-400">
-              All line items must have a description, quantity &gt; 0, and rate &gt; 0
-            </div>
-          )}
-        </div>
+          {/* Column headers */}
+          <div className="grid grid-cols-12 gap-2 px-2 text-xs text-white/50 font-medium mb-2">
+            <div className="col-span-5">Description</div>
+            <div className="col-span-2 text-center">Qty</div>
+            <div className="col-span-2 text-right">Rate</div>
+            <div className="col-span-2 text-right">Amount</div>
+            <div className="col-span-1"></div>
+          </div>
 
-        {/* Column headers */}
-        <div className="grid grid-cols-12 gap-2 px-2 text-xs text-white/50 font-medium mb-2">
-          <div className="col-span-5">Description</div>
-          <div className="col-span-2 text-center">Qty</div>
-          <div className="col-span-2 text-right">Rate</div>
-          <div className="col-span-2 text-right">Amount</div>
-          <div className="col-span-1"></div>
-        </div>
+          <div className="space-y-3">
+            {lineItems.length === 0 && (
+              <div className="text-sm text-white/50 font-medium text-center py-8 border border-dashed border-white/10 rounded-xl bg-white/[0.02]">
+                No items yet. Add your first service or product.
+              </div>
+            )}
 
-        <div className="space-y-3">
-          {lineItems.length === 0 && (
-            <div className="text-sm text-white/50 font-medium text-center py-8 border border-dashed border-white/10 rounded-xl bg-white/[0.02]">
-              No items yet. Add your first service or product.
-            </div>
-          )}
+            {lineItems.map((li, idx) => {
+              const rate = Number(li.rate || 0);
+              const amount = li.qty * rate;
 
-          {lineItems.map((li, idx) => {
-            const rate = Number(li.rate || 0);
-            const amount = li.qty * rate;
-
-            return (
-              <div
-                key={idx}
-                className="grid grid-cols-12 gap-2 items-center bg-transparent border border-white/10
+              return (
+                <div
+                  key={idx}
+                  className="grid grid-cols-12 gap-2 items-center bg-transparent border border-white/10
                   hover:bg-white/[0.04]
                   hover:scale-[1.01]
                   hover:shadow-[0_8px_25px_rgba(0,0,0,0.35)]
@@ -870,20 +920,20 @@ hover:bg-white/[0.04]">
                   transition-all duration-200
                   hover:border-white/20
                   focus-within:border-violet-500/40"
-              >
-                {/* Description */}
-                <input
-                  disabled={isIssued}
-                  title={isIssued ? "Locked after issuing invoice" : ""}
-                  ref={idx === 0 ? firstDescRef : undefined}
-                  placeholder="Service description"
-                  value={li.desc}
-                  onKeyDown={focusNext}
-                  onChange={(e) => {
-                    updateLine(idx, { desc: e.target.value });
-                    if (errors.lineItems) setErrors(prev => ({ ...prev, lineItems: false }));
-                  }}
-                  className="col-span-5 w-full px-3 py-2 rounded-lg bg-transparent border border-white/10
+                >
+                  {/* Description */}
+                  <input
+                    disabled={isIssued}
+                    title={isIssued ? "Locked after issuing invoice" : ""}
+                    ref={idx === 0 ? firstDescRef : undefined}
+                    placeholder="Service description"
+                    value={li.desc}
+                    onKeyDown={focusNext}
+                    onChange={(e) => {
+                      updateLine(idx, { desc: e.target.value });
+                      if (errors.lineItems) setErrors(prev => ({ ...prev, lineItems: false }));
+                    }}
+                    className="col-span-5 w-full px-3 py-2 rounded-lg bg-transparent border border-white/10
                     hover:bg-white/[0.04]
                     hover:scale-[1.015]
                     hover:shadow-[0_8px_30px_rgba(0,0,0,0.4)]
@@ -891,21 +941,21 @@ hover:bg-white/[0.04]">
                     focus:outline-none
                     focus:ring-2 focus:ring-violet-500/30
                     "
-                />
+                  />
 
-                {/* Quantity */}
-                <input
-                  disabled={isIssued}
-                  title={isIssued ? "Locked after issuing invoice" : ""}
-                  type="number"
-                  min="1"
-                  value={li.qty}
-                  onKeyDown={focusNext}
-                  onChange={(e) => {
-                    updateLine(idx, { qty: Number(e.target.value) || 1 });
-                    if (errors.lineItems) setErrors(prev => ({ ...prev, lineItems: false }));
-                  }}
-                  className="col-span-2 w-full px-3 py-2 rounded-lg bg-transparent border border-white/10
+                  {/* Quantity */}
+                  <input
+                    disabled={isIssued}
+                    title={isIssued ? "Locked after issuing invoice" : ""}
+                    type="number"
+                    min="1"
+                    value={li.qty}
+                    onKeyDown={focusNext}
+                    onChange={(e) => {
+                      updateLine(idx, { qty: Number(e.target.value) || 1 });
+                      if (errors.lineItems) setErrors(prev => ({ ...prev, lineItems: false }));
+                    }}
+                    className="col-span-2 w-full px-3 py-2 rounded-lg bg-transparent border border-white/10
                   hover:bg-white/[0.04]
                   hover:scale-[1.015]
                   hover:shadow-[0_8px_30px_rgba(0,0,0,0.4)]
@@ -913,288 +963,288 @@ hover:bg-white/[0.04]">
                   focus:outline-none
                   focus:ring-2 focus:ring-violet-500/30
                   "
-                />
+                  />
 
-                {/* Rate */}
-                <input
-                  disabled={isIssued}
-                  title={isIssued ? "Locked after issuing invoice" : ""}
-                  type="number"
-                  inputMode="numeric"
-                  value={li.rate}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && e.shiftKey) {
+                  {/* Rate */}
+                  <input
+                    disabled={isIssued}
+                    title={isIssued ? "Locked after issuing invoice" : ""}
+                    type="number"
+                    inputMode="numeric"
+                    value={li.rate}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && e.shiftKey) {
+                        e.preventDefault();
+                        addLine();
+                        return;
+                      }
+
+                      if (e.key !== "Enter") return;
+
                       e.preventDefault();
-                      addLine();
-                      return;
-                    }
 
-                    if (e.key !== "Enter") return;
+                      const isLastRow = idx === lineItems.length - 1;
 
-                    e.preventDefault();
+                      if (isLastRow) {
+                        addLine();
 
-                    const isLastRow = idx === lineItems.length - 1;
+                        setTimeout(() => {
+                          const nextRow = document.querySelectorAll(
+                            'input[placeholder="Service description"]'
+                          )[idx + 1] as HTMLElement;
 
-                    if (isLastRow) {
-                      addLine();
-
-                      setTimeout(() => {
+                          nextRow?.focus();
+                        }, 0);
+                      } else {
                         const nextRow = document.querySelectorAll(
                           'input[placeholder="Service description"]'
                         )[idx + 1] as HTMLElement;
 
                         nextRow?.focus();
-                      }, 0);
-                    } else {
-                      const nextRow = document.querySelectorAll(
-                        'input[placeholder="Service description"]'
-                      )[idx + 1] as HTMLElement;
-
-                      nextRow?.focus();
-                    }
-                  }}
-                  onChange={(e) => {
-                    updateLine(idx, { rate: e.target.value });
-                    if (errors.lineItems) setErrors(prev => ({ ...prev, lineItems: false }));
-                  }}
-                  className="col-span-2 w-full px-3 py-2 rounded-lg bg-transparent border border-white/10 hover:bg-white/[0.04]
+                      }
+                    }}
+                    onChange={(e) => {
+                      updateLine(idx, { rate: e.target.value });
+                      if (errors.lineItems) setErrors(prev => ({ ...prev, lineItems: false }));
+                    }}
+                    className="col-span-2 w-full px-3 py-2 rounded-lg bg-transparent border border-white/10 hover:bg-white/[0.04]
                   hover:scale-[1.015]
                   hover:shadow-[0_8px_30px_rgba(0,0,0,0.4)] text-sm text-white focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500"
-                />
+                  />
 
-                {/* Amount (READ ONLY) */}
-                <div className="col-span-2 text-right text-sm text-white/80 font-medium px-2">
-                  {currency
-                    ? `${currencySymbol}${amount.toLocaleString(getLocale(currency || "USD"))}`
-                    : "--"}
+                  {/* Amount (READ ONLY) */}
+                  <div className="col-span-2 text-right text-sm text-white/80 font-medium px-2">
+                    {currency
+                      ? `${currencySymbol}${amount.toLocaleString(getLocale(currency || "USD"))}`
+                      : "--"}
+                  </div>
+
+                  {/* Remove */}
+                  <button
+                    disabled={isIssued}
+                    title={isIssued ? "Locked after issuing invoice" : ""}
+                    onClick={() => removeLine(idx)}
+                    className="col-span-1 text-rose-400 hover:text-rose-300 transition text-sm no-print"
+                  >
+                    ✕
+                  </button>
                 </div>
+              );
+            })}
+          </div>
 
-                {/* Remove */}
-                <button
-                  disabled={isIssued}
-                  title={isIssued ? "Locked after issuing invoice" : ""}
-                  onClick={() => removeLine(idx)}
-                  className="col-span-1 text-rose-400 hover:text-rose-300 transition text-sm no-print"
-                >
-                  ✕
-                </button>
-              </div>
-            );
-          })}
-        </div>
-
-        <button
-          disabled={isIssued}
-          title={isIssued ? "Locked after issuing invoice" : ""}
-          onClick={addLine}
-          className="mt-4 px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold transition-all duration-150 ease-out
+          <button
+            disabled={isIssued}
+            title={isIssued ? "Locked after issuing invoice" : ""}
+            onClick={addLine}
+            className="mt-4 px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold transition-all duration-150 ease-out
           active:scale-[0.97]
           active:shadow-none
           hover:scale-[1.02] shadow-[0_0_25px_rgba(124,58,237,0.35)]
           hover:shadow-[0_0_45px_rgba(124,58,237,0.55)]"
-        >
-          + Add line item
-        </button>
-        <div className="mt-6 space-y-4">
+          >
+            + Add line item
+          </button>
+          <div className="mt-6 space-y-4">
 
-          {/* TAX & DISCOUNT */}
-          <div className="grid grid-cols-2 gap-4 mb-5">
+            {/* TAX & DISCOUNT */}
+            <div className="grid grid-cols-2 gap-4 mb-5">
 
-            <div className="space-y-1">
-              <label className="text-xs text-slate-400">Tax (%)</label>
+              <div className="space-y-1">
+                <label className="text-xs text-slate-400">Tax (%)</label>
 
-              <input
-                disabled={isIssued}
-                title={isIssued ? "Locked after issuing invoice" : ""}
-                type="number"
-                value={taxRate || ""}
-                placeholder="0"
-                onKeyDown={focusNext}
-                onChange={(e) => setTaxRate(Number(e.target.value))}
-                className={`w-full rounded-lg bg-white/5 border border-white/10 hover:bg-white/[0.03] hover:scale-[1.01] px-3 py-2 text-sm text-white focus:outline-none ${lockStyle} focus:ring-2 focus:ring-violet-500/30
+                <input
+                  disabled={isIssued}
+                  title={isIssued ? "Locked after issuing invoice" : ""}
+                  type="number"
+                  value={taxRate || ""}
+                  placeholder="0"
+                  onKeyDown={focusNext}
+                  onChange={(e) => setTaxRate(Number(e.target.value))}
+                  className={`w-full rounded-lg bg-white/5 border border-white/10 hover:bg-white/[0.03] hover:scale-[1.01] px-3 py-2 text-sm text-white focus:outline-none ${lockStyle} focus:ring-2 focus:ring-violet-500/30
                 `} />
-            </div>
+              </div>
 
-            <div className="space-y-1">
-              <label className="text-xs text-slate-400">Discount</label>
+              <div className="space-y-1">
+                <label className="text-xs text-slate-400">Discount</label>
 
-              <input
-                disabled={isIssued}
-                title={isIssued ? "Locked after issuing invoice" : ""}
-                type="number"
-                value={discount || ""}
-                placeholder="0"
-                onKeyDown={focusNext}
-                onChange={(e) => setDiscount(Number(e.target.value))}
-                className={`
+                <input
+                  disabled={isIssued}
+                  title={isIssued ? "Locked after issuing invoice" : ""}
+                  type="number"
+                  value={discount || ""}
+                  placeholder="0"
+                  onKeyDown={focusNext}
+                  onChange={(e) => setDiscount(Number(e.target.value))}
+                  className={`
                 ${baseInput}
                 ${normalState}
                 ${focusState}
                 ${lockStyle}
               `}
+                />
+              </div>
+
+            </div>
+
+            {/* NOTES */}
+            <div className="mt-6 space-y-1">
+              <label className="text-xs text-slate-400">Notes</label>
+              <textarea
+                value={notes}
+                onKeyDown={focusNext}
+                onChange={(e) => setNotes(e.target.value)}
+                rows={3}
+                className="w-full rounded-lg bg-white/5 border border-white/10 hover:bg-white/[0.03] hover:scale-[1.01] px-3 py-2 text-sm text-white focus:ring-2 focus:ring-violet-500/30
+              focus:ring-offset-0 transition focus:outline-none"
               />
             </div>
 
-          </div>
+            <div className="mt-8 space-y-6 no-print">
 
-          {/* NOTES */}
-          <div className="mt-6 space-y-1">
-            <label className="text-xs text-slate-400">Notes</label>
-            <textarea
-              value={notes}
-              onKeyDown={focusNext}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={3}
-              className="w-full rounded-lg bg-white/5 border border-white/10 hover:bg-white/[0.03] hover:scale-[1.01] px-3 py-2 text-sm text-white focus:ring-2 focus:ring-violet-500/30
-              focus:ring-offset-0 transition focus:outline-none"
-            />
-          </div>
+              {/* ===== TOTALS CARD ===== */}
+              <div className="ml-auto w-full max-w-sm sticky bottom-6 backdrop-blur-md rounded-2xl border border-violet-500/20 bg-gradient-to-br from-[#0b0b12] to-[#111124] p-6 space-y-4 shadow-[0_0_40px_rgba(124,58,237,0.15)] animate-[pulseSoft_3s_ease-in-out_infinite]">
 
-          <div className="mt-8 space-y-6 no-print">
-
-            {/* ===== TOTALS CARD ===== */}
-            <div className="ml-auto w-full max-w-sm sticky bottom-6 backdrop-blur-md rounded-2xl border border-violet-500/20 bg-gradient-to-br from-[#0b0b12] to-[#111124] p-6 space-y-4 shadow-[0_0_40px_rgba(124,58,237,0.15)] animate-[pulseSoft_3s_ease-in-out_infinite]">
-
-              {/* Subtotal */}
-              <div className="flex justify-between text-sm text-white/70">
-                <span>Subtotal</span>
-                <span>{subtotalFormatted}</span>
-              </div>
-
-              {/* Tax */}
-              {taxRate > 0 && (
+                {/* Subtotal */}
                 <div className="flex justify-between text-sm text-white/70">
-                  <span>Tax ({taxRate}%)</span>
-                  <span>
+                  <span>Subtotal</span>
+                  <span>{subtotalFormatted}</span>
+                </div>
+
+                {/* Tax */}
+                {taxRate > 0 && (
+                  <div className="flex justify-between text-sm text-white/70">
+                    <span>Tax ({taxRate}%)</span>
+                    <span>
+                      {currencySymbol}
+                      {Number(taxAmount || 0).toLocaleString(getLocale(currency || "USD"))}
+                    </span>
+                  </div>
+                )}
+
+                {/* Discount */}
+                {discount > 0 && (
+                  <div className="flex justify-between text-sm text-rose-300">
+                    <span>Discount</span>
+                    <span>
+                      -{currencySymbol}{discount.toLocaleString()}
+                    </span>
+                  </div>
+                )}
+
+                {/* Divider */}
+                <div className="border-t border-white/10 my-2" />
+
+                {/* Total */}
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-white/60">Total</span>
+                  <span className="text-4xl font-semibold tracking-tight text-white drop-shadow-[0_0_20px_rgba(124,58,237,0.25)]">
                     {currencySymbol}
-                    {Number(taxAmount || 0).toLocaleString(getLocale(currency || "USD"))}
+                    {total.toLocaleString(getLocale(currency || "USD"))}
                   </span>
                 </div>
-              )}
 
-              {/* Discount */}
-              {discount > 0 && (
-                <div className="flex justify-between text-sm text-rose-300">
-                  <span>Discount</span>
-                  <span>
-                    -{currencySymbol}{discount.toLocaleString()}
-                  </span>
-                </div>
-              )}
+                {(taxRate > 0 || discount > 0) && (
+                  <div className="text-[11px] text-white/50 font-medium mt-1 text-right">
+                    {taxRate > 0 && `+${taxRate}% tax `}
+                    {discount > 0 && `• -${currencySymbol}${discount}`}
+                  </div>
+                )}
 
-              {/* Divider */}
-              <div className="border-t border-white/10 my-2" />
-
-              {/* Total */}
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-white/60">Total</span>
-                <span className="text-4xl font-semibold tracking-tight text-white drop-shadow-[0_0_20px_rgba(124,58,237,0.25)]">
-                  {currencySymbol}
-                  {total.toLocaleString(getLocale(currency || "USD"))}
-                </span>
               </div>
 
-              {(taxRate > 0 || discount > 0) && (
-                <div className="text-[11px] text-white/50 font-medium mt-1 text-right">
-                  {taxRate > 0 && `+${taxRate}% tax `}
-                  {discount > 0 && `• -${currencySymbol}${discount}`}
-                </div>
-              )}
+              {/* ===== ACTIONS ===== */}
+              <div className="flex justify-end gap-2">
 
-            </div>
-
-            {/* ===== ACTIONS ===== */}
-            <div className="flex justify-end gap-2">
-
-              {/* Save ALWAYS visible */}
-              <button
-                onClick={() => {
-                  if (saving) return;
-
-                  if (
-                    previousClientCurrency &&
-                    currency &&
-                    previousClientCurrency !== currency
-                  ) {
-                    setPendingAction("save");
-                    setShowCurrencyModal(true);
-                    return;
-                  }
-
-                  onSave();
-                }}
-                disabled={saving}
-                className={`px-4 py-2 rounded-xl font-semibold transition-all duration-200 ease-out
-                  ${justSaved
-                    ? "bg-emerald-500 text-black shadow-[0_0_25px_rgba(16,185,129,0.45)]"
-                    : "bg-white/10 hover:bg-white/20 text-white"
-                  }
-                    hover:scale-[1.02]
-                    active:scale-[0.97] active:shadow-none
-                    disabled:opacity-50`}
-              >
-                {saving ? "Saving…" : justSaved ? "Saved ✓" : "Save"}
-              </button>
-
-              {/* Draft only */}
-              {!isIssued && (
+                {/* Save ALWAYS visible */}
                 <button
                   onClick={() => {
+                    if (saving) return;
+
                     if (
                       previousClientCurrency &&
                       currency &&
                       previousClientCurrency !== currency
                     ) {
-                      setPendingAction("issue");
+                      setPendingAction("save");
                       setShowCurrencyModal(true);
                       return;
                     }
 
-                    onIssue();
+                    onSave();
                   }}
-                  className="px-4 py-2 rounded-xl font-semibold text-white
+                  disabled={saving}
+                  className={`px-4 py-2 rounded-xl font-semibold transition-all duration-200 ease-out
+                  ${justSaved
+                      ? "bg-emerald-500 text-black shadow-[0_0_25px_rgba(16,185,129,0.45)]"
+                      : "bg-white/10 hover:bg-white/20 text-white"
+                    }
+                    hover:scale-[1.02]
+                    active:scale-[0.97] active:shadow-none
+                    disabled:opacity-50`}
+                >
+                  {saving ? "Saving…" : justSaved ? "Saved ✓" : "Save"}
+                </button>
+
+                {/* Draft only */}
+                {!isIssued && (
+                  <button
+                    onClick={() => {
+                      if (
+                        previousClientCurrency &&
+                        currency &&
+                        previousClientCurrency !== currency
+                      ) {
+                        setPendingAction("issue");
+                        setShowCurrencyModal(true);
+                        return;
+                      }
+
+                      onIssue();
+                    }}
+                    className="px-4 py-2 rounded-xl font-semibold text-white
                     bg-gradient-to-r from-violet-600 to-indigo-600
                     hover:from-violet-500 hover:to-indigo-500
                     shadow-[0_0_25px_rgba(124,58,237,0.4)]
                     hover:scale-[1.02]
                     active:scale-[0.97] active:shadow-none
                     transition-all duration-150 ease-out"
-                >
-                  Issue & Lock Invoice
-                </button>
-              )}
-
-              {/* Issued only */}
-              {isIssued && (
-                <>
-                  <button
-                    onClick={onSendEmail}
-                    className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold"
                   >
-                    Send
+                    Issue & Lock Invoice
                   </button>
+                )}
 
-                  <button
-                    onClick={() => window.print()}
-                    className="px-4 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-semibold"
-                  >
-                    Print
-                  </button>
+                {/* Issued only */}
+                {isIssued && (
+                  <>
+                    <button
+                      onClick={onSendEmail}
+                      className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold"
+                    >
+                      Send
+                    </button>
 
-                  <button
-                    onClick={() => window.print()}
-                    className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold"
-                  >
-                    Download PDF
-                  </button>
-                </>
-              )}
+                    <button
+                      onClick={() => window.print()}
+                      className="px-4 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-semibold"
+                    >
+                      Print
+                    </button>
 
+                    <button
+                      onClick={() => window.print()}
+                      className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+                    >
+                      Download PDF
+                    </button>
+                  </>
+                )}
+
+              </div>
             </div>
-          </div>
 
+          </div>
         </div>
-      </div>
       </div>
 
 
