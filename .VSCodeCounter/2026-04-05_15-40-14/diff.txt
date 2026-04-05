@@ -1,0 +1,37 @@
+Date : 2026-04-05 15:40:14
+Directory : /Users/nssanjeev/Documents/cosmi
+Total : 5 files,  167 codes, 6 comments, 33 blanks, all 206 lines
+
+Languages
++----------------+------------+------------+------------+------------+------------+
+| language       | files      | code       | comment    | blank      | total      |
++----------------+------------+------------+------------+------------+------------+
+| TypeScript JSX |          5 |        167 |          6 |         33 |        206 |
++----------------+------------+------------+------------+------------+------------+
+
+Directories
++-------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                      | files      | code       | comment    | blank      | total      |
++-------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                         |          5 |        167 |          6 |         33 |        206 |
+| app                                                                                       |          5 |        167 |          6 |         33 |        206 |
+| app/invoice                                                                               |          1 |          2 |          0 |          1 |          3 |
+| app/invoice-editor                                                                        |          4 |        165 |          6 |         32 |        203 |
+| app/invoice-editor (Files)                                                                |          1 |         13 |          0 |          1 |         14 |
+| app/invoice-editor/components                                                             |          2 |        135 |          6 |         28 |        169 |
+| app/invoice-editor/components/invoice                                                     |          2 |        135 |          6 |         28 |        169 |
+| app/invoice-editor/hooks                                                                  |          1 |         17 |          0 |          3 |         20 |
+| app/invoice/[id]                                                                          |          1 |          2 |          0 |          1 |          3 |
++-------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++-------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+
+| filename                                                                                  | language       | code       | comment    | blank      | total      |
++-------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+
+| /Users/nssanjeev/Documents/cosmi/app/invoice-editor/components/invoice/InvoiceForm.tsx    | TypeScript JSX |        132 |          6 |         29 |        167 |
+| /Users/nssanjeev/Documents/cosmi/app/invoice-editor/components/invoice/InvoicePreview.tsx | TypeScript JSX |          3 |          0 |         -1 |          2 |
+| /Users/nssanjeev/Documents/cosmi/app/invoice-editor/hooks/useInvoiceEditor.tsx            | TypeScript JSX |         17 |          0 |          3 |         20 |
+| /Users/nssanjeev/Documents/cosmi/app/invoice-editor/page.tsx                              | TypeScript JSX |         13 |          0 |          1 |         14 |
+| /Users/nssanjeev/Documents/cosmi/app/invoice/[id]/page.tsx                                | TypeScript JSX |          2 |          0 |          1 |          3 |
+| Total                                                                                     |                |        167 |          6 |         33 |        206 |
++-------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+

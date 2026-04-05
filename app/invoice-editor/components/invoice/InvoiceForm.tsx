@@ -178,7 +178,7 @@ export default function InvoiceForm({
   isValidating,
   setLineItems,
   previousClientCurrency,
-setPreviousClientCurrency,
+  setPreviousClientCurrency,
 
 }: Props) {
 
@@ -689,10 +689,10 @@ hover:bg-white/[0.04]">
                 onKeyDown={focusNext}
                 placeholder="client@email.com"
                 className={`
-  ${baseInput}
-  ${errors.clientEmail ? errorState : normalState}
-  ${!errors.clientEmail ? focusState : ""}
-`}
+                ${baseInput}
+                ${errors.clientEmail ? errorState : normalState}
+                ${!errors.clientEmail ? focusState : ""}
+              `}
               />
 
               {errors.clientEmail && (
@@ -716,11 +716,11 @@ hover:bg-white/[0.04]">
                 onChange={(e) => setClientAddress(e.target.value)}
                 rows={2}
                 className={`
-  ${baseInput}
-  ${normalState}
-  ${focusState}
-  ${lockStyle}
-`}
+                ${baseInput}
+                ${normalState}
+                ${focusState}
+                ${lockStyle}
+              `}
               />
             </div>
 
@@ -753,10 +753,10 @@ hover:bg-white/[0.04]">
                   }}
                   onKeyDown={focusNext}
                   className={`
-  ${baseInput}
-  ${errors.date ? errorState : normalState}
-  ${!errors.date ? focusState : ""}
-`}
+                  ${baseInput}
+                  ${errors.date ? errorState : normalState}
+                  ${!errors.date ? focusState : ""}
+                `}
                 />
 
                 {errors.date && (
@@ -788,10 +788,10 @@ hover:bg-white/[0.04]">
                   }}
                   onKeyDown={focusNext}
                   className={`
-  ${baseInput}
-  ${errors.dueDate ? errorState : normalState}
-  ${!errors.dueDate ? focusState : ""}
-`}
+                  ${baseInput}
+                  ${errors.dueDate ? errorState : normalState}
+                  ${!errors.dueDate ? focusState : ""}
+                `}
                 />
 
                 {errors.dueDate && (
@@ -817,7 +817,7 @@ hover:bg-white/[0.04]">
           <div className="h-[1.5px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
           <div className="absolute inset-0 blur-[4px] bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent" />
         </div>
-      </div>
+      
 
 
       <div className={`mt-6 bg-transparent border border-white/5 rounded-2xl p-5 backdrop-blur-sm space-y-4 transition
@@ -863,13 +863,13 @@ hover:bg-white/[0.04]">
               <div
                 key={idx}
                 className="grid grid-cols-12 gap-2 items-center bg-transparent border border-white/10
-hover:bg-white/[0.04]
-hover:scale-[1.01]
-hover:shadow-[0_8px_25px_rgba(0,0,0,0.35)]
-rounded-xl px-3 py-2
-transition-all duration-200
-hover:border-white/20
-focus-within:border-violet-500/40"
+                  hover:bg-white/[0.04]
+                  hover:scale-[1.01]
+                  hover:shadow-[0_8px_25px_rgba(0,0,0,0.35)]
+                  rounded-xl px-3 py-2
+                  transition-all duration-200
+                  hover:border-white/20
+                  focus-within:border-violet-500/40"
               >
                 {/* Description */}
                 <input
@@ -884,13 +884,13 @@ focus-within:border-violet-500/40"
                     if (errors.lineItems) setErrors(prev => ({ ...prev, lineItems: false }));
                   }}
                   className="col-span-5 w-full px-3 py-2 rounded-lg bg-transparent border border-white/10
-hover:bg-white/[0.04]
-hover:scale-[1.015]
-hover:shadow-[0_8px_30px_rgba(0,0,0,0.4)]
-text-sm text-white
-focus:outline-none
-focus:ring-2 focus:ring-violet-500/30
-"
+                    hover:bg-white/[0.04]
+                    hover:scale-[1.015]
+                    hover:shadow-[0_8px_30px_rgba(0,0,0,0.4)]
+                    text-sm text-white
+                    focus:outline-none
+                    focus:ring-2 focus:ring-violet-500/30
+                    "
                 />
 
                 {/* Quantity */}
@@ -906,13 +906,13 @@ focus:ring-2 focus:ring-violet-500/30
                     if (errors.lineItems) setErrors(prev => ({ ...prev, lineItems: false }));
                   }}
                   className="col-span-2 w-full px-3 py-2 rounded-lg bg-transparent border border-white/10
-hover:bg-white/[0.04]
-hover:scale-[1.015]
-hover:shadow-[0_8px_30px_rgba(0,0,0,0.4)]
-text-sm text-white
-focus:outline-none
-focus:ring-2 focus:ring-violet-500/30
-"
+                  hover:bg-white/[0.04]
+                  hover:scale-[1.015]
+                  hover:shadow-[0_8px_30px_rgba(0,0,0,0.4)]
+                  text-sm text-white
+                  focus:outline-none
+                  focus:ring-2 focus:ring-violet-500/30
+                  "
                 />
 
                 {/* Rate */}
@@ -958,8 +958,8 @@ focus:ring-2 focus:ring-violet-500/30
                     if (errors.lineItems) setErrors(prev => ({ ...prev, lineItems: false }));
                   }}
                   className="col-span-2 w-full px-3 py-2 rounded-lg bg-transparent border border-white/10 hover:bg-white/[0.04]
-hover:scale-[1.015]
-hover:shadow-[0_8px_30px_rgba(0,0,0,0.4)] text-sm text-white focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500"
+                  hover:scale-[1.015]
+                  hover:shadow-[0_8px_30px_rgba(0,0,0,0.4)] text-sm text-white focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500"
                 />
 
                 {/* Amount (READ ONLY) */}
@@ -988,10 +988,10 @@ hover:shadow-[0_8px_30px_rgba(0,0,0,0.4)] text-sm text-white focus:outline-none 
           title={isIssued ? "Locked after issuing invoice" : ""}
           onClick={addLine}
           className="mt-4 px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold transition-all duration-150 ease-out
-active:scale-[0.97]
-active:shadow-none
-hover:scale-[1.02] shadow-[0_0_25px_rgba(124,58,237,0.35)]
-hover:shadow-[0_0_45px_rgba(124,58,237,0.55)]"
+          active:scale-[0.97]
+          active:shadow-none
+          hover:scale-[1.02] shadow-[0_0_25px_rgba(124,58,237,0.35)]
+          hover:shadow-[0_0_45px_rgba(124,58,237,0.55)]"
         >
           + Add line item
         </button>
@@ -1012,7 +1012,7 @@ hover:shadow-[0_0_45px_rgba(124,58,237,0.55)]"
                 onKeyDown={focusNext}
                 onChange={(e) => setTaxRate(Number(e.target.value))}
                 className={`w-full rounded-lg bg-white/5 border border-white/10 hover:bg-white/[0.03] hover:scale-[1.01] px-3 py-2 text-sm text-white focus:outline-none ${lockStyle} focus:ring-2 focus:ring-violet-500/30
-`} />
+                `} />
             </div>
 
             <div className="space-y-1">
@@ -1027,11 +1027,11 @@ hover:shadow-[0_0_45px_rgba(124,58,237,0.55)]"
                 onKeyDown={focusNext}
                 onChange={(e) => setDiscount(Number(e.target.value))}
                 className={`
-  ${baseInput}
-  ${normalState}
-  ${focusState}
-  ${lockStyle}
-`}
+                ${baseInput}
+                ${normalState}
+                ${focusState}
+                ${lockStyle}
+              `}
               />
             </div>
 
@@ -1046,7 +1046,7 @@ hover:shadow-[0_0_45px_rgba(124,58,237,0.55)]"
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
               className="w-full rounded-lg bg-white/5 border border-white/10 hover:bg-white/[0.03] hover:scale-[1.01] px-3 py-2 text-sm text-white focus:ring-2 focus:ring-violet-500/30
- focus:ring-offset-0 transition focus:outline-none"
+              focus:ring-offset-0 transition focus:outline-none"
             />
           </div>
 
@@ -1125,13 +1125,13 @@ hover:shadow-[0_0_45px_rgba(124,58,237,0.55)]"
                 }}
                 disabled={saving}
                 className={`px-4 py-2 rounded-xl font-semibold transition-all duration-200 ease-out
-${justSaved
+                  ${justSaved
                     ? "bg-emerald-500 text-black shadow-[0_0_25px_rgba(16,185,129,0.45)]"
                     : "bg-white/10 hover:bg-white/20 text-white"
                   }
-hover:scale-[1.02]
-active:scale-[0.97] active:shadow-none
-disabled:opacity-50`}
+                    hover:scale-[1.02]
+                    active:scale-[0.97] active:shadow-none
+                    disabled:opacity-50`}
               >
                 {saving ? "Saving…" : justSaved ? "Saved ✓" : "Save"}
               </button>
@@ -1153,12 +1153,12 @@ disabled:opacity-50`}
                     onIssue();
                   }}
                   className="px-4 py-2 rounded-xl font-semibold text-white
-bg-gradient-to-r from-violet-600 to-indigo-600
-hover:from-violet-500 hover:to-indigo-500
-shadow-[0_0_25px_rgba(124,58,237,0.4)]
-hover:scale-[1.02]
-active:scale-[0.97] active:shadow-none
-transition-all duration-150 ease-out"
+                    bg-gradient-to-r from-violet-600 to-indigo-600
+                    hover:from-violet-500 hover:to-indigo-500
+                    shadow-[0_0_25px_rgba(124,58,237,0.4)]
+                    hover:scale-[1.02]
+                    active:scale-[0.97] active:shadow-none
+                    transition-all duration-150 ease-out"
                 >
                   Issue & Lock Invoice
                 </button>
@@ -1195,6 +1195,7 @@ transition-all duration-150 ease-out"
 
         </div>
       </div>
+      </div>
 
 
       {/* Currency Mismatch Modal*/}
@@ -1212,9 +1213,9 @@ transition-all duration-150 ease-out"
 
           {/* MODAL */}
           <div className="relative w-full max-w-md rounded-2xl 
-    border border-sky-500/20 
-    bg-[#0b0b12] p-6 
-    shadow-[0_0_60px_rgba(56,189,248,0.25)]">
+            border border-sky-500/20 
+            bg-[#0b0b12] p-6 
+            shadow-[0_0_60px_rgba(56,189,248,0.25)]">
 
             {/* TITLE */}
             <div className="text-lg font-semibold text-sky-300 mb-2">
@@ -1242,7 +1243,7 @@ transition-all duration-150 ease-out"
                   setPendingAction(null);
                 }}
                 className="px-4 py-2 rounded-lg border border-white/10 
-          text-slate-300 hover:bg-white/5 transition"
+                text-slate-300 hover:bg-white/5 transition"
               >
                 Go Back
               </button>
@@ -1262,7 +1263,7 @@ transition-all duration-150 ease-out"
                   setPendingAction(null);
                 }}
                 className="px-4 py-2 rounded-lg 
-          bg-sky-500 hover:bg-sky-600 text-black font-semibold transition"
+                bg-sky-500 hover:bg-sky-600 text-black font-semibold transition"
               >
                 Continue
               </button>
