@@ -125,6 +125,7 @@ export default function InvoiceEditorPage() {
     setNotes,
     lineItems,
 
+
     company,
 
     subtotal,
@@ -146,6 +147,9 @@ export default function InvoiceEditorPage() {
     idToUse,
     createdInvoiceId,
     ensurePublicLink,
+
+    terms,
+    setTerms,
 
     shouldUpsellClient,
     setShouldUpsellClient,
@@ -855,7 +859,8 @@ export default function InvoiceEditorPage() {
           setUserTouchedCurrency={setUserTouchedCurrency}
           previousClientCurrency={previousClientCurrency}
           setPreviousClientCurrency={setPreviousClientCurrency}
-          
+          terms={terms}
+          setTerms={setTerms}
         />
 
       </div>
@@ -948,6 +953,7 @@ export default function InvoiceEditorPage() {
             taxAmount={taxAmount}
             total={total}
             notes={notes}
+            terms={terms}
             company={company}
             currency={currency}
             plan={plan}

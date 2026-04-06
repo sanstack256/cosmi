@@ -73,6 +73,9 @@ type Props = {
 
   idToUse: string;
 
+  terms: string;
+  setTerms: (v: string) => void;
+
 
   userTouchedCurrency: boolean;
   setUserTouchedCurrency: (v: boolean) => void;
@@ -157,6 +160,9 @@ export default function InvoiceForm({
   addLine,
   removeLine,
 
+  terms,
+  setTerms,
+
   subtotalFormatted,
   total,
   onSave,
@@ -212,6 +218,9 @@ export default function InvoiceForm({
     "border border-rose-500/60 ring-2 ring-rose-500/30 bg-rose-500/[0.04]";
 
   const [paymentTerms, setPaymentTerms] = useState<"due_on_receipt" | "net_7" | "net_15" | "net_30">("due_on_receipt");
+
+
+
 
 
   const filteredClients = isPro
@@ -1108,6 +1117,21 @@ bg-[#0f0f18]">
                 rows={3}
                 className="w-full rounded-lg bg-white/5 border border-white/10 hover:bg-white/[0.03] hover:scale-[1.01] px-3 py-2 text-sm text-white focus:ring-2 focus:ring-violet-500/30
               focus:ring-offset-0 transition focus:outline-none"
+              />
+            </div>
+
+            {/* TERMS & CONDITIONS */}
+            <div className="mt-6 space-y-1">
+              <label className="text-xs text-slate-400">
+                Terms & Conditions
+              </label>
+
+              <textarea
+                value={terms}
+                onChange={(e) => setTerms(e.target.value)}
+                rows={3}
+                placeholder="Payment terms, legal notes, bank details..."
+                className="w-full rounded-lg bg-white/5 border border-white/10 hover:bg-white/[0.03] hover:scale-[1.01] px-3 py-2 text-sm text-white focus:ring-2 focus:ring-violet-500/30 focus:outline-none transition"
               />
             </div>
 

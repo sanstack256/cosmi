@@ -96,6 +96,9 @@ export function useInvoiceEditor() {
   );
 
   const [notes, setNotes] = useState("");
+  const [terms, setTerms] = useState("")
+
+
 
   const [lineItems, setLineItems] = useState<LineItem[]>([
     { desc: "", qty: 1, rate: "" },
@@ -141,6 +144,7 @@ export function useInvoiceEditor() {
     }
 
     setNotes(editingInvoice.meta?.notes ?? "");
+    setTerms(editingInvoice.meta?.terms ?? "");
 
     if (editingInvoice.meta?.lineItems?.length) {
       setLineItems(
@@ -368,6 +372,7 @@ export function useInvoiceEditor() {
             rate: Number(li.rate || 0),
           })),
           notes,
+          terms,
         },
 
         company,
@@ -450,6 +455,7 @@ export function useInvoiceEditor() {
     discount,
     setDiscount,
     notes,
+
     setNotes,
     lineItems,
     currency,
@@ -463,6 +469,8 @@ export function useInvoiceEditor() {
     taxAmount,
     total,
 
+    terms,
+    setTerms,
 
     updateLine,
     addLine,

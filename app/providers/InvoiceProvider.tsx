@@ -86,6 +86,7 @@ export type Invoice = {
   meta?: {
     notes?: string;
     lineItems?: Array<{ desc: string; qty: number; rate: number }>;
+    terms?: string;
   };
 
   activity?: {

@@ -63,6 +63,7 @@ type Props = {
   taxAmount: number;
   total: number;
   notes: string;
+  terms?: string;
   company?: Company;
   plan?: string;
   payments?: any[];
@@ -82,6 +83,7 @@ export default function InvoicePreview({
   taxAmount,
   total,
   notes,
+  terms,
   company,
   plan,
   discount,
@@ -198,20 +200,7 @@ export default function InvoicePreview({
           </header>
 
           <div className="mt-6">
-            <span
-              className={`px-3 py-1 rounded-full text-xs font-semibold border
-      ${computedStatus === "paid"
-                  ? "bg-emerald-100 text-emerald-700 border-emerald-200"
-                  : computedStatus === "partial"
-                    ? "bg-amber-100 text-amber-700 border-amber-200"
-                    : computedStatus === "overdue"
-                      ? "bg-rose-100 text-rose-700 border-rose-200"
-                      : "bg-slate-100 text-slate-600 border-slate-200"
-                }
-    `}
-            >
-              {computedStatus.toUpperCase()}
-            </span>
+
           </div>
 
           {/* ===== TABLE ===== */}
@@ -305,14 +294,18 @@ export default function InvoicePreview({
               </div>
             )}
 
-            {/* ===== PAYMENT TERMS ===== */}
-            <div className="mt-12 text-sm text-slate-700">
-              <div className="font-semibold mb-2">Payment Terms</div>
+            {/* ===== TERMS & CONDITIONS ===== */}
+            {terms && (
+              <div className="mt-12 text-sm">
+                <div className="font-semibold mb-2 text-slate-800">
+                  Terms & Conditions
+                </div>
 
-              <div className="border border-slate-300 rounded-md p-4">
-                Payment is due within 15 days unless otherwise agreed.
+                <div className="border border-slate-300 rounded-md p-4 text-slate-800 leading-relaxed whitespace-pre-line">
+                  {terms}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* ===== FOOTER ===== */}
             {plan === "free" && (
