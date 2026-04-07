@@ -85,8 +85,28 @@ export type Invoice = {
 
   meta?: {
     notes?: string;
-    lineItems?: Array<{ desc: string; qty: number; rate: number }>;
     terms?: string;
+
+    // legacy (backward compatibility)
+    poNumber?: string | null;
+
+    // new structured metadata
+    extra?: {
+      poNumber?: string | null;
+
+      // future-ready
+      fields?: {
+        key: string;
+        label: string;
+        value: string;
+      }[];
+    };
+
+    lineItems?: {
+      desc: string;
+      qty: number;
+      rate: number;
+    }[];
   };
 
   activity?: {

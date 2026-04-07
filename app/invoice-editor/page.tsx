@@ -151,6 +151,9 @@ export default function InvoiceEditorPage() {
     terms,
     setTerms,
 
+    poNumber,
+    setPoNumber,
+
     shouldUpsellClient,
     setShouldUpsellClient,
 
@@ -861,6 +864,8 @@ export default function InvoiceEditorPage() {
           setPreviousClientCurrency={setPreviousClientCurrency}
           terms={terms}
           setTerms={setTerms}
+          poNumber={poNumber}
+          setPoNumber={setPoNumber}
         />
 
       </div>
@@ -959,6 +964,7 @@ export default function InvoiceEditorPage() {
             plan={plan}
             discount={discount}
             payments={currentInvoice?.payments || []}
+            poNumber={poNumber}
           />
         </div>
       </div>

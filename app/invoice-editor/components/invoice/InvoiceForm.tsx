@@ -76,6 +76,9 @@ type Props = {
   terms: string;
   setTerms: (v: string) => void;
 
+  poNumber: string;
+  setPoNumber: (v: string) => void;
+
 
   userTouchedCurrency: boolean;
   setUserTouchedCurrency: (v: boolean) => void;
@@ -163,6 +166,9 @@ export default function InvoiceForm({
   terms,
   setTerms,
 
+  poNumber,
+  setPoNumber,
+
   subtotalFormatted,
   total,
   onSave,
@@ -221,8 +227,6 @@ export default function InvoiceForm({
 
   const [paymentTerms, setPaymentTerms] = useState<"due_on_receipt" | "net_7" | "net_15" | "net_30">("due_on_receipt");
 
-
-  const [poNumber, setPoNumber] = useState("");
 
 
   const filteredClients = isPro

@@ -70,6 +70,7 @@ type Props = {
   discount?: number;
   currency?: string;
   status?: string;
+  poNumber?: string | null;
 };
 
 export default function InvoicePreview({
@@ -90,6 +91,7 @@ export default function InvoicePreview({
   currency,
   status,
   payments,
+  poNumber,
 }: Props) {
 
 
@@ -194,6 +196,16 @@ export default function InvoicePreview({
                     {safeFormatDate(dueDate)}
                   </div>
                 )}
+
+
+
+                {poNumber && (
+                  <div>
+                    <span className="text-slate-500">PO Number: </span>
+                    {poNumber}
+                  </div>
+                )}
+
 
               </div>
             </div>

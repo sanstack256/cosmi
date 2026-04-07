@@ -60,6 +60,8 @@ export function useInvoiceEditor() {
   const [shouldUpsellClient, setShouldUpsellClient] = useState(false);
   const { invoices, clients, addInvoice, updateInvoice, addClient } = useInvoices();
 
+
+
   /* ---------- Company ---------- */
 
   const [company, setCompany] = useState<Company>({});
@@ -96,7 +98,8 @@ export function useInvoiceEditor() {
   );
 
   const [notes, setNotes] = useState("");
-  const [terms, setTerms] = useState("")
+  const [terms, setTerms] = useState("");
+  const [poNumber, setPoNumber] = useState("");
 
 
 
@@ -145,6 +148,11 @@ export function useInvoiceEditor() {
 
     setNotes(editingInvoice.meta?.notes ?? "");
     setTerms(editingInvoice.meta?.terms ?? "");
+    setPoNumber(
+      editingInvoice.meta?.extra?.poNumber ??
+      editingInvoice.meta?.poNumber ??
+      ""
+    );
 
     if (editingInvoice.meta?.lineItems?.length) {
       setLineItems(
@@ -186,6 +194,11 @@ export function useInvoiceEditor() {
     setDate(new Date().toISOString().slice(0, 10));
 
     setNotes(source.meta?.notes ?? "");
+    setPoNumber(
+      source.meta?.extra?.poNumber ??
+      source.meta?.poNumber ??
+      ""
+    );
 
     if (source.meta?.lineItems?.length) {
       setLineItems(
@@ -373,6 +386,9 @@ export function useInvoiceEditor() {
           })),
           notes,
           terms,
+          extra: {
+            poNumber: poNumber || null,
+          }
         },
 
         company,
@@ -489,6 +505,9 @@ export function useInvoiceEditor() {
     setUserTouchedCurrency,
     setPreviousClientCurrency,
     previousClientCurrency,
+
+    poNumber,
+    setPoNumber,
 
   };
 }
