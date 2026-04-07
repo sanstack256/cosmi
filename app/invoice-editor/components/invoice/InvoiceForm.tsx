@@ -196,6 +196,8 @@ export default function InvoiceForm({
   const [search, setSearch] = useState("");
   const [showResults, setShowResults] = useState(false);
 
+  const [showMoreDetails, setShowMoreDetails] = useState(false);
+
   const [activeIndex, setActiveIndex] = useState(-1);
 
   const { isPro } = useAuth();
@@ -220,7 +222,7 @@ export default function InvoiceForm({
   const [paymentTerms, setPaymentTerms] = useState<"due_on_receipt" | "net_7" | "net_15" | "net_30">("due_on_receipt");
 
 
-
+  const [poNumber, setPoNumber] = useState("");
 
 
   const filteredClients = isPro
@@ -877,7 +879,37 @@ bg-[#0f0f18]">
               </select>
             </div>
 
+            {/* MORE DETAILS TOGGLE */}
+            <div className="mt-6">
+              <button
+                type="button"
+                onClick={() => setShowMoreDetails((prev) => !prev)}
+                className="text-xs text-indigo-400 hover:text-indigo-300 transition"
+              >
+                {showMoreDetails ? "− Hide details" : "+ Add more details"}
+              </button>
+            </div>
 
+            {showMoreDetails && (
+              <div className="mt-4 space-y-4 border border-white/5 rounded-2xl p-4 bg-white/[0.02]">
+
+                {/* PO NUMBER */}
+                <div className="space-y-1">
+                  <label className="text-xs text-slate-400">
+                    PO Number
+                  </label>
+
+                  <input
+                    type="text"
+                    value={poNumber}
+                    onChange={(e) => setPoNumber(e.target.value)}
+                    placeholder="Purchase order (optional)"
+                    className={`${baseInput} ${normalState} ${focusState}`}
+                  />
+                </div>
+
+              </div>
+            )}
 
 
 
