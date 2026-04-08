@@ -71,6 +71,13 @@ type Props = {
   currency?: string;
   status?: string;
   poNumber?: string | null;
+
+  extraFields?: {
+    key: string;
+    label: string;
+    value: string;
+  }[];
+
 };
 
 export default function InvoicePreview({
@@ -92,6 +99,7 @@ export default function InvoicePreview({
   status,
   payments,
   poNumber,
+  extraFields,
 }: Props) {
 
 
@@ -199,11 +207,21 @@ export default function InvoicePreview({
 
 
 
-                {poNumber && (
-                  <div>
-                    <span className="text-slate-500">PO Number: </span>
-                    {poNumber}
-                  </div>
+                {/* Dynamic extra fields (source of truth) */}
+                {extraFields?.length ? (
+                  extraFields.map((field) => (
+                    <div key={field.key}>
+                      <span className="text-slate-500">{field.label}: </span>
+                      {field.value}
+                    </div>
+                  ))
+                ) : (
+                  poNumber && (
+                    <div>
+                      <span className="text-slate-500">PO Number: </span>
+                      {poNumber}
+                    </div>
+                  )
                 )}
 
 

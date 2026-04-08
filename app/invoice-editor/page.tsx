@@ -154,6 +154,9 @@ export default function InvoiceEditorPage() {
     poNumber,
     setPoNumber,
 
+    extraFields,
+    setExtraFields,
+
     shouldUpsellClient,
     setShouldUpsellClient,
 
@@ -965,6 +968,7 @@ export default function InvoiceEditorPage() {
             discount={discount}
             payments={currentInvoice?.payments || []}
             poNumber={poNumber}
+            extraFields={extraFields}
           />
         </div>
       </div>

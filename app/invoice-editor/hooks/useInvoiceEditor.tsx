@@ -101,6 +101,9 @@ export function useInvoiceEditor() {
   const [terms, setTerms] = useState("");
   const [poNumber, setPoNumber] = useState("");
 
+  const [extraFields, setExtraFields] = useState<
+    { key: string; label: string; value: string }[]
+  >([]);
 
 
   const [lineItems, setLineItems] = useState<LineItem[]>([
@@ -154,6 +157,23 @@ export function useInvoiceEditor() {
       ""
     );
 
+    const po =
+      editingInvoice.meta?.extra?.poNumber ??
+      editingInvoice.meta?.poNumber ??
+      "";
+
+    if (po) {
+      setExtraFields([
+        {
+          key: "poNumber",
+          label: "PO Number",
+          value: po,
+        },
+      ]);
+    } else {
+      setExtraFields([]);
+    }
+
     if (editingInvoice.meta?.lineItems?.length) {
       setLineItems(
         editingInvoice.meta.lineItems.map((li: any) => ({
@@ -199,6 +219,23 @@ export function useInvoiceEditor() {
       source.meta?.poNumber ??
       ""
     );
+
+    const po =
+      source.meta?.extra?.poNumber ??
+      source.meta?.poNumber ??
+      "";
+
+    if (po) {
+      setExtraFields([
+        {
+          key: "poNumber",
+          label: "PO Number",
+          value: po,
+        },
+      ]);
+    } else {
+      setExtraFields([]);
+    }
 
     if (source.meta?.lineItems?.length) {
       setLineItems(
@@ -388,6 +425,7 @@ export function useInvoiceEditor() {
           terms,
           extra: {
             poNumber: poNumber || null,
+            fields: extraFields.length > 0 ? extraFields : [],
           }
         },
 
@@ -508,6 +546,9 @@ export function useInvoiceEditor() {
 
     poNumber,
     setPoNumber,
+
+    extraFields,
+    setExtraFields,
 
   };
 }
