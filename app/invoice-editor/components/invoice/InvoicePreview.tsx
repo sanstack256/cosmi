@@ -209,12 +209,16 @@ export default function InvoicePreview({
 
                 {/* Dynamic extra fields (source of truth) */}
                 {extraFields?.length ? (
-                  extraFields.map((field) => (
-                    <div key={field.key}>
-                      <span className="text-slate-500">{field.label}: </span>
-                      {field.value}
-                    </div>
-                  ))
+                  extraFields
+                    .filter((field) => field.label && field.value)
+                    .map((field) => (
+                      <div key={field.key}>
+                        <span className="text-slate-500">
+                          {field.label}:
+                        </span>{" "}
+                        {field.value}
+                      </div>
+                    ))
                 ) : (
                   poNumber && (
                     <div>

@@ -869,6 +869,8 @@ export default function InvoiceEditorPage() {
           setTerms={setTerms}
           poNumber={poNumber}
           setPoNumber={setPoNumber}
+          extraFields={extraFields}
+          setExtraFields={setExtraFields}
         />
 
       </div>

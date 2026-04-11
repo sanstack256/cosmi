@@ -116,6 +116,22 @@ type Props = {
   }>>;
 
   isValidating: React.RefObject<boolean>;
+
+  extraFields: {
+    key: string;
+    label: string;
+    value: string;
+  }[];
+
+  setExtraFields: (
+    v: {
+      key: string;
+      label: string;
+      value: string;
+    }[]
+  ) => void;
+
+
 };
 
 
@@ -193,6 +209,9 @@ export default function InvoiceForm({
   previousClientCurrency,
   setPreviousClientCurrency,
 
+  extraFields,
+  setExtraFields,
+
 }: Props) {
 
 
@@ -234,6 +253,13 @@ export default function InvoiceForm({
       c.name.toLowerCase().includes(search.toLowerCase())
     )
     : [];
+
+
+  const FIELD_PRESETS = [
+    { key: "poNumber", label: "PO Number" },
+    { key: "projectId", label: "Project ID" },
+    { key: "reference", label: "Reference" },
+  ];
 
 
   const currencyMismatch =
@@ -897,25 +923,99 @@ bg-[#0f0f18]">
             {showMoreDetails && (
               <div className="mt-4 space-y-4 border border-white/5 rounded-2xl p-4 bg-white/[0.02]">
 
-                {/* PO NUMBER */}
-                <div className="space-y-1">
-                  <label className="text-xs text-slate-400">
-                    PO Number
-                  </label>
 
-                  <input
-                    type="text"
-                    value={poNumber}
-                    onChange={(e) => setPoNumber(e.target.value)}
-                    placeholder="Purchase order (optional)"
-                    className={`${baseInput} ${normalState} ${focusState}`}
-                  />
+
+                {/* 🔥 Dynamic Fields */}
+                {extraFields.length === 0 && (
+                  <div className="text-xs text-slate-500">
+                    Add custom fields like PO Number, Project ID, or Reference
+                  </div>
+                )}
+                <div className="space-y-2">
+                  {extraFields.map((field, index) => (
+                    <div
+                      key={field.key}
+                      className="flex items-center gap-2 w-full min-w-0 bg-white/[0.02] border border-white/5 rounded-xl p-2"
+                    >
+                      {/* LABEL */}
+                      <input
+                        type="text"
+                        value={field.label}
+                        onChange={(e) => {
+                          const updated = [...extraFields];
+                          updated[index].label = e.target.value;
+                          setExtraFields(updated);
+                        }}
+                        className="flex-1 h-10 bg-transparent border border-white/10 rounded-lg px-3 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500"
+                        placeholder="Field name"
+                      />
+
+                      {/* VALUE */}
+                      <input
+                        type="text"
+                        value={field.value}
+                        onChange={(e) => {
+                          const updated = [...extraFields];
+                          updated[index].value = e.target.value;
+                          setExtraFields(updated);
+                        }}
+                        className="flex-1 h-10 bg-transparent border border-white/10 rounded-lg px-3 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500"
+                        placeholder="Value"
+                      />
+
+                      {/* DELETE */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setExtraFields(extraFields.filter((_, i) => i !== index));
+                        }}
+                        className="h-10 w-10 flex items-center justify-center rounded-lg text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
                 </div>
+
+                {/* ADD FIELD BUTTON */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    // find first unused preset
+                    const usedKeys = extraFields.map((f) => f.key);
+
+                    const preset = FIELD_PRESETS.find(
+                      (p) => !usedKeys.includes(p.key)
+                    );
+
+                    if (preset) {
+                      setExtraFields([
+                        ...extraFields,
+                        {
+                          key: preset.key,
+                          label: preset.label,
+                          value: "",
+                        },
+                      ]);
+                    } else {
+                      // fallback to custom
+                      setExtraFields([
+                        ...extraFields,
+                        {
+                          key: `field_${Date.now()}`,
+                          label: "",
+                          value: "",
+                        },
+                      ]);
+                    }
+                  }}
+                  className="mt-3 text-sm text-violet-400 hover:text-violet-300 transition"
+                >
+                  + Add custom field
+                </button>
 
               </div>
             )}
-
-
 
           </div>
         </div>
