@@ -920,8 +920,8 @@ bg-[#0f0f18]">
               </button>
             </div>
 
-            {showMoreDetails && (
-              <div className="mt-4 space-y-4 border border-white/5 rounded-2xl p-4 bg-white/[0.02]">
+{showMoreDetails && (
+  <div className="col-span-2 mt-4 space-y-4 border border-white/5 rounded-2xl p-4 bg-white/[0.02]">
 
 
 
@@ -935,7 +935,7 @@ bg-[#0f0f18]">
                   {extraFields.map((field, index) => (
                     <div
                       key={field.key}
-                      className="flex items-center gap-2 w-full min-w-0 bg-white/[0.02] border border-white/5 rounded-xl p-2"
+                      className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full min-w-0 bg-white/[0.02] border border-white/5 rounded-xl p-2"
                     >
                       {/* LABEL */}
                       <input
@@ -946,7 +946,7 @@ bg-[#0f0f18]">
                           updated[index].label = e.target.value;
                           setExtraFields(updated);
                         }}
-                        className="flex-1 h-10 bg-transparent border border-white/10 rounded-lg px-3 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500"
+                        className="w-full sm:flex-1 min-w-0 h-10 bg-transparent border border-white/10 rounded-lg px-3 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500"
                         placeholder="Field name"
                       />
 
@@ -959,7 +959,7 @@ bg-[#0f0f18]">
                           updated[index].value = e.target.value;
                           setExtraFields(updated);
                         }}
-                        className="flex-1 h-10 bg-transparent border border-white/10 rounded-lg px-3 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500"
+                        className="w-full sm:flex-1 min-w-0 h-10 bg-transparent border border-white/10 rounded-lg px-3 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500"
                         placeholder="Value"
                       />
 
@@ -969,7 +969,7 @@ bg-[#0f0f18]">
                         onClick={() => {
                           setExtraFields(extraFields.filter((_, i) => i !== index));
                         }}
-                        className="h-10 w-10 flex items-center justify-center rounded-lg text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition"
+                        className="h-9 w-9 shrink-0 self-end sm:self-auto flex items-center justify-center rounded-lg text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition"
                       >
                         ✕
                       </button>
