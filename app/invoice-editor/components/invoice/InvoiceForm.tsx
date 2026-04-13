@@ -1108,6 +1108,7 @@ bg-[#0f0f18]">
                     disabled={isIssued}
                     title={isIssued ? "Locked after issuing invoice" : ""}
                     type="number"
+                    onWheel={(e) => (e.target as HTMLInputElement).blur()}
                     min="1"
                     value={li.qty}
                     onKeyDown={focusNext}
@@ -1130,6 +1131,7 @@ bg-[#0f0f18]">
                     disabled={isIssued}
                     title={isIssued ? "Locked after issuing invoice" : ""}
                     type="number"
+                    onWheel={(e) => (e.target as HTMLInputElement).blur()}
                     inputMode="numeric"
                     value={li.rate}
                     onKeyDown={(e) => {
@@ -1217,6 +1219,7 @@ bg-[#0f0f18]">
                   disabled={isIssued}
                   title={isIssued ? "Locked after issuing invoice" : ""}
                   type="number"
+                  onWheel={(e) => (e.target as HTMLInputElement).blur()}
                   value={taxRate || ""}
                   placeholder="0"
                   onKeyDown={focusNext}
@@ -1232,6 +1235,7 @@ bg-[#0f0f18]">
                   disabled={isIssued}
                   title={isIssued ? "Locked after issuing invoice" : ""}
                   type="number"
+                  onWheel={(e) => (e.target as HTMLInputElement).blur()}
                   value={discount || ""}
                   placeholder="0"
                   onKeyDown={focusNext}
