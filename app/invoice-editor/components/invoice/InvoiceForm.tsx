@@ -384,6 +384,9 @@ export default function InvoiceForm({
     return d.toISOString().split("T")[0];
   }
 
+
+  
+
   const derivedCurrencySource =
     currencySource ||
     (currency && client && !userTouchedCurrency ? "client" : null);
@@ -701,6 +704,7 @@ bg-[#0f0f18]">
                           if (lastInvoice.currency && !userTouchedCurrency) {
                             setCurrency(lastInvoice.currency);
                             setCurrencySource("client");
+                            setPreviousClientCurrency(lastInvoice.currency);
                           }
 
 
