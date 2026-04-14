@@ -385,7 +385,24 @@ export default function InvoiceForm({
   }
 
 
-  
+
+  function SectionCard({
+    title,
+    children,
+  }: {
+    title: string;
+    children: React.ReactNode;
+  }) {
+    return (
+      <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 space-y-4">
+        <div className="text-[11px] uppercase tracking-[0.2em] text-white/30 font-medium">
+          {title}
+        </div>
+        <div className="space-y-4">{children}</div>
+      </div>
+    );
+  }
+
 
   const derivedCurrencySource =
     currencySource ||
@@ -536,18 +553,9 @@ export default function InvoiceForm({
 
 
         </div>
-        <div
-          ref={lineItemsRef}
-          className={`bg-transparent border border-white/5 rounded-2xl p-5 backdrop-blur-sm space-y-4 transition
-    ${highlightSection === "lineItems"
-              ? "border-rose-500/50 ring-1 ring-rose-500/30"
-              : "border-white/5"}
-  `}
-        >
-          <h3 className="text-[11px] uppercase tracking-[0.2em] text-white/30 font-medium mb-4">
-            Billing Details
-          </h3>
 
+
+        <SectionCard title="Customer">
           {/* CLIENT */}
           <div ref={containerRef} className="space-y-1 mb-5 relative">
             <label className="text-xs text-slate-400">
@@ -801,13 +809,13 @@ bg-[#0f0f18]">
 
           </div>
 
+        </SectionCard>
 
-          <h3 className="text-[11px] uppercase tracking-[0.18em] text-white/30 font-medium font-medium mt-6 mb-4">
-            Invoice Details
-          </h3>
-          <div className="grid grid-cols-2 gap-4">
+        <SectionCard title="Invoice Details">
+
+          <div className="grid grid-cols-2 gap-3">
             {/* DATE */}
-            <div className="space-y-1 mb-5">
+            <div className="space-y-1">
               <label className="text-xs text-slate-400">
                 Date <span className="text-red-400">*</span>
               </label>
@@ -845,7 +853,7 @@ bg-[#0f0f18]">
             </div>
 
             {/* DUE DATE */}
-            <div className="space-y-1 mb-5">
+            <div className="space-y-1">
               <label className="text-xs text-slate-400">
                 Due Date <span className="text-red-400">*</span>
               </label>
@@ -887,45 +895,49 @@ bg-[#0f0f18]">
 
 
 
-            {/* PAYMENT TERMS */}
-            <div className="space-y-1 mb-5">
-              <label className="text-xs text-slate-400">
-                Payment Terms
-              </label>
+            <div className="col-span-2 flex items-center justify-between gap-4">
 
-              <select
-                value={paymentTerms}
-                onChange={(e) => {
-                  const term = e.target.value as typeof paymentTerms;
-                  setPaymentTerms(term);
+              {/* LEFT: PAYMENT TERMS */}
+              <div className="space-y-1 w-full max-w-xs">
+                <label className="text-xs text-slate-400">
+                  Payment Terms
+                </label>
 
-                  if (date) {
-                    const newDue = applyPaymentTerms(date, term);
-                    setDueDate(newDue);
-                  }
-                }}
-                className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-violet-500/40 focus:outline-none"
-              >
-                <option value="due_on_receipt">Due on receipt</option>
-                <option value="net_7">Net 7</option>
-                <option value="net_15">Net 15</option>
-                <option value="net_30">Net 30</option>
-              </select>
-            </div>
+                <select
+                  value={paymentTerms}
+                  onChange={(e) => {
+                    const term = e.target.value as typeof paymentTerms;
+                    setPaymentTerms(term);
 
-            {/* MORE DETAILS TOGGLE */}
-            <div className="mt-6">
+                    if (date) {
+                      const newDue = applyPaymentTerms(date, term);
+                      setDueDate(newDue);
+                    }
+                  }}
+                  className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-violet-500/40 focus:outline-none"
+                >
+                  <option value="due_on_receipt">Due on receipt</option>
+                  <option value="net_7">Net 7</option>
+                  <option value="net_15">Net 15</option>
+                  <option value="net_30">Net 30</option>
+                </select>
+              </div>
+
+              {/* RIGHT: TOGGLE */}
               <button
                 type="button"
                 onClick={() => setShowMoreDetails((prev) => !prev)}
-                className="text-xs text-indigo-400 hover:text-indigo-300 transition"
+                className="text-xs text-indigo-400 hover:text-indigo-300 transition whitespace-nowrap"
               >
-                {showMoreDetails ? "− Hide details" : "+ Add more details"}
+                {showMoreDetails ? "− Hide advanced" : "+ Add details"}
               </button>
+
             </div>
 
-{showMoreDetails && (
-  <div className="col-span-2 mt-4 space-y-4 border border-white/5 rounded-2xl p-4 bg-white/[0.02]">
+            
+
+            {showMoreDetails && (
+              <div className="col-span-2 mt-2 space-y-4 border border-white/5 rounded-2xl p-4 bg-white/[0.02]">
 
 
 
@@ -1022,7 +1034,10 @@ bg-[#0f0f18]">
             )}
 
           </div>
-        </div>
+
+        </SectionCard>
+
+
         <div className="relative my-10">
           <div className="h-[1.5px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
           <div className="absolute inset-0 blur-[4px] bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent" />
@@ -1424,132 +1439,136 @@ bg-[#0f0f18]">
 
           </div>
         </div>
-      </div>
+      </div >
 
 
       {/* Currency Mismatch Modal*/}
-      {showCurrencyModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {
+        showCurrencyModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
 
-          {/* BACKDROP */}
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => {
-              setShowCurrencyModal(false);
-              setPendingAction(null);
-            }}
-          />
+            {/* BACKDROP */}
+            <div
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => {
+                setShowCurrencyModal(false);
+                setPendingAction(null);
+              }}
+            />
 
-          {/* MODAL */}
-          <div className="relative w-full max-w-md rounded-2xl 
+            {/* MODAL */}
+            <div className="relative w-full max-w-md rounded-2xl 
             border border-sky-500/20 
             bg-[#0b0b12] p-6 
             shadow-[0_0_60px_rgba(56,189,248,0.25)]">
 
-            {/* TITLE */}
-            <div className="text-lg font-semibold text-sky-300 mb-2">
-              Currency Change Detected
-            </div>
+              {/* TITLE */}
+              <div className="text-lg font-semibold text-sky-300 mb-2">
+                Currency Change Detected
+              </div>
 
-            {/* MESSAGE */}
-            <div className="text-sm text-slate-300 mb-5 leading-relaxed">
-              This client was previously invoiced in{" "}
-              <span className="text-white font-medium">
-                {previousClientCurrency}
-              </span>, but this invoice uses{" "}
-              <span className="text-white font-medium">
-                {currency}
-              </span>.
-              <br /><br />
-              Make sure this is intentional before continuing.
-            </div>
+              {/* MESSAGE */}
+              <div className="text-sm text-slate-300 mb-5 leading-relaxed">
+                This client was previously invoiced in{" "}
+                <span className="text-white font-medium">
+                  {previousClientCurrency}
+                </span>, but this invoice uses{" "}
+                <span className="text-white font-medium">
+                  {currency}
+                </span>.
+                <br /><br />
+                Make sure this is intentional before continuing.
+              </div>
 
-            {/* ACTIONS */}
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => {
-                  setShowCurrencyModal(false);
-                  setPendingAction(null);
-                }}
-                className="px-4 py-2 rounded-lg border border-white/10 
+              {/* ACTIONS */}
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => {
+                    setShowCurrencyModal(false);
+                    setPendingAction(null);
+                  }}
+                  className="px-4 py-2 rounded-lg border border-white/10 
                 text-slate-300 hover:bg-white/5 transition"
-              >
-                Go Back
-              </button>
+                >
+                  Go Back
+                </button>
 
-              <button
-                onClick={() => {
-                  setShowCurrencyModal(false);
+                <button
+                  onClick={() => {
+                    setShowCurrencyModal(false);
 
-                  if (pendingAction === "save") {
-                    onSave();
-                  }
+                    if (pendingAction === "save") {
+                      onSave();
+                    }
 
-                  if (pendingAction === "issue") {
-                    onIssue();
-                  }
+                    if (pendingAction === "issue") {
+                      onIssue();
+                    }
 
-                  setPendingAction(null);
-                }}
-                className="px-4 py-2 rounded-lg 
+                    setPendingAction(null);
+                  }}
+                  className="px-4 py-2 rounded-lg 
                 bg-sky-500 hover:bg-sky-600 text-black font-semibold transition"
-              >
-                Continue
-              </button>
+                >
+                  Continue
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
 
       {/* 🚀 PRO UPGRADE MODAL */}
-      {showUpgradeModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-auto">
+      {
+        showUpgradeModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-auto">
 
-          {/* BACKDROP */}
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => setShowUpgradeModal(false)}
-          />
+            {/* BACKDROP */}
+            <div
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => setShowUpgradeModal(false)}
+            />
 
-          {/* MODAL */}
-          <div className="relative w-full max-w-md rounded-2xl border border-white/10 hover:bg-white/[0.03] hover:scale-[1.01] bg-transparent p-6 shadow-2xl">
+            {/* MODAL */}
+            <div className="relative w-full max-w-md rounded-2xl border border-white/10 hover:bg-white/[0.03] hover:scale-[1.01] bg-transparent p-6 shadow-2xl">
 
-            <div className="text-lg font-semibold text-white mb-2">
-              Save clients & auto-fill invoices
-            </div>
+              <div className="text-lg font-semibold text-white mb-2">
+                Save clients & auto-fill invoices
+              </div>
 
-            <div className="text-sm text-slate-400 mb-4">
-              Stop typing client details every time.
-            </div>
+              <div className="text-sm text-slate-400 mb-4">
+                Stop typing client details every time.
+              </div>
 
-            <div className="space-y-2 text-sm text-slate-300 mb-6">
-              <div>• Save clients once</div>
-              <div>• Auto-fill details instantly</div>
-              <div>• Create invoices faster</div>
-            </div>
+              <div className="space-y-2 text-sm text-slate-300 mb-6">
+                <div>• Save clients once</div>
+                <div>• Auto-fill details instantly</div>
+                <div>• Create invoices faster</div>
+              </div>
 
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setShowUpgradeModal(false)}
-                className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-sm text-white"
-              >
-                Maybe later
-              </button>
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => setShowUpgradeModal(false)}
+                  className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-sm text-white"
+                >
+                  Maybe later
+                </button>
 
-              <button
-                onClick={() => {
-                  setShowUpgradeModal(false);
-                  // TODO: route to pricing later
-                }}
-                className="px-4 py-2 rounded-lg bg-violet-500 hover:bg-violet-600 text-black font-semibold text-sm"
-              >
-                Upgrade to Pro
-              </button>
+                <button
+                  onClick={() => {
+                    setShowUpgradeModal(false);
+                    // TODO: route to pricing later
+                  }}
+                  className="px-4 py-2 rounded-lg bg-violet-500 hover:bg-violet-600 text-black font-semibold text-sm"
+                >
+                  Upgrade to Pro
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
 
     </>
