@@ -933,7 +933,6 @@ bg-[#0f0f18]">
               </button>
 
             </div>
-
             
 
             {showMoreDetails && (
