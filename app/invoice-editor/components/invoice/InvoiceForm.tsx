@@ -246,7 +246,6 @@ export default function InvoiceForm({
   const [paymentTerms, setPaymentTerms] = useState<"due_on_receipt" | "net_7" | "net_15" | "net_30">("due_on_receipt");
 
 
-
   const filteredClients = isPro
     ? clients.filter((c) =>
       c.name.toLowerCase().includes(search.toLowerCase())
@@ -894,9 +893,7 @@ bg-[#0f0f18]">
 
 
 
-            <div className="col-span-2 flex items-center justify-between gap-4">
-
-              {/* LEFT: PAYMENT TERMS */}
+            <div className="col-span-2">
               <div className="space-y-1 w-full max-w-xs">
                 <label className="text-xs text-slate-400">
                   Payment Terms
@@ -921,17 +918,20 @@ bg-[#0f0f18]">
                   <option value="net_30">Net 30</option>
                 </select>
               </div>
+            </div>
 
-              {/* RIGHT: TOGGLE */}
+
+
+            <div className="col-span-2 mt-2">
               <button
                 type="button"
                 onClick={() => setShowMoreDetails((prev) => !prev)}
-                className="text-xs text-indigo-400 hover:text-indigo-300 transition whitespace-nowrap"
+                className="text-sm text-violet-400 hover:text-violet-300 transition"
               >
-                {showMoreDetails ? "− Hide advanced" : "+ Add details"}
+                {showMoreDetails ? "− Hide additional details" : "+ Add additional details"}
               </button>
-
             </div>
+
 
 
             {showMoreDetails && (
@@ -940,30 +940,32 @@ bg-[#0f0f18]">
 
 
                 {/* 🔥 Dynamic Fields */}
-                {extraFields.length === 0 && (
-                  <div className="space-y-2">
-                    <div className="text-xs text-slate-500">
-                      Add details to your invoice
-                    </div>
+                {FIELD_PRESETS.some(
+                  (preset) => !extraFields.find((f) => f.key === preset.key)
+                ) && (
+                    <div className="space-y-2">
+                      <div className="text-xs text-slate-500">
+                        Add details to your invoice
+                      </div>
 
-                    <div className="flex flex-wrap gap-2">
-                      {FIELD_PRESETS.map((preset) => (
-                        <button
-                          key={preset.key}
-                          onClick={() => {
-                            setExtraFields([
-                              ...extraFields,
-                              { ...preset, value: "" }
-                            ]);
-                          }}
-                          className="text-xs px-2 py-1 rounded-md bg-white/5 border border-white/10 hover:bg-white/10 text-white/70"
-                        >
-                          + {preset.label}
-                        </button>
-                      ))}
+                      <div className="flex flex-wrap gap-2">
+                        {FIELD_PRESETS.map((preset) => (
+                          <button
+                            key={preset.key}
+                            onClick={() => {
+                              setExtraFields([
+                                ...extraFields,
+                                { ...preset, value: "" }
+                              ]);
+                            }}
+                            className="text-xs px-2 py-1 rounded-md bg-white/5 border border-white/10 hover:bg-white/10 text-white/70"
+                          >
+                            + {preset.label}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
                 <div className="space-y-2">
                   {extraFields.map((field, index) => (
                     <div
