@@ -233,14 +233,13 @@ export default function InvoiceForm({
   const [pendingAction, setPendingAction] = useState<"save" | "issue" | null>(null);
 
   const baseInput =
-    "w-full rounded-xl bg-white/[0.04] px-3 py-2 text-sm text-white transition-all duration-200 outline-none";
+    "w-full rounded-xl bg-white/[0.03] backdrop-blur-sm px-3 py-2 text-sm text-white transition-all duration-200 outline-none";
 
   const normalState =
-    "border border-white/10 hover:border-white/20 hover:bg-white/[0.06]";
+    "border border-white/10 hover:border-white/20 hover:bg-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]";
 
   const focusState =
-    "focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500 focus:bg-white/[0.07]";
-
+    "focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500 focus:bg-white/[0.06] shadow-[0_0_0_1px_rgba(124,58,237,0.35)]";
   const errorState =
     "border border-rose-500/60 ring-2 ring-rose-500/30 bg-rose-500/[0.04]";
 
@@ -933,7 +932,7 @@ bg-[#0f0f18]">
               </button>
 
             </div>
-            
+
 
             {showMoreDetails && (
               <div className="col-span-2 mt-2 space-y-4 border border-white/5 rounded-2xl p-4 bg-white/[0.02]">
@@ -942,8 +941,27 @@ bg-[#0f0f18]">
 
                 {/* 🔥 Dynamic Fields */}
                 {extraFields.length === 0 && (
-                  <div className="text-xs text-slate-500">
-                    Add custom fields like PO Number, Project ID, or Reference
+                  <div className="space-y-2">
+                    <div className="text-xs text-slate-500">
+                      Add details to your invoice
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      {FIELD_PRESETS.map((preset) => (
+                        <button
+                          key={preset.key}
+                          onClick={() => {
+                            setExtraFields([
+                              ...extraFields,
+                              { ...preset, value: "" }
+                            ]);
+                          }}
+                          className="text-xs px-2 py-1 rounded-md bg-white/5 border border-white/10 hover:bg-white/10 text-white/70"
+                        >
+                          + {preset.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
                 <div className="space-y-2">
