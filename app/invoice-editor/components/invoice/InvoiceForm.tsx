@@ -123,14 +123,13 @@ type Props = {
     value: string;
   }[];
 
-  setExtraFields: (
-    v: {
+  setExtraFields: React.Dispatch<
+    React.SetStateAction<{
       key: string;
       label: string;
       value: string;
-    }[]
-  ) => void;
-
+    }[]>
+  >;
 
 };
 
@@ -287,6 +286,8 @@ export default function InvoiceForm({
   const containerRef = useRef<HTMLDivElement>(null);
 
   const firstDescRef = useRef<HTMLInputElement>(null);
+
+  const extraFieldRefs = useRef<(HTMLInputElement | null)[]>([]);
 
 
   useEffect(() => {
@@ -933,7 +934,6 @@ bg-[#0f0f18]">
             </div>
 
 
-
             {showMoreDetails && (
               <div className="col-span-2 mt-2 space-y-4 border border-white/5 rounded-2xl p-4 bg-white/[0.02]">
 
@@ -949,20 +949,27 @@ bg-[#0f0f18]">
                       </div>
 
                       <div className="flex flex-wrap gap-2">
-                        {FIELD_PRESETS.map((preset) => (
-                          <button
-                            key={preset.key}
-                            onClick={() => {
-                              setExtraFields([
-                                ...extraFields,
-                                { ...preset, value: "" }
-                              ]);
-                            }}
-                            className="text-xs px-2 py-1 rounded-md bg-white/5 border border-white/10 hover:bg-white/10 text-white/70"
-                          >
-                            + {preset.label}
-                          </button>
-                        ))}
+                        {FIELD_PRESETS
+                          .filter((preset) => !extraFields.find((f) => f.key === preset.key))
+                          .map((preset) => (
+                            <button
+                              key={preset.key}
+                              onClick={() => {
+                                setExtraFields((prev) => {
+                                  const updated = [...prev, { ...preset, value: "" }];
+
+                                  setTimeout(() => {
+                                    extraFieldRefs.current[updated.length - 1]?.focus();
+                                  }, 0);
+
+                                  return updated;
+                                });
+                              }}
+                              className="text-xs px-2 py-1 rounded-md bg-white/5 border border-white/10 hover:bg-white/10 text-white/70"
+                            >
+                              + {preset.label}
+                            </button>
+                          ))}
                       </div>
                     </div>
                   )}
@@ -977,9 +984,11 @@ bg-[#0f0f18]">
                         type="text"
                         value={field.label}
                         onChange={(e) => {
-                          const updated = [...extraFields];
-                          updated[index].label = e.target.value;
-                          setExtraFields(updated);
+                          setExtraFields((prev) =>
+                            prev.map((f, i) =>
+                              i === index ? { ...f, label: e.target.value } : f
+                            )
+                          );
                         }}
                         className="w-full sm:flex-1 min-w-0 h-10 bg-transparent border border-white/10 rounded-lg px-3 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500"
                         placeholder="Field name"
@@ -987,12 +996,18 @@ bg-[#0f0f18]">
 
                       {/* VALUE */}
                       <input
+                        ref={(el) => {
+                          extraFieldRefs.current[index] = el;
+                        }}
+
                         type="text"
                         value={field.value}
                         onChange={(e) => {
-                          const updated = [...extraFields];
-                          updated[index].value = e.target.value;
-                          setExtraFields(updated);
+                          setExtraFields((prev) =>
+                            prev.map((f, i) =>
+                              i === index ? { ...f, value: e.target.value } : f
+                            )
+                          );
                         }}
                         className="w-full sm:flex-1 min-w-0 h-10 bg-transparent border border-white/10 rounded-lg px-3 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500"
                         placeholder="Value"
@@ -1016,33 +1031,36 @@ bg-[#0f0f18]">
                 <button
                   type="button"
                   onClick={() => {
-                    // find first unused preset
-                    const usedKeys = extraFields.map((f) => f.key);
+                    setExtraFields((prev) => {
+                      // prevent duplicate empty fields
+                      if (prev.some((f) => !f.label && !f.value)) return prev;
 
-                    const preset = FIELD_PRESETS.find(
-                      (p) => !usedKeys.includes(p.key)
-                    );
+                      const usedKeys = prev.map((f) => f.key);
 
-                    if (preset) {
-                      setExtraFields([
-                        ...extraFields,
-                        {
+                      const preset = FIELD_PRESETS.find(
+                        (p) => !usedKeys.includes(p.key)
+                      );
+
+                      const newField = preset
+                        ? {
                           key: preset.key,
                           label: preset.label,
                           value: "",
-                        },
-                      ]);
-                    } else {
-                      // fallback to custom
-                      setExtraFields([
-                        ...extraFields,
-                        {
+                        }
+                        : {
                           key: `field_${Date.now()}`,
                           label: "",
                           value: "",
-                        },
-                      ]);
-                    }
+                        };
+
+                      const updated = [...prev, newField];
+
+                      setTimeout(() => {
+                        extraFieldRefs.current[updated.length - 1]?.focus();
+                      }, 0);
+
+                      return updated;
+                    });
                   }}
                   className="mt-3 text-sm text-violet-400 hover:text-violet-300 transition"
                 >
