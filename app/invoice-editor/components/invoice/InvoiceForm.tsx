@@ -945,7 +945,7 @@ bg-[#0f0f18]">
                 ) && (
                     <div className="space-y-2">
                       <div className="text-xs text-slate-500">
-                        Add details to your invoice
+                        Add structured details to your invoice
                       </div>
 
                       <div className="flex flex-wrap gap-2">
