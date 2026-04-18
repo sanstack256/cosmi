@@ -990,8 +990,8 @@ bg-[#0f0f18]">
                             )
                           );
                         }}
-                        className="w-full sm:flex-1 min-w-0 h-10 bg-transparent border border-white/10 rounded-lg px-3 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500"
-                        placeholder="Field name"
+                        className="w-full sm:flex-1 min-w-0 h-10 bg-transparent border border-white/10 rounded-lg px-3 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500 hover:border-white/20"
+                        placeholder="Field name (optional)"
                       />
 
                       {/* VALUE */}
