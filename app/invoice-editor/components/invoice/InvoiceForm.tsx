@@ -973,6 +973,7 @@ bg-[#0f0f18]">
                       </div>
                     </div>
                   )}
+                  
                 <div className="space-y-2">
                   {extraFields.map((field, index) => (
                     <div
