@@ -1,0 +1,7 @@
+"filename", "language", "TypeScript JSX", "comment", "blank", "total"
+"/Users/nssanjeev/Documents/cosmi/app/invoice-editor/components/invoice/InvoiceForm.tsx", "TypeScript JSX", 162, 5, 34, 201
+"/Users/nssanjeev/Documents/cosmi/app/invoice-editor/components/invoice/InvoicePreview.tsx", "TypeScript JSX", 27, 1, 6, 34
+"/Users/nssanjeev/Documents/cosmi/app/invoice-editor/hooks/useInvoiceEditor.tsx", "TypeScript JSX", 52, 0, 8, 60
+"/Users/nssanjeev/Documents/cosmi/app/invoice-editor/page.tsx", "TypeScript JSX", 10, 0, 2, 12
+"/Users/nssanjeev/Documents/cosmi/app/providers/InvoiceProvider.tsx", "TypeScript JSX", 13, 3, 4, 20
+"Total", "-", 264, 9, 54, 327

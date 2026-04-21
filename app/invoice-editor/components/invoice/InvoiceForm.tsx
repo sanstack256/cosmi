@@ -929,7 +929,7 @@ bg-[#0f0f18]">
                 onClick={() => setShowMoreDetails((prev) => !prev)}
                 className="text-sm text-violet-400 hover:text-violet-300 transition"
               >
-                {showMoreDetails ? "− Hide additional details" : "+ Add additional details"}
+                {showMoreDetails ? "Hide details" : "Add details"}
               </button>
             </div>
 
@@ -940,15 +940,25 @@ bg-[#0f0f18]">
 
 
                 {/* 🔥 Dynamic Fields */}
-                {FIELD_PRESETS.some(
+                {FIELD_PRESETS.filter(
                   (preset) => !extraFields.find((f) => f.key === preset.key)
-                ) && (
+                ).length > 0 && (
                     <div className="space-y-2">
                       <div className="text-xs text-slate-500">
                         Add structured details to your invoice
                       </div>
 
+                      {extraFields.length === 0 && (
+                        <div className="text-xs text-slate-500">
+                          No additional details added yet
+                        </div>
+                      )}
+
+
                       <div className="flex flex-wrap gap-2">
+
+
+
                         {FIELD_PRESETS
                           .filter((preset) => !extraFields.find((f) => f.key === preset.key))
                           .map((preset) => (
@@ -973,7 +983,15 @@ bg-[#0f0f18]">
                       </div>
                     </div>
                   )}
-                  
+
+                {FIELD_PRESETS.filter(
+                  (preset) => !extraFields.find((f) => f.key === preset.key)
+                ).length === 0 && (
+                    <div className="text-xs text-slate-500">
+                      All standard fields added. You can still add custom fields below.
+                    </div>
+                  )}
+
                 <div className="space-y-2">
                   {extraFields.map((field, index) => (
                     <div
@@ -1020,7 +1038,7 @@ bg-[#0f0f18]">
                         onClick={() => {
                           setExtraFields(extraFields.filter((_, i) => i !== index));
                         }}
-                        className="h-9 w-9 shrink-0 self-end sm:self-auto flex items-center justify-center rounded-lg text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition"
+                        className="h-9 w-9 shrink-0 self-end sm:self-auto flex items-center justify-center rounded-lg opacity-60 hover:opacity-100 text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition"
                       >
                         ✕
                       </button>
@@ -1050,7 +1068,7 @@ bg-[#0f0f18]">
                         }
                         : {
                           key: `field_${Date.now()}`,
-                          label: "",
+                          label: `Custom Field ${prev.length + 1}`,
                           value: "",
                         };
 
@@ -1065,7 +1083,7 @@ bg-[#0f0f18]">
                   }}
                   className="mt-3 text-sm text-violet-400 hover:text-violet-300 transition"
                 >
-                  + Add custom field
+                  + Add another field
                 </button>
 
               </div>

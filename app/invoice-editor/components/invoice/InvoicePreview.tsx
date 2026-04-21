@@ -210,11 +210,11 @@ export default function InvoicePreview({
                 {/* Dynamic extra fields (source of truth) */}
                 {extraFields?.length ? (
                   extraFields
-                    .filter((field) => field.label && field.value)
+                    .filter((field) => field.value.trim())
                     .map((field) => (
                       <div key={field.key}>
                         <span className="text-slate-500">
-                          {field.label}:
+                          {(field.label || "Note").trim()}:
                         </span>{" "}
                         {field.value}
                       </div>
