@@ -167,6 +167,11 @@ export default function InvoiceEditorPage() {
   } = useInvoiceEditor();
 
 
+  const [onboardingChoice, setOnboardingChoice] = useState<
+    "none" | "blank" | "sample"
+  >("none");
+
+
 
   const [saving, setSaving] = useState(false);
 
@@ -802,7 +807,50 @@ export default function InvoiceEditorPage() {
      UI
   ------------------------------------------- */
 
+
+  if (onboardingChoice === "none") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#050509] text-white">
+        <div className="w-full max-w-md space-y-6 text-center">
+
+          <h1 className="text-2xl font-semibold">
+            Create your first invoice
+          </h1>
+
+          <p className="text-sm text-slate-400">
+            Start from scratch or use a sample to explore how Cosmi works
+          </p>
+
+          <div className="flex flex-col gap-3 mt-6">
+
+            <button
+              onClick={() => setOnboardingChoice("blank")}
+              className="w-full py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition"
+            >
+              Start from scratch
+            </button>
+
+            <button
+              onClick={() => setOnboardingChoice("sample")}
+              className="w-full py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 transition"
+            >
+              Use a sample invoice
+            </button>
+
+          </div>
+
+        </div>
+      </div>
+    );
+  }
+
+
+
+
   return (
+
+
+
     <div className="min-h-screen bg-[#050509] text-slate-100 flex overflow-y-auto">
 
       {/* LEFT PANEL */}
