@@ -392,9 +392,17 @@ export default function ProfilePage() {
 
                         if (error.code === "auth/wrong-password") {
                           setAuthError("Incorrect password.");
+                        } else if (error.code === "auth/too-many-requests") {
+                          setAuthError("Too many failed attempts. Try again later.");
+                        } else if (error.code === "auth/requires-recent-login") {
+                          setAuthError("Session expired. Please sign in again.");
+                        } else if (error.code === "auth/network-request-failed") {
+                          setAuthError("Network error. Check your connection.");
                         } else {
-                          setAuthError("Failed to delete account.");
+                          console.error("Unhandled error:", error);
+                          setAuthError("Something went wrong. Please try again.");
                         }
+
                       } finally {
                         setDeleteLoading(false);
                       }
