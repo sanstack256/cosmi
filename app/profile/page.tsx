@@ -7,6 +7,11 @@ import { useAuth } from "@/app/providers/AuthProvider";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { updateProfile } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import {
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+} from "firebase/auth";
+
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -25,6 +30,9 @@ export default function ProfilePage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteInput, setDeleteInput] = useState("");
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  const [password, setPassword] = useState("");
+  const [authError, setAuthError] = useState("");
 
 
   if (!user) return null;
@@ -327,11 +335,25 @@ export default function ProfilePage() {
                   className="w-full mb-4 px-3 py-2 rounded-lg bg-[#12121f] border border-white/10 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                 />
 
+                <input
+                  type="password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full mb-4 px-3 py-2 rounded-lg bg-[#12121f] border border-white/10 text-sm"
+                />
+
+                {authError && (
+                  <p className="text-xs text-red-400 mb-3">{authError}</p>
+                )}
+
                 <div className="flex justify-end gap-3">
                   <button
                     onClick={() => {
                       setShowDeleteModal(false);
                       setDeleteInput("");
+                      setPassword("");
+                      setAuthError("");
                     }}
                     className="px-4 py-2 text-sm rounded-lg border border-white/20 hover:bg-white/10 transition"
                   >
@@ -341,12 +363,38 @@ export default function ProfilePage() {
                   <button
                     disabled={deleteInput !== "DELETE" || deleteLoading}
                     onClick={async () => {
+                      const user = auth.currentUser;
+
+                      if (!user || !user.email) return;
+
                       try {
                         setDeleteLoading(true);
-                        await auth.currentUser?.delete();
+                        setAuthError("");
+
+                        if (!password) {
+                          setAuthError("Please enter your password.");
+                          setDeleteLoading(false);
+                          return;
+                        }
+
+                        const credential = EmailAuthProvider.credential(
+                          user.email,
+                          password
+                        );
+
+                        await reauthenticateWithCredential(user, credential);
+
+                        await user.delete();
+
                         router.push("/");
-                      } catch {
-                        alert("Please re-login before deleting your account.");
+                      } catch (error: any) {
+                        console.error(error);
+
+                        if (error.code === "auth/wrong-password") {
+                          setAuthError("Incorrect password.");
+                        } else {
+                          setAuthError("Failed to delete account.");
+                        }
                       } finally {
                         setDeleteLoading(false);
                       }
