@@ -8,7 +8,7 @@ if (!admin.apps.length) {
   try {
     const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_KEY);
 
-    // 🔥 FIX: restore line breaks in private key
+    //  Fix private key formatting
     serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, "\n");
 
     admin.initializeApp({
@@ -16,9 +16,11 @@ if (!admin.apps.length) {
     });
 
   } catch (err) {
-    console.error("🔥 Failed to parse FIREBASE_ADMIN_KEY", err);
+    console.error(" Failed to parse FIREBASE_ADMIN_KEY", err);
     throw err;
   }
 }
 
-export const db = admin.firestore();
+// ✅ EXPORTS (important)
+export const adminAuth = admin.auth();
+export const adminDb = admin.firestore();

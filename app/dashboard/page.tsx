@@ -472,16 +472,7 @@ export default function DashboardPage() {
   };
 
 
-
-  if (!userData) {
-    return (
-      <div className="flex items-center justify-center h-screen text-slate-500 text-sm">
-        Loading dashboard...
-      </div>
-    );
-  }
-
-
+if (!userData) return <div>Loading...</div>;
 
 
   return (

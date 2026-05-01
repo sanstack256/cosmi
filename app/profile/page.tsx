@@ -2,11 +2,12 @@
 
 import React, { useRef, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, Shield, LogOut, Camera } from "lucide-react";
+import { ChevronLeft, Shield, LogOut, Camera, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { updateProfile } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { GoogleAuthProvider, reauthenticateWithPopup } from "firebase/auth";
 import {
   EmailAuthProvider,
   reauthenticateWithCredential,
@@ -15,7 +16,7 @@ import {
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { user, plan, signOut, sendPasswordReset } = useAuth();
+  const { user, loading, plan, signOut, sendPasswordReset } = useAuth();
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -33,18 +34,37 @@ export default function ProfilePage() {
 
   const [password, setPassword] = useState("");
   const [authError, setAuthError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
 
-  if (!user) return null;
+  const providerId = user?.providerData[0]?.providerId;
+
 
   /* ---------------- Sync User Data ---------------- */
 
+
+
   useEffect(() => {
-    if (user.photoURL) setPreview(user.photoURL);
-    if (user.displayName) setNewName(user.displayName);
+    if (user?.photoURL) setPreview(user?.photoURL);
+    if (user?.displayName) setNewName(user?.displayName);
   }, [user]);
 
-  const workspaceId = "COS-" + user.uid.slice(0, 6).toUpperCase();
+
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#050509] text-slate-400">
+        Loading profile...
+      </div>
+    );
+  }
+
+
+const workspaceId = user
+  ? "COS-" + user.uid.slice(0, 6).toUpperCase()
+  : "";
+
+
 
 
   /* ---------------- Name Update ---------------- */
@@ -76,10 +96,11 @@ export default function ProfilePage() {
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (!user) return;
 
     try {
       const storage = getStorage();
-      const storageRef = ref(storage, `profilePictures/${user.uid}`);
+      const storageRef = ref(storage, `profilePictures/${user?.uid}`);
 
       await uploadBytes(storageRef, file);
       const downloadURL = await getDownloadURL(storageRef);
@@ -132,9 +153,9 @@ export default function ProfilePage() {
                 onClick={handleImageClick}
                 className="h-20 w-20 rounded-2xl overflow-hidden cursor-pointer bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center"
               >
-                {preview || user.photoURL ? (
+                {preview || user?.photoURL ? (
                   <img
-                    src={preview || user.photoURL || ""}
+                    src={preview || user?.photoURL || ""}
                     alt="Profile"
                     className="h-full w-full object-cover"
                   />
@@ -182,7 +203,7 @@ export default function ProfilePage() {
                 ) : (
                   <>
                     <h2 className="text-xl font-semibold">
-                      {user.displayName || "User"}
+                      {user?.displayName || "User"}
                     </h2>
                     <button
                       onClick={() => setEditingName(true)}
@@ -194,7 +215,7 @@ export default function ProfilePage() {
                 )}
               </div>
 
-              <p className="text-sm text-slate-400 mt-1">{user.email}</p>
+              <p className="text-sm text-slate-400 mt-1">{user?.email}</p>
 
               <span className="inline-block mt-3 px-3 py-1 rounded-full text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                 Active account
@@ -230,7 +251,7 @@ export default function ProfilePage() {
             <div className="space-y-4 text-sm">
               <div>
                 <p className="text-slate-400 text-xs">Email</p>
-                <p className="font-medium">{user.email}</p>
+                <p className="font-medium">{user?.email}</p>
               </div>
 
               <div>
@@ -243,14 +264,14 @@ export default function ProfilePage() {
               <div>
                 <p className="text-slate-400 text-xs">Account Created</p>
                 <p className="text-xs text-slate-300">
-                  {new Date(user.metadata.creationTime || "").toLocaleDateString()}
+                  {new Date(user?.metadata.creationTime || "").toLocaleDateString()}
                 </p>
               </div>
 
               <div>
                 <p className="text-slate-400 text-xs">Last Login</p>
                 <p className="text-xs text-slate-300">
-                  {new Date(user.metadata.lastSignInTime || "").toLocaleDateString()}
+                  {new Date(user?.metadata.lastSignInTime || "").toLocaleDateString()}
                 </p>
               </div>
             </div>
@@ -335,13 +356,29 @@ export default function ProfilePage() {
                   className="w-full mb-4 px-3 py-2 rounded-lg bg-[#12121f] border border-white/10 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                 />
 
-                <input
-                  type="password"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full mb-4 px-3 py-2 rounded-lg bg-[#12121f] border border-white/10 text-sm"
-                />
+                {providerId === "password" && (
+                  <div className="relative mb-4">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Enter your password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full px-3 py-2 pr-10 rounded-lg bg-[#12121f] border border-white/10 text-sm"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+                )}
 
                 {authError && (
                   <p className="text-xs text-red-400 mb-3">{authError}</p>
@@ -365,27 +402,53 @@ export default function ProfilePage() {
                     onClick={async () => {
                       const user = auth.currentUser;
 
-                      if (!user || !user.email) return;
+                      const providerId = user?.providerData[0]?.providerId;
+
+                      if (!user || !user?.email) return;
 
                       try {
                         setDeleteLoading(true);
                         setAuthError("");
+                        setDeleteInput("");
+                        setPassword("");
 
-                        if (!password) {
-                          setAuthError("Please enter your password.");
-                          setDeleteLoading(false);
-                          return;
+                        if (providerId === "google.com") {
+                          const provider = new GoogleAuthProvider();
+                          await reauthenticateWithPopup(user, provider);
+
+                        } else {
+                          if (!password) {
+                            setAuthError("Please enter your password.");
+                            setDeleteLoading(false);
+                            return;
+                          }
+
+                          const credential = EmailAuthProvider.credential(
+                            user?.email,
+                            password
+                          );
+
+                          await reauthenticateWithCredential(user, credential);
                         }
 
-                        const credential = EmailAuthProvider.credential(
-                          user.email,
-                          password
-                        );
+                        const idToken = await user.getIdToken();
 
-                        await reauthenticateWithCredential(user, credential);
+                        const res = await fetch("/api/delete-account", {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${idToken}`,
+                          },
+                          body: JSON.stringify({}),
+                        });
 
-                        await user.delete();
+                        const data = await res.json();
 
+                        if (!res.ok) {
+                          throw new Error(data.error || "Failed to delete account");
+                        }
+
+                        await signOut();
                         router.push("/");
                       } catch (error: any) {
                         console.error(error);
