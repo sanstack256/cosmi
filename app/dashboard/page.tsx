@@ -1,7 +1,7 @@
 "use client";
 
 import RequireAuth from "@/app/components/RequireAuth";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useInvoices, Invoice } from "../providers/InvoiceProvider";
@@ -130,7 +130,14 @@ export default function DashboardPage() {
   const router = useRouter();
   const { invoices, issueInvoice } = useInvoices();
 
-  const { plan, userData, accountCurrency } = useAuth();
+  const { user, loading, plan, userData, accountCurrency } = useAuth();
+
+
+  useEffect(() => {
+  if (!loading && !user) {
+    router.replace("/signin");
+  }
+}, [user, loading, router]);
 
 
 
@@ -472,6 +479,7 @@ export default function DashboardPage() {
   };
 
 
+if (loading || !user) return <div>Loading...</div>;
 if (!userData) return <div>Loading...</div>;
 
 
