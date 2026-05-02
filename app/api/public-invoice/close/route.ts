@@ -16,7 +16,7 @@ export async function POST(req: Request) {
             );
         }
 
-        await db!.collection("publicInvoices").doc(publicId).update({
+        await adminDb.collection("publicInvoices").doc(publicId).update({
             isActive: false,
             closedAt: new Date(),
         });

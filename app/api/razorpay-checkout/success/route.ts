@@ -58,7 +58,7 @@ export async function POST(req: Request) {
 
     /* 2️⃣ Fetch invoice (direct path, no queries) */
 
-    const invoiceRef = db.doc(`users/${userId}/invoices/${invoiceId}`);
+    const invoiceRef = adminDb.doc(`users/${userId}/invoices/${invoiceId}`);
     const invoiceSnap = await invoiceRef.get();
 
     if (!invoiceSnap.exists) {
@@ -120,7 +120,7 @@ const newPayments = [...existingPayments, newPayment];
     /* 8️⃣ (Optional but recommended) Auto-close public link */
 
     try {
-      const publicQuery = await db
+      const publicQuery = await adminDb
         .collection("publicInvoices")
         .where("invoicePath", "==", `users/${userId}/invoices/${invoiceId}`)
         .limit(1)
