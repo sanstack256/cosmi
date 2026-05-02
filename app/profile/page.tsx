@@ -60,9 +60,9 @@ export default function ProfilePage() {
   }
 
 
-const workspaceId = user
-  ? "COS-" + user.uid.slice(0, 6).toUpperCase()
-  : "";
+  const workspaceId = user
+    ? "COS-" + user.uid.slice(0, 6).toUpperCase()
+    : "";
 
 
 
@@ -415,6 +415,7 @@ const workspaceId = user
                         if (providerId === "google.com") {
                           const provider = new GoogleAuthProvider();
                           await reauthenticateWithPopup(user, provider);
+                          console.log("Reauth completed, calling API...");
 
                         } else {
                           if (!password) {
