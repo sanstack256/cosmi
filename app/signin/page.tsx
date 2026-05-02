@@ -86,7 +86,18 @@ export default function SignIn() {
       // redirect handled by effect above
     } catch (err: any) {
       console.error("Email sign in error:", err);
-      setError(String(err?.message ?? err));
+
+      if (err.code === "auth/user-not-found") {
+        router.push("/signup");
+        return;
+      }
+
+      if (err.code === "auth/wrong-password") {
+        setError("Incorrect password");
+        return;
+      }
+
+      setError("Something went wrong");
     } finally {
       setBusy(false);
     }
