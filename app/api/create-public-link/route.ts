@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/firebase-admin";
+import { adminDb } from "@/lib/firebase-admin";
 import { randomUUID } from "crypto";
 
 // ✅ CRITICAL FIXES
