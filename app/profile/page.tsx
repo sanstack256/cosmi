@@ -415,6 +415,7 @@ export default function ProfilePage() {
                         if (providerId === "google.com") {
                           const provider = new GoogleAuthProvider();
                           await reauthenticateWithPopup(user, provider);
+                          await user.reload();
                           console.log("Reauth completed, calling API...");
 
                         } else {
@@ -432,7 +433,9 @@ export default function ProfilePage() {
                           await reauthenticateWithCredential(user, credential);
                         }
 
-                        const idToken = await user.getIdToken();
+                        const idToken = await user.getIdToken(true);
+
+
 
                         const res = await fetch("/api/delete-account", {
                           method: "POST",
