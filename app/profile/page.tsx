@@ -445,6 +445,8 @@ export default function ProfilePage() {
 
                         const data = await res.json();
 
+                        console.log("Delete API response:", res.status, data);
+
                         if (!res.ok) {
                           throw new Error(data.error || "Failed to delete account");
                         }
