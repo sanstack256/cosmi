@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/providers/AuthProvider";
+import Link from "next/link";
 
 /**
  * Sign in page — wired to Firebase Auth safely.
@@ -212,7 +213,7 @@ export default function SignIn() {
 
         <p className="text-white/60 mt-6 text-center text-sm">
           Don't have an account?{" "}
-          <a href="/signup" className="text-indigo-300 hover:underline cursor-pointer">Sign Up</a>
+          <Link href="/signup"className="text-indigo-300 hover:underline cursor-pointer">Sign Up</Link>
         </p>
       </motion.div>
 

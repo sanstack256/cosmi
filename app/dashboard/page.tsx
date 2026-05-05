@@ -134,10 +134,20 @@ export default function DashboardPage() {
 
 
   useEffect(() => {
-  if (!loading && !user) {
-    router.replace("/signin");
-  }
-}, [user, loading, router]);
+    if (loading) return;
+
+    if (!user) {
+      router.replace("/signin");
+      return;
+    }
+
+    // 🆕 NEW USER → onboarding
+    if (user.isNewUser) {
+      router.replace("/onboarding");
+      return;
+    }
+
+  }, [user, loading, router]);
 
 
 
@@ -479,8 +489,8 @@ export default function DashboardPage() {
   };
 
 
-if (loading || !user) return <div>Loading...</div>;
-if (!userData) return <div>Loading...</div>;
+  if (loading || !user) return <div>Loading...</div>;
+  if (!userData) return <div>Loading...</div>;
 
 
   return (

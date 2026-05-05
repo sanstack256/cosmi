@@ -30,10 +30,13 @@ import { ToastProvider } from "./ToastProvider"
    Types
 ----------------------------------------- */
 
+type ExtendedUser = User & { isNewUser?: boolean };
+
+
 type PlanType = "free" | "pro" | "business";
 
 type AuthCtx = {
-  user: User | null;
+  user: ExtendedUser | null;
   loading: boolean;
   userData: any;
 
@@ -61,7 +64,7 @@ const googleProvider = new GoogleAuthProvider();
 ----------------------------------------- */
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<ExtendedUser | null>(null);
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [plan, setPlan] = useState<PlanType>("free");
@@ -72,9 +75,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   /* 🔐 Auth state */
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => {
-      setUser(u ?? null);
-      setLoading(false);
+    const unsub = onAuthStateChanged(auth, async (u) => {
+      if (!u) {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const ref = doc(db, "users", u.uid);
+        const snap = await getDoc(ref);
+
+        if (!snap.exists()) {
+          // 🆕 New user
+          await setDoc(ref, {
+            email: u.email,
+            plan: "free",
+            createdAt: new Date(),
+          });
+
+          // 👇 attach flag
+          setUser({ ...u, isNewUser: true });
+        } else {
+          setUser({ ...u, isNewUser: false });
+        }
+
+      } catch (err) {
+        console.error("Auth check failed:", err);
+        setUser(u);
+      } finally {
+        setLoading(false);
+      }
     });
 
     return () => unsub();
@@ -155,19 +186,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function signInWithGoogle() {
-    const result = await signInWithPopup(auth, googleProvider);
-    const user = result.user;
-
-    const ref = doc(db, "users", user.uid);
-    const snap = await getDoc(ref);
-
-    if (!snap.exists()) {
-      await setDoc(ref, {
-        email: user.email,
-        plan: "free",
-        createdAt: new Date(),
-      });
-    }
+    await signInWithPopup(auth, googleProvider);
   }
 
   async function signOut() {
