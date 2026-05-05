@@ -490,7 +490,12 @@ export default function DashboardPage() {
 
 
   if (loading || !user) return <div>Loading...</div>;
-  if (!userData) return <div>Loading...</div>;
+if (loading) return <div>Loading...</div>;
+
+//  block dashboard render for new users
+if (user?.isNewUser) return null;
+
+if (!userData) return <div>Loading...</div>;
 
 
   return (

@@ -30,6 +30,8 @@ export default function ProfilePage() {
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteInput, setDeleteInput] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const [password, setPassword] = useState("");
@@ -116,6 +118,7 @@ export default function ProfilePage() {
   };
 
   return (
+    
     <div className="min-h-screen bg-[#050509] text-slate-100 px-6 py-10 relative overflow-hidden">
       {/* BACK BUTTON */}
       <button
@@ -409,6 +412,9 @@ export default function ProfilePage() {
                       try {
                         setDeleteLoading(true);
                         setAuthError("");
+
+                        await new Promise((r) => setTimeout(r, 0));
+                        
                         setDeleteInput("");
                         setPassword("");
 
