@@ -8,7 +8,7 @@ export function CosmiLogo({ size = 260 }: { size?: number }) {
   const centerY = rows / 2;
 
   // 🔥 SHIFTED LEFT CENTER (CRITICAL FIX)
-const shiftedCenterX = centerX - 0.9;
+  const shiftedCenterX = centerX - 0.9;
 
   const spacingX = 100 / cols;
   const spacingY = 100 / rows;
@@ -64,8 +64,8 @@ const shiftedCenterX = centerX - 0.9;
         color = "#6d28d9";
       }
 
-      const r = Math.min(maxR * 0.85, 3.5 * intensity * sizeMultiplier);
-      const opacity = 0.5 + intensity * 0.6;
+      const r = Math.min(maxR * 0.95, 5.5 * intensity * sizeMultiplier);
+      const opacity = 0.7 + intensity * 0.3;
 
       if (t < 0.15 && radial > 0.4) {
         dots.push(
