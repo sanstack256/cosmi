@@ -1,6 +1,7 @@
 export function CosmiLogo({ size = 260 }: { size?: number }) {
   const dots = [];
 
+  
   const rows = 28;
   const cols = 28;
 
