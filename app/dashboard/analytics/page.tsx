@@ -301,7 +301,7 @@ export default function AnalyticsPage() {
                         <div>
                             <div className="flex items-center gap-3">
                                 <div className="text-2xl font-semibold">
-                                    {getCurrencySymbol(selectedCurrency)}
+
                                     {formatCurrency(totalRevenue, selectedCurrency)}
                                 </div>
 
@@ -343,7 +343,7 @@ export default function AnalyticsPage() {
                     </div>
 
                     {/* CHART */}
-<div className="h-[220px] focus:outline-none [&_*]:focus:outline-none select-none">
+                    <div className="h-[220px] focus:outline-none [&_*]:focus:outline-none select-none">
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart
                                 tabIndex={-1}
@@ -416,7 +416,7 @@ export default function AnalyticsPage() {
                                     labelFormatter={(label) => label}
 
                                     formatter={(value: any) =>
-                                        `${getCurrencySymbol(selectedCurrency)}${formatCurrency(value, selectedCurrency)}`
+                                        formatCurrency(value, selectedCurrency)
                                     }
                                     contentStyle={{
                                         background: "rgba(10,10,15,0.95)",
