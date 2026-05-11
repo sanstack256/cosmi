@@ -432,6 +432,7 @@ export default function AnalyticsPage() {
                                     cursor={false}
                                 />
 
+
                                 {/* GLOW */}
                                 <Area
                                     type="linear"
@@ -443,6 +444,7 @@ export default function AnalyticsPage() {
                                     connectNulls
                                     tooltipType="none"
                                 />
+                                
 
                                 {/* MAIN */}
                                 <Area
