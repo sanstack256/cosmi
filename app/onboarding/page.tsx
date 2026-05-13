@@ -11,15 +11,22 @@ export default function Onboarding() {
     const router = useRouter();
 
     const [step, setStep] = useState(0);
+
     const [companyName, setCompanyName] = useState("");
+
     const [currency, setCurrency] = useState("INR");
+
+    const [invoiceMode, setInvoiceMode] = useState<"blank" | "sample">(
+        "blank"
+    );
+
     const [saving, setSaving] = useState(false);
 
     useEffect(() => {
         if (!loading && !user) {
             router.replace("/signin");
         }
-    }, [user, loading]);
+    }, [user, loading, router]);
 
     async function handleFinish() {
         if (!user) return;
@@ -34,12 +41,13 @@ export default function Onboarding() {
                         name: companyName,
                         currency,
                     },
+
                     onboardingComplete: true,
                 },
                 { merge: true }
             );
 
-            router.replace("/invoice-editor");
+            router.replace(`/invoice-editor?mode=${invoiceMode}`);
         } catch (err) {
             console.error(err);
         } finally {
@@ -56,12 +64,7 @@ export default function Onboarding() {
                 <div className="bg-[#0b0b0f]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-8 transition-all">
 
                     {/* PROGRESS */}
-                    <div className="h-1 bg-white/10 rounded-full mb-6 overflow-hidden">
-                        <div
-                            className="h-full bg-indigo-500 transition-all duration-300"
-                            style={{ width: step === 0 ? "50%" : "100%" }}
-                        />
-                    </div>
+                    <div className="flex items-center gap-2 mb-8"> {[0, 1].map((s) => (<div key={s} className={` flex-1 h-1 rounded-full transition-all duration-300 ${step >= s ? "bg-indigo-600" : "bg-white/10"} `} />))} </div>
 
                     {/* STEP 1 */}
                     {step === 0 && (
@@ -71,6 +74,7 @@ export default function Onboarding() {
                                 <h2 className="text-2xl font-semibold mb-2">
                                     What’s your business name?
                                 </h2>
+
                                 <p className="text-white/50 text-sm">
                                     This will appear on your invoices
                                 </p>
@@ -80,7 +84,9 @@ export default function Onboarding() {
                                 type="text"
                                 placeholder="e.g. Cosmi Labs"
                                 value={companyName}
-                                onChange={(e) => setCompanyName(e.target.value)}
+                                onChange={(e) =>
+                                    setCompanyName(e.target.value)
+                                }
                                 className="w-full px-4 py-3 bg-black/40 border border-white/10 rounded-lg focus:border-indigo-400 outline-none"
                                 autoFocus
                             />
@@ -104,11 +110,14 @@ export default function Onboarding() {
                                 <h2 className="text-2xl font-semibold mb-2">
                                     What currency do you usually invoice in?
                                 </h2>
+
                                 <p className="text-white/50 text-sm">
-                                    This will be used as default currency in your invoices. You can change this anytime later.
+                                    This will be used as default currency in your invoices.
+                                    You can change this anytime later.
                                 </p>
                             </div>
 
+                            {/* CURRENCY */}
                             <div className="flex gap-3">
 
                                 <button
@@ -133,6 +142,46 @@ export default function Onboarding() {
 
                             </div>
 
+                            {/* INVOICE MODE */}
+                            <div className="pt-2">
+
+                                <h3 className="text-lg font-semibold mb-2">
+                                    Create your first invoice
+                                </h3>
+
+                                <p className="text-sm text-slate-400 mb-4">
+                                    Start from scratch or use a sample to explore how Cosmi works
+                                </p>
+
+                                <div className="flex flex-col gap-3">
+
+                                    <button
+                                        onClick={() =>
+                                            setInvoiceMode("blank")
+                                        }
+                                        className={`w-full py-2.5 rounded-xl border transition ${invoiceMode === "blank"
+                                                ? "bg-white text-black border-white"
+                                                : "bg-white/5 border-white/10 hover:bg-white/10"
+                                            }`}
+                                    >
+                                        Start from scratch
+                                    </button>
+
+                                    <button
+                                        onClick={() =>
+                                            setInvoiceMode("sample")
+                                        }
+                                        className={`w-full py-2.5 rounded-xl border transition ${invoiceMode === "sample" ? "bg-white text-black border-white"
+                                            : "bg-white/5 border-white/10 hover:bg-white/10"}`}
+                                    >
+                                        Use a sample invoice
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                            {/* FINISH */}
                             <button
                                 onClick={handleFinish}
                                 disabled={saving}
@@ -147,6 +196,8 @@ export default function Onboarding() {
                 </div>
 
             </div>
+
         </div>
     );
 }
+
