@@ -142,6 +142,7 @@ export default function Onboarding() {
 
                             </div>
 
+
                             {/* INVOICE MODE */}
                             <div className="pt-2">
 
