@@ -5,6 +5,7 @@ import { useAuth } from "@/app/providers/AuthProvider";
 import { useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
 import { doc, setDoc } from "firebase/firestore";
+import { updateProfile } from "firebase/auth";
 
 export default function Onboarding() {
     const { user, loading } = useAuth();
@@ -13,6 +14,7 @@ export default function Onboarding() {
     const [step, setStep] = useState(0);
 
     const [companyName, setCompanyName] = useState("");
+    const [fullName, setFullName] = useState("");
 
     const [currency, setCurrency] = useState("INR");
 
@@ -34,6 +36,11 @@ export default function Onboarding() {
         setSaving(true);
 
         try {
+            await updateProfile(user, {
+                displayName: fullName,
+            });
+
+
             await setDoc(
                 doc(db, "users", user.uid),
                 {
@@ -64,7 +71,7 @@ export default function Onboarding() {
                 <div className="bg-[#0b0b0f]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-8 transition-all">
 
                     {/* PROGRESS */}
-                    <div className="flex items-center gap-2 mb-8"> {[0, 1].map((s) => (<div key={s} className={` flex-1 h-1 rounded-full transition-all duration-300 ${step >= s ? "bg-indigo-600" : "bg-white/10"} `} />))} </div>
+                    <div className="flex items-center gap-2 mb-8"> {[0, 1, 2].map((s) => (<div key={s} className={` flex-1 h-1 rounded-full transition-all duration-300 ${step >= s ? "bg-indigo-600" : "bg-white/10"} `} />))} </div>
 
                     {/* STEP 1 */}
                     {step === 0 && (
@@ -102,8 +109,48 @@ export default function Onboarding() {
                         </div>
                     )}
 
+
+
                     {/* STEP 2 */}
                     {step === 1 && (
+                        <div className="space-y-6 animate-fade-in">
+
+                            <div>
+                                <h2 className="text-2xl font-semibold mb-2">
+                                    What should clients call you?
+                                </h2>
+
+                                <p className="text-white/50 text-sm">
+                                    This appears on invoices and client communication.
+                                </p>
+                            </div>
+
+                            <input
+                                type="text"
+                                placeholder="Enter your name"
+                                value={fullName}
+                                onChange={(e) =>
+                                    setFullName(e.target.value)
+                                }
+                                className="w-full px-4 py-3 bg-black/40 border border-white/10 rounded-lg focus:border-indigo-400 outline-none"
+                                autoFocus
+                            />
+
+                            <button
+                                onClick={() => setStep(2)}
+                                disabled={!fullName}
+                                className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 rounded-lg transition disabled:opacity-40"
+                            >
+                                Continue
+                            </button>
+
+                        </div>
+                    )}
+
+
+
+                    {/* STEP 3 */}
+                    {step === 2 && (
                         <div className="space-y-6 animate-fade-in">
 
                             <div>
@@ -123,8 +170,8 @@ export default function Onboarding() {
                                 <button
                                     onClick={() => setCurrency("INR")}
                                     className={`flex-1 py-3 rounded-lg border transition ${currency === "INR"
-                                            ? "bg-indigo-600 border-indigo-500"
-                                            : "border-white/10 hover:bg-white/5"
+                                        ? "bg-indigo-600 border-indigo-500"
+                                        : "border-white/10 hover:bg-white/5"
                                         }`}
                                 >
                                     INR ₹
@@ -133,8 +180,8 @@ export default function Onboarding() {
                                 <button
                                     onClick={() => setCurrency("USD")}
                                     className={`flex-1 py-3 rounded-lg border transition ${currency === "USD"
-                                            ? "bg-indigo-600 border-indigo-500"
-                                            : "border-white/10 hover:bg-white/5"
+                                        ? "bg-indigo-600 border-indigo-500"
+                                        : "border-white/10 hover:bg-white/5"
                                         }`}
                                 >
                                     USD $
@@ -161,8 +208,8 @@ export default function Onboarding() {
                                             setInvoiceMode("blank")
                                         }
                                         className={`w-full py-2.5 rounded-xl border transition ${invoiceMode === "blank"
-                                                ? "bg-white text-black border-white"
-                                                : "bg-white/5 border-white/10 hover:bg-white/10"
+                                            ? "bg-white text-black border-white"
+                                            : "bg-white/5 border-white/10 hover:bg-white/10"
                                             }`}
                                     >
                                         Start from scratch
