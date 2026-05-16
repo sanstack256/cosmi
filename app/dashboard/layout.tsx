@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 
 import UserMenu from "@/app/components/UserMenu";
+import { useAuth } from "@/app/providers/AuthProvider";
 import RequireAuth from "@/app/components/RequireAuth";
 
 export default function DashboardLayout({
@@ -30,6 +31,16 @@ export default function DashboardLayout({
 
 
   const pathname = usePathname();
+  const { user } = useAuth();
+
+  const hour = new Date().getHours();
+
+  const greeting =
+    hour < 12
+      ? "Good morning"
+      : hour < 18
+        ? "Good afternoon"
+        : "Good evening";
 
 
   return (
@@ -229,13 +240,17 @@ export default function DashboardLayout({
           >
             {/* Left */}
             <div className="flex flex-col">
-              <span className="text-[11px] uppercase tracking-[0.24em] text-slate-500">
-                Workspace
-              </span>
 
-              <h1 className="mt-1 text-[22px] font-semibold tracking-[-0.03em] text-white">
-                Good evening, Sanjeev
+              <h1 className="text-[22px] font-semibold tracking-[-0.03em] text-white">
+                {greeting}
+                {user?.displayName ? `, ${user.displayName}` : ""}
               </h1>
+
+              <p className="mt-1 text-sm text-slate-500">
+                Here’s what’s happening across your workspace today.
+              </p>
+
+
             </div>
 
             {/* Right */}
