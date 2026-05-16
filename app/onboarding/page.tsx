@@ -5,7 +5,7 @@ import { useAuth } from "@/app/providers/AuthProvider";
 import { useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
 import { doc, setDoc } from "firebase/firestore";
-import { updateProfile } from "firebase/auth";
+import { updateProfile, getAuth } from "firebase/auth";
 
 export default function Onboarding() {
     const { user, loading } = useAuth();
@@ -36,10 +36,13 @@ export default function Onboarding() {
         setSaving(true);
 
         try {
-            await updateProfile(user, {
-                displayName: fullName,
-            });
+            const auth = getAuth();
 
+            if (auth.currentUser) {
+                await updateProfile(auth.currentUser, {
+                    displayName: fullName,
+                });
+            }
 
             await setDoc(
                 doc(db, "users", user.uid),
