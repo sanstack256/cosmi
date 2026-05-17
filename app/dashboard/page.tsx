@@ -727,314 +727,289 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
 
 
 
 
-              {/* Bottom row */}
-              <div className="grid gap-6 lg:grid-cols-[1.35fr_0.65fr] items-stretch">
+          {/* Bottom row */}
+          <div className="grid gap-6 lg:grid-cols-[0.95fr_1.35fr] items-stretch min-w-0">
 
-                {/* Chart */}
-                {/* <div className="relative px-8 pt-6 pb-6 bg-gradient-to-br from-[#0b0b18] to-[#14142f]  overflow-hidden">  */}
-                <div className="rounded-[28px] border border-white/[0.06] bg-[#0b1020]/80 p-6">
+            {/* LEFT — Revenue Chart */}
+            <div className="relative overflow-hidden rounded-[28px] border border-white/[0.035] bg-[#0b1020]/72 p-6 min-w-0">
 
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <p className="text-[11px] uppercase tracking-wide text-slate-500">
-                        Revenue
-                      </p>
+              {/* Chart header */}
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <p className="text-[11px] uppercase tracking-wide text-slate-500">
+                    Revenue
+                  </p>
 
-                      <h2 className="text-xl font-semibold tracking-tight text-white mt-1">
-                        {revenueRange === "6m"
-                          ? "Last 6 months"
-                          : revenueRange === "12m"
-                            ? "Last 12 months"
-                            : "This month"}
-                      </h2>
+                  <h2 className="text-xl font-semibold tracking-tight text-white mt-1">
+                    Last 6 months
+                  </h2>
 
-                      {/* 🔥 HERO METRIC */}
-                      <div className="mt-3 flex items-baseline gap-3">
-                        <span className="text-2xl font-semibold text-white">
-                          {formatCurrency(currentRevenue, accountCurrency)}
-                        </span>
-
-                        {typeof growth === "number" && growth > 0 && (
-                          <span className="text-emerald-400 text-sm">
-                            ↑ {growth}%
-                          </span>
-                        )}
-
-                        {typeof growth === "number" && growth < 0 && (
-                          <span className="text-rose-400 text-sm">
-                            ↓ {Math.abs(growth)}%
-                          </span>
-                        )}
-                      </div>
-
-                      {/* SUBTEXT */}
-                      <p className="text-xs text-slate-500 mt-1">
-                        {revenueRange === "1m"
-                          ? "Revenue this month"
-                          : "Total revenue in selected period"}
-                      </p>
-
-                    </div>
-
-
-
-                    <select
-                      value={revenueRange}
-                      onChange={(e) => setRevenueRange(e.target.value as any)}
-                      className="bg-black/50 border border-white/12 text-[11px] rounded-xl px-2 py-1"
-                    >
-                      <option value="6m">Last 6 months</option>
-                      <option value="12m">Last 12 months</option>
-                      <option value="1m">This month</option>
-                    </select>
-                  </div>
-
-                  <div className="h-[260px] w-full">
-
-                    <div className="absolute inset-0 pointer-events-none">
-                      <div className="absolute left-1/3 top-0 h-full w-[200px] bg-violet-500/10 blur-[120px]" />
-                      <div className="absolute right-1/4 top-0 h-full w-[150px] bg-indigo-500/10 blur-[100px]" />
-                    </div>
-
-
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart
-                        data={revenueChartData}
-                        margin={{ top: 10, right: 20, left: 20, bottom: 20 }}
-                      >
-                        <defs>
-                          <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#8b5cf6" stopOpacity={1} />
-                            <stop offset="30%" stopColor="#8b5cf6" stopOpacity={0.45} />
-                            <stop offset="65%" stopColor="#6366f1" stopOpacity={0.18} />
-                            <stop offset="100%" stopColor="#6366f1" stopOpacity={0.02} />
-                          </linearGradient>
-                        </defs>
-
-                        <CartesianGrid
-                          stroke="rgba(255,255,255,0.04)"
-                          strokeDasharray="3 6"
-                          vertical={false}
-                        />
-
-                        <XAxis
-                          dataKey="label"
-                          stroke="#94a3b8"
-                          fontSize={11}
-                          tickLine={false}
-                          axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
-                          interval={0}
-                          padding={{ left: 10, right: 10 }}
-                          tick={{ fill: "#94a3b8", opacity: 0.8 }}
-                          minTickGap={20}
-                        />
-
-
-
-                        <Tooltip
-                          cursor={<CustomCursor />}
-                          contentStyle={{
-                            backgroundColor: "rgba(15,15,26,0.85)",
-                            backdropFilter: "blur(12px)",
-                            border: "1px solid rgba(124,58,237,0.25)",
-                            borderRadius: "12px",
-                            fontSize: "12px",
-                            boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
-                          }}
-                          formatter={(value: any, name, props: any) => {
-                            const isCurrent = props.payload?.isCurrent;
-                            const real = props.payload?.realValue ?? value;
-
-                            return `${isCurrent ? "So far: " : ""}${formatCurrency(Number(real) / 100, accountCurrency)}`
-                          }}
-                        />
-
-
-                        <Area
-                          type="monotone"
-                          dataKey="value"
-                          stroke="#8b5cf6"
-                          strokeWidth={6}
-                          fill="none"
-                          opacity={0.08}
-                          dot={false}
-                          tooltipType="none"
-                        />
-
-
-                        <Area
-                          type="monotone"
-                          animationDuration={700}
-                          animationEasing="ease-out"
-                          dataKey="value"
-                          stroke="#a78bfa"
-                          strokeWidth={3.2}
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          fill="url(#areaGradient)"
-                          dot={false}
-                          activeDot={(props: any) => {
-                            if (props.payload?.isCurrent) {
-                              return (
-                                <circle
-                                  cx={props.cx}
-                                  cy={props.cy}
-                                  r={7}
-                                  fill="#a78bfa"
-                                  stroke="#0b0b18"
-                                  strokeWidth={3}
-
-                                />
-
-
-                              );
-                            }
-                            return null;
-                          }}
-                        />
-
-
-
-                      </AreaChart>
-
-                    </ResponsiveContainer>
-                  </div>
-
-                  <div className="mt-5 flex flex-col gap-1">
-                    <span className="text-[11px] text-slate-500">
-                      Current period is still in progress
+                  <div className="mt-3">
+                    <span className="text-2xl font-semibold text-white">
+                      {formatCurrency(currentRevenue, accountCurrency)}
                     </span>
-
-                    <div className="text-xs">
-                      {growth === "new" && (
-                        <span className="text-emerald-400">
-                          First revenue recorded
-                        </span>
-                      )}
-
-                      {typeof growth === "number" && growth > 0 && (
-                        <span className="text-emerald-400">
-                          ↑ {growth}% growth
-                        </span>
-                      )}
-
-                      {typeof growth === "number" && growth < 0 && (
-                        <span className="text-rose-400">
-                          ↓ {Math.abs(growth)}% decline
-                        </span>
-                      )}
-                    </div>
                   </div>
                 </div>
 
+                <select
+                  value={revenueRange}
+                  onChange={(e) => setRevenueRange(e.target.value as any)}
+                  className="bg-black/50 border border-white/12 text-[11px] rounded-xl px-2 py-1"
+                >
+                  <option value="6m">Last 6 months</option>
+                  <option value="12m">Last 12 months</option>
+                  <option value="1m">This month</option>
+                </select>
+              </div>
 
-                {/* Recent invoices */}
-                <div className={`${cardBase} ${cardHover} p-6`}>
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <p className="text-xs text-slate-400">Recent invoices</p>
-                      <h2 className="text-sm font-semibold">Last activity</h2>
-                    </div>
-                    <Link href="/dashboard/invoices" className="text-[11px] text-violet-300 hover:text-violet-200">View all</Link>
-                  </div>
+              {/* Chart */}
+              <div className="h-[240px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={revenueChartData}>
+                    <defs>
+                      <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.8} />
+                        <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.02} />
+                      </linearGradient>
+                    </defs>
 
+                    <CartesianGrid
+                      stroke="rgba(255,255,255,0.04)"
+                      vertical={false}
+                    />
 
-                  {/* TABLE */}
-                  <div className="rounded-[28px] border border-white/[0.06] bg-[#080b17]/90 p-6">
-                  <div className="w-full ">
-                    <table className="w-full text-xs">
-                      <thead>
-                        <tr className="text-slate-400 border-b border-white/12">
-                          <th className="py-2 pr-4 w-[110px]">Invoice</th>
-                          <th className="py-2 pr-4 w-[180px]">Client</th>
-                          <th className="py-2 pr-4 w-[100px]">Amount</th>
-                          <th className="py-2 pr-4 w-[110px]">Status</th>
-                          <th className="py-2 pr-4 w-[110px]">Date</th>
-                          <th className="py-2 pr-4 text-right w-[170px]">Actions</th>
+                    <XAxis
+                      dataKey="label"
+                      stroke="#94a3b8"
+                      fontSize={11}
+                      tickLine={false}
+                      axisLine={false}
+                    />
 
-                        </tr>
-                      </thead>
+                    <Tooltip
+                      contentStyle={{
+                        background: "rgba(10, 10, 18, 0.92)",
+                        border: "1px solid rgba(255,255,255,0.08)",
+                        borderRadius: "16px",
+                        backdropFilter: "blur(18px)",
+                        boxShadow: "0 10px 40px rgba(0,0,0,0.45)",
+                      }}
+                      labelStyle={{
+                        color: "#a1a1aa",
+                        fontSize: 12,
+                        fontWeight: 500,
+                      }}
+                      itemStyle={{
+                        color: "#a78bfa",
+                        fontWeight: 600,
+                        fontSize: 14,
+                      }}
+                      cursor={{
+                        stroke: "rgba(167,139,250,0.35)",
+                        strokeWidth: 1,
+                      }}
+                    />
 
-                      <tbody>
-                        {recentInvoices.length === 0 && (
-                          <tr>
-                            <td colSpan={6} className="py-6 text-center text-slate-500 text-[11px]">No invoices found.</td>
-                          </tr>
-                        )}
+                    <Area
+                      type="monotone"
+                      dataKey="value"
+                      stroke="#a78bfa"
+                      strokeWidth={3}
+                      fill="url(#areaGradient)"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
 
-                        {recentInvoices.map((inv) => (
-                          <tr key={inv.id} className="border-b border-white/12 last:border-0 hover:bg-white/5">
-                            <td className="py-2 pr-4 w-[120px]">
+            {/* RIGHT — Recent invoices */}
+            <div className={`${cardBase} ${cardHover} p-6 min-w-0`}>
 
-                              <span className="inline-block max-w-[110px] truncate px-2 py-1 rounded-md bg-violet-500/10 border border-violet-500/20 text-violet-300 text-[10px] font-medium">
-                                {inv.invoiceNumber
-                                  ? inv.invoiceNumber
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <p className="text-xs text-slate-400">
+                    Recent invoices
+                  </p>
 
-                                  : inv.id.slice(0, 6)}
+                  <h2 className="text-sm font-semibold">
+                    Last activity
+                  </h2>
+                </div>
 
-                              </span>
+                <Link
+                  href="/dashboard/invoices"
+                  className="text-[11px] text-violet-300 hover:text-violet-200"
+                >
+                  View all
+                </Link>
+              </div>
 
-                            </td>
+              <div className="relative overflow-hidden rounded-[28px] border border-white/[0.025] bg-[#0b1020]/72 p-5 min-w-0">
 
+                <div className="w-full overflow-x-auto min-w-0">
 
-                            <td className="py-2 pr-4 truncate max-w-[180px]">
-                              {inv.client}
-                            </td>
+                  <div className="flex flex-col gap-3">
 
-                            <td className="py-2 pr-4">
-                              {formatCurrency(
-                                parseAmount(inv.amount),
-                                accountCurrency
-                              )
-                              }
-                            </td>
-                            <td className="py-2 pr-4">
-                              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] ${statusColors[computeInvoiceStatus(inv)]}`}>
-                                {computeInvoiceStatus(inv)}
-                              </span>
-                            </td>
-                            <td className="py-2 text-slate-400 text-[11px]">{inv.date}</td>
+                    {recentInvoices.length === 0 && (
+                      <div className="rounded-2xl border border-white/[0.04] bg-white/[0.02] px-5 py-8 text-center text-sm text-slate-500">
+                        No invoices yet.
+                      </div>
+                    )}
 
-                            <td className="py-2 pr-4 text-right">
-                              <div className="flex gap-2 items-center justify-end">
+                    {recentInvoices.map((inv) => {
+                      const status = computeInvoiceStatus(inv);
 
-                                {inv.lifecycle === "draft" && (
-                                  <button
-                                    onClick={() => issueInvoice(inv.id)}
-                                    className="text-[10px] px-2 py-1 rounded-md border border-violet-500/30 text-violet-300 hover:bg-violet-500/10 whitespace-nowrap"
-                                  >
-                                    Issue
-                                  </button>
-                                )}
+                      return (
+                        <div
+                          key={inv.id}
+                          className="
+                            group
+                            relative
+                            overflow-hidden
+                            rounded-2xl
+                            border border-white/[0.04]
+                            bg-white/[0.02]
+                            px-5 py-4
+                            transition-all duration-300
+                            hover:border-violet-500/20
+                            hover:bg-white/[0.035]
+                            hover:shadow-[0_0_30px_rgba(124,58,237,0.08)]
+                          "
+                        >
 
-                                <Link href={`/invoice-editor?id=${inv.id}`} className="text-[10px] px-2 py-1 rounded-md bg-white/[0.03] hover:bg-white/[0.06] hover:bg-white/10 whitespace-nowrap"
-                                >Edit</Link>
+                          {/* Ambient Glow */}
+                          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+                            <div className="absolute -left-10 top-0 h-full w-32 bg-violet-500/10 blur-3xl" />
+                          </div>
 
-                                <button
-                                  onClick={() => exportInvoiceAsPDF(inv)}
-                                  className="text-[10px] px-2 py-1 rounded-md bg-white/[0.03] hover:bg-white/[0.06] hover:bg-white/10 whitespace-nowrap"
-                                  title="Open print dialog (choose 'Save as PDF')"
-                                >
-                                  PDF
-                                </button>
+                          <div className="relative z-10 flex items-center justify-between gap-6">
 
-                                <button
-                                  onClick={() => shareInvoice(inv)}
-                                  className="text-[10px] px-2 py-1 rounded-md bg-white/[0.03] hover:bg-white/[0.06] hover:bg-white/10 whitespace-nowrap"
-                                >
-                                  Share
-                                </button>
+                            {/* LEFT */}
+                            <div className="flex items-center gap-5 min-w-0">
+
+                              {/* Invoice Pill */}
+                              <div className="shrink-0">
+                                <div className="
+                                  rounded-xl
+                                  border border-violet-500/20
+                                  bg-violet-500/10
+                                  px-3 py-2
+                                  text-[11px]
+                                  font-medium
+                                  tracking-wide
+                                  text-violet-300
+                                ">
+                                  {inv.invoiceNumber || inv.id.slice(0, 6)}
+                                </div>
                               </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+
+                              {/* Client + Date */}
+                              <div className="min-w-0">
+
+                                <div className="flex items-center gap-3">
+
+                                  <h3 className="truncate text-sm font-medium text-white">
+                                    {inv.client}
+                                  </h3>
+
+                                  <span
+                                    className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${status === "Paid"
+                                      ? "bg-emerald-500/10 text-emerald-300"
+                                      : status === "Overdue"
+                                        ? "bg-rose-500/10 text-rose-300"
+                                        : "bg-amber-500/10 text-amber-300"
+                                      }`}
+                                  >
+                                    {status}
+                                  </span>
+
+                                </div>
+
+                                <p className="mt-1 text-xs text-slate-500">
+                                  {inv.date}
+                                </p>
+
+                              </div>
+                            </div>
+
+                            {/* CENTER */}
+                            <div className="hidden md:flex flex-col items-end">
+                              <span className="text-sm font-semibold text-white">
+                                {formatCurrency(
+                                  parseAmount(inv.amount),
+                                  accountCurrency
+                                )}
+                              </span>
+
+                              <span className="text-[11px] text-slate-500">
+                                Invoice amount
+                              </span>
+                            </div>
+
+                            {/* RIGHT ACTIONS */}
+                            <div className="flex items-center gap-2 shrink-0">
+
+                              <Link
+                                href={`/invoice-editor?id=${inv.id}`}
+                                className="
+                rounded-xl
+                border border-white/[0.06]
+                bg-white/[0.03]
+                px-3 py-2
+                text-[11px]
+                text-slate-300
+                transition-all
+                hover:bg-white/[0.06]
+                hover:text-white
+              "
+                              >
+                                Edit
+                              </Link>
+
+                              <button
+                                onClick={() => exportInvoiceAsPDF(inv)}
+                                className="
+                rounded-xl
+                border border-white/[0.06]
+                bg-white/[0.03]
+                px-3 py-2
+                text-[11px]
+                text-slate-300
+                transition-all
+                hover:bg-white/[0.06]
+                hover:text-white
+              "
+                              >
+                                PDF
+                              </button>
+
+                              <button
+                                onClick={() => shareInvoice(inv)}
+                                className="
+                rounded-xl
+                bg-violet-500/12
+                px-3 py-2
+                text-[11px]
+                text-violet-200
+                transition-all
+                hover:bg-violet-500/20
+                hover:text-white
+              "
+                              >
+                                Share
+                              </button>
+
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
