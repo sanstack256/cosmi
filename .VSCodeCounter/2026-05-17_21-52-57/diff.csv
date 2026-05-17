@@ -1,0 +1,17 @@
+"filename", "language", "TypeScript", "TypeScript JSX", "comment", "blank", "total"
+"/Users/nssanjeev/Documents/cosmi/app/api/delete-account/route.ts", "TypeScript", 33, 0, 3, 11, 47
+"/Users/nssanjeev/Documents/cosmi/app/dashboard/analytics/page.tsx", "TypeScript JSX", 0, -1, 0, 3, 2
+"/Users/nssanjeev/Documents/cosmi/app/dashboard/layout.tsx", "TypeScript JSX", 0, 105, 2, 11, 118
+"/Users/nssanjeev/Documents/cosmi/app/dashboard/page.tsx", "TypeScript JSX", 0, 8, 2, 4, 14
+"/Users/nssanjeev/Documents/cosmi/app/head.tsx", "TypeScript JSX", 0, -1, -1, 1, -1
+"/Users/nssanjeev/Documents/cosmi/app/invoice-editor/components/invoice/InvoiceForm.tsx", "TypeScript JSX", 0, 12, 0, 6, 18
+"/Users/nssanjeev/Documents/cosmi/app/invoice-editor/components/invoice/InvoicePreview.tsx", "TypeScript JSX", 0, 0, 0, 3, 3
+"/Users/nssanjeev/Documents/cosmi/app/invoice-editor/page.tsx", "TypeScript JSX", 0, 3, 0, 10, 13
+"/Users/nssanjeev/Documents/cosmi/app/onboarding/page.tsx", "TypeScript JSX", 0, 68, 4, 31, 103
+"/Users/nssanjeev/Documents/cosmi/app/profile/page.tsx", "TypeScript JSX", 0, 97, 0, 34, 131
+"/Users/nssanjeev/Documents/cosmi/app/providers/AuthProvider.tsx", "TypeScript JSX", 0, 13, 2, 4, 19
+"/Users/nssanjeev/Documents/cosmi/app/signin/page.tsx", "TypeScript JSX", 0, 9, 0, 3, 12
+"/Users/nssanjeev/Documents/cosmi/app/test/CosmiLogo.tsx", "TypeScript JSX", 0, 100, 7, 27, 134
+"/Users/nssanjeev/Documents/cosmi/app/test/page.tsx", "TypeScript JSX", 0, 8, 0, 1, 9
+"/Users/nssanjeev/Documents/cosmi/lib/firebase-admin.ts", "TypeScript", 1, 0, 1, 0, 2
+"Total", "-", 34, 421, 20, 149, 624

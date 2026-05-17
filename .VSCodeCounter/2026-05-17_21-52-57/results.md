@@ -1,19 +1,19 @@
 # Summary
 
-Date : 2026-04-05 01:12:52
+Date : 2026-05-17 21:52:57
 
 Directory /Users/nssanjeev/Documents/cosmi
 
-Total : 78 files,  20341 codes, 552 comments, 2471 blanks, all 23364 lines
+Total : 81 files,  21292 codes, 588 comments, 2737 blanks, all 24617 lines
 
 Summary / [Details](details.md) / [Diff Summary](diff.md) / [Diff Details](diff-details.md)
 
 ## Languages
 | language | files | code | comment | blank | total |
 | :--- | ---: | ---: | ---: | ---: | ---: |
+| TypeScript JSX | 46 | 10,142 | 530 | 2,480 | 13,152 |
 | JSON | 2 | 10,080 | 0 | 2 | 10,082 |
-| TypeScript JSX | 44 | 9,225 | 498 | 2,225 | 11,948 |
-| TypeScript | 20 | 639 | 36 | 172 | 847 |
+| TypeScript | 21 | 673 | 40 | 183 | 896 |
 | PostCSS | 1 | 275 | 15 | 49 | 339 |
 | JavaScript | 4 | 52 | 3 | 8 | 63 |
 | JSON with Comments | 1 | 42 | 0 | 1 | 43 |
@@ -23,12 +23,13 @@ Summary / [Details](details.md) / [Diff Summary](diff.md) / [Diff Details](diff-
 ## Directories
 | path | files | code | comment | blank | total |
 | :--- | ---: | ---: | ---: | ---: | ---: |
-| . | 78 | 20,341 | 552 | 2,471 | 23,364 |
+| . | 81 | 21,292 | 588 | 2,737 | 24,617 |
 | . (Files) | 10 | 10,213 | 6 | 31 | 10,250 |
-| app | 53 | 9,990 | 537 | 2,411 | 12,938 |
-| app (Files) | 6 | 621 | 39 | 100 | 760 |
-| app/api | 7 | 463 | 24 | 132 | 619 |
+| app | 56 | 10,940 | 572 | 2,677 | 14,189 |
+| app (Files) | 6 | 620 | 38 | 101 | 759 |
+| app/api | 8 | 496 | 27 | 143 | 666 |
 | app/api/create-public-link | 1 | 50 | 2 | 12 | 64 |
+| app/api/delete-account | 1 | 33 | 3 | 11 | 47 |
 | app/api/paypal-capture | 1 | 132 | 7 | 40 | 179 |
 | app/api/paypal-checkout | 1 | 88 | 5 | 19 | 112 |
 | app/api/public-invoice | 1 | 27 | 0 | 7 | 34 |
@@ -42,36 +43,37 @@ Summary / [Details](details.md) / [Diff Summary](diff.md) / [Diff Details](diff-
 | app/components (Files) | 6 | 358 | 33 | 52 | 443 |
 | app/components/hero | 1 | 47 | 6 | 6 | 59 |
 | app/components/ui | 1 | 139 | 6 | 28 | 173 |
-| app/dashboard | 7 | 2,807 | 118 | 720 | 3,645 |
-| app/dashboard (Files) | 2 | 1,027 | 55 | 269 | 1,351 |
-| app/dashboard/analytics | 1 | 420 | 18 | 69 | 507 |
+| app/dashboard | 7 | 2,919 | 122 | 738 | 3,779 |
+| app/dashboard (Files) | 2 | 1,140 | 59 | 284 | 1,483 |
+| app/dashboard/analytics | 1 | 419 | 18 | 72 | 509 |
 | app/dashboard/clients | 2 | 360 | 12 | 105 | 477 |
 | app/dashboard/clients (Files) | 1 | 329 | 12 | 94 | 435 |
 | app/dashboard/clients/[id] | 1 | 31 | 0 | 11 | 42 |
 | app/dashboard/invoices | 2 | 1,000 | 33 | 277 | 1,310 |
 | app/dashboard/invoices (Files) | 1 | 565 | 9 | 141 | 715 |
 | app/dashboard/invoices/[id] | 1 | 435 | 24 | 136 | 595 |
-| app/invoice | 1 | 610 | 35 | 171 | 816 |
-| app/invoice-editor | 5 | 2,633 | 136 | 665 | 3,434 |
-| app/invoice-editor (Files) | 2 | 1,180 | 37 | 260 | 1,477 |
-| app/invoice-editor/components | 2 | 1,144 | 59 | 287 | 1,490 |
-| app/invoice-editor/components/invoice | 2 | 1,144 | 59 | 287 | 1,490 |
-| app/invoice-editor/hooks | 1 | 309 | 40 | 118 | 467 |
-| app/invoice/[id] | 1 | 610 | 35 | 171 | 816 |
-| app/onboarding | 1 | 121 | 4 | 27 | 152 |
+| app/invoice | 1 | 612 | 35 | 172 | 819 |
+| app/invoice-editor | 5 | 3,128 | 149 | 796 | 4,073 |
+| app/invoice-editor (Files) | 2 | 1,211 | 37 | 276 | 1,524 |
+| app/invoice-editor/components | 2 | 1,534 | 72 | 388 | 1,994 |
+| app/invoice-editor/components/invoice | 2 | 1,534 | 72 | 388 | 1,994 |
+| app/invoice-editor/hooks | 1 | 383 | 40 | 132 | 555 |
+| app/invoice/[id] | 1 | 612 | 35 | 172 | 819 |
+| app/onboarding | 1 | 189 | 8 | 58 | 255 |
 | app/payment-success | 1 | 30 | 0 | 13 | 43 |
 | app/pricing | 1 | 118 | 8 | 23 | 149 |
-| app/profile | 5 | 738 | 41 | 147 | 926 |
-| app/profile (Files) | 1 | 311 | 14 | 62 | 387 |
+| app/profile | 5 | 835 | 41 | 181 | 1,057 |
+| app/profile (Files) | 1 | 408 | 14 | 96 | 518 |
 | app/profile/components | 4 | 427 | 27 | 85 | 539 |
-| app/providers | 4 | 604 | 60 | 207 | 871 |
-| app/signin | 1 | 184 | 11 | 24 | 219 |
+| app/providers | 4 | 631 | 65 | 215 | 911 |
+| app/signin | 1 | 193 | 11 | 27 | 231 |
 | app/signout | 1 | 19 | 1 | 5 | 25 |
 | app/signup | 1 | 160 | 5 | 29 | 194 |
+| app/test | 2 | 108 | 7 | 28 | 143 |
 | app/test-auth | 1 | 12 | 0 | 4 | 16 |
 | app/test-firestore | 1 | 33 | 0 | 9 | 42 |
 | app/utils | 1 | 27 | 0 | 5 | 32 |
-| lib | 9 | 116 | 9 | 27 | 152 |
+| lib | 9 | 117 | 10 | 27 | 154 |
 | public | 5 | 5 | 0 | 0 | 5 |
 | types | 1 | 17 | 0 | 2 | 19 |
 

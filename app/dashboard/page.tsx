@@ -490,12 +490,12 @@ export default function DashboardPage() {
 
 
   if (loading || !user) return <div>Loading...</div>;
-if (loading) return <div>Loading...</div>;
+  if (loading) return <div>Loading...</div>;
 
-//  block dashboard render for new users
-if (user?.isNewUser) return null;
+  //  block dashboard render for new users
+  if (user?.isNewUser) return null;
 
-if (!userData) return <div>Loading...</div>;
+  if (!userData) return <div>Loading...</div>;
 
 
   return (
@@ -519,13 +519,13 @@ if (!userData) return <div>Loading...</div>;
             <div className="grid gap-4 lg:grid-cols-12 items-stretch">
 
               {/* Quick Actions Card */}
-              <div className="lg:col-span-5 flex">
-                <div className="flex-1 relative overflow-hidden rounded-3xl p-5 bg-gradient-to-br from-[#0f0f25] via-[#141432] to-[#1b1b40] border border-violet-500/25 transition-all duration-300">
+              <div className="lg:col-span-4 flex">
+                <div className="flex-1 relative overflow-hidden rounded-3xl p-4 bg-gradient-to-br from-[#0f0f25] via-[#141432] to-[#1b1b40] border border-violet-500/25 transition-all duration-300">
 
                   {/* Subtle background glow */}
-                  <div className="absolute -top-20 -right-20 w-72 h-72 bg-violet-500/20 blur-[120px] pointer-events-none" />
+                  <div className="absolute -top-20 -right-20 w-72 h-72 bg-violet-400/10 blur-[140px] pointer-events-none" />
 
-                  <div className="relative z-10 flex flex-col gap-4">
+                  <div className="relative z-10 flex flex-col gap-3">
 
                     {/* LEFT CONTENT */}
                     <div>
@@ -564,360 +564,485 @@ if (!userData) return <div>Loading...</div>;
                 </div>
               </div>
 
-              {/* Stats */}
-              <div className="lg:col-span-7 flex">
-                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 flex-1">
+              {/* Business Pulse */}
+              <div className="lg:col-span-8">
+                <div
+                  className="
+      relative overflow-hidden
+      rounded-[32px]
+      border border-white/[0.05]
+      bg-[#0B111B]
+      px-8 py-8 md:px-10 md:py-10
+    "
+                >
+                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-10">
 
-                  <StatCard
-                    label="Total Revenue"
-                    value={formatCurrency(stats.totalRevenue, accountCurrency)}
-                    subLabel="From all invoices"
-                    trend="+ Live"
-                  />
-                  <StatCard
-                    label="Pending Invoices"
-                    value={String(stats.pendingCount)}
-                    subLabel={
-                      stats.pendingAmount
-                        ? `${formatCurrency(stats.pendingAmount, accountCurrency)} pending`
-                        : "No pending amount"
-                    }
-                    trend="Updated"
-                  />
-                  <StatCard
-                    label="Paid Invoices"
-                    value={String(stats.paidCount)}
-                    subLabel="Marked as paid"
-                    trend="Accurate"
-                  />
-                  <StatCard
-                    label="Active Clients"
-                    value={String(stats.activeClients)}
-                    subLabel="Unique billed"
-                    trend="Growing"
-                  />
+                    {/* LEFT CONTENT */}
+                    <div className="max-w-xl">
 
-                  <StatCard
-                    label="Overdue"
-                    value={String(stats.overdueCount)}
-                    subLabel="Require attention"
-                    trend="Critical"
-                  />
+                      <div className="text-sm text-slate-500 mb-3">
+                        Outstanding Revenue
+                      </div>
 
+                      <div className="text-5xl md:text-6xl font-semibold tracking-[-0.06em] text-white">
+                        {formatCurrency(stats.pendingAmount, accountCurrency)}
+                      </div>
+
+                      <div className="mt-8 space-y-3">
+
+                        <div className="flex items-center gap-3 text-sm">
+                          <div className="h-2 w-2 rounded-full bg-violet-400/80" />
+
+                          <span className="text-slate-300">
+                            {stats.pendingCount} awaiting payment
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-3 text-sm">
+                          <div className="h-2 w-2 rounded-full bg-rose-400/80" />
+
+                          <span className="text-slate-300">
+                            {stats.overdueCount} overdue
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-3 text-sm">
+                          <div className="h-2 w-2 rounded-full bg-emerald-400/80" />
+
+                          <span className="text-slate-300">
+                            {stats.paidCount} paid this month
+                          </span>
+                        </div>
+
+                      </div>
+                    </div>
+
+                    {/* RIGHT VISUAL */}
+                    <div className="flex items-center justify-center">
+
+                      {(() => {
+
+                        const total =
+                          stats.paidCount +
+                          stats.pendingCount +
+                          stats.overdueCount;
+
+                        const radius = 48;
+                        const circumference = 2 * Math.PI * radius;
+
+                        const paid =
+                          total > 0
+                            ? (stats.paidCount / total) * circumference
+                            : 0;
+
+                        const pending =
+                          total > 0
+                            ? (stats.pendingCount / total) * circumference
+                            : 0;
+
+                        const overdue =
+                          total > 0
+                            ? (stats.overdueCount / total) * circumference
+                            : 0;
+
+                        return (
+                          <div className="relative h-[140px] w-[140px] flex items-center justify-center">
+
+                            <svg
+                              width="140"
+                              height="140"
+                              viewBox="0 0 140 140"
+                              className="-rotate-90"
+                            >
+
+                              {/* Base Track */}
+                              <circle
+                                cx="70"
+                                cy="70"
+                                r={radius}
+                                fill="none"
+                                stroke="rgba(255,255,255,0.05)"
+                                strokeWidth="6"
+                              />
+
+                              {/* Paid */}
+                              <circle
+                                cx="70"
+                                cy="70"
+                                r={radius}
+                                fill="none"
+                                stroke="rgba(52,211,153,0.72)"
+                                strokeWidth="6"
+                                strokeLinecap="round"
+                                strokeDasharray={`${paid} ${circumference}`}
+                                strokeDashoffset="0"
+                              />
+
+                              {/* Pending */}
+                              <circle
+                                cx="70"
+                                cy="70"
+                                r={radius}
+                                fill="none"
+                                stroke="rgba(167,139,250,0.72)"
+                                strokeWidth="6"
+                                strokeLinecap="round"
+                                strokeDasharray={`${pending} ${circumference}`}
+                                strokeDashoffset={-paid - 8}
+                              />
+
+                              {/* Overdue */}
+                              <circle
+                                cx="70"
+                                cy="70"
+                                r={radius}
+                                fill="none"
+                                stroke="rgba(251,113,133,0.72)"
+                                strokeWidth="6"
+                                strokeLinecap="round"
+                                strokeDasharray={`${overdue} ${circumference}`}
+                                strokeDashoffset={-paid - pending - 16}
+                              />
+
+                            </svg>
+
+                            {/* Center Content */}
+                            <div className="absolute inset-0 flex flex-col items-center justify-center">
+
+                              <div className="text-3xl font-semibold tracking-[-0.05em] text-white">
+                                {stats.pendingCount}
+                              </div>
+
+                              <div className="mt-1 text-[11px] uppercase tracking-[0.22em] text-slate-500">
+                                Pending
+                              </div>
+
+                            </div>
+
+                          </div>
+                        );
+                      })()}
+
+                    </div>
+                  </div>
                 </div>
               </div>
 
-            </div>
 
 
-            {/* Bottom row */}
-            <div className="grid gap-6 lg:grid-cols-2 items-stretch">
 
-              {/* Chart */}
-              <div className="relative rounded-3xl px-8 pt-6 pb-6 bg-gradient-to-br from-[#0b0b18] to-[#14142f] border border-violet-500/20 shadow-[0_0_50px_rgba(124,58,237,0.15)] overflow-hidden">
+              {/* Bottom row */}
+              <div className="grid gap-6 lg:grid-cols-[1.35fr_0.65fr] items-stretch">
 
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <p className="text-[11px] uppercase tracking-wide text-slate-500">
-                      Revenue
-                    </p>
+                {/* Chart */}
+                {/* <div className="relative px-8 pt-6 pb-6 bg-gradient-to-br from-[#0b0b18] to-[#14142f]  overflow-hidden">  */}
+                <div className="rounded-[28px] border border-white/[0.06] bg-[#0b1020]/80 p-6">
 
-                    <h2 className="text-xl font-semibold tracking-tight text-white mt-1">
-                      {revenueRange === "6m"
-                        ? "Last 6 months"
-                        : revenueRange === "12m"
-                          ? "Last 12 months"
-                          : "This month"}
-                    </h2>
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <p className="text-[11px] uppercase tracking-wide text-slate-500">
+                        Revenue
+                      </p>
 
-                    {/* 🔥 HERO METRIC */}
-                    <div className="mt-3 flex items-baseline gap-3">
-                      <span className="text-2xl font-semibold text-white">
-                        {formatCurrency(currentRevenue, accountCurrency)}
-                      </span>
+                      <h2 className="text-xl font-semibold tracking-tight text-white mt-1">
+                        {revenueRange === "6m"
+                          ? "Last 6 months"
+                          : revenueRange === "12m"
+                            ? "Last 12 months"
+                            : "This month"}
+                      </h2>
+
+                      {/* 🔥 HERO METRIC */}
+                      <div className="mt-3 flex items-baseline gap-3">
+                        <span className="text-2xl font-semibold text-white">
+                          {formatCurrency(currentRevenue, accountCurrency)}
+                        </span>
+
+                        {typeof growth === "number" && growth > 0 && (
+                          <span className="text-emerald-400 text-sm">
+                            ↑ {growth}%
+                          </span>
+                        )}
+
+                        {typeof growth === "number" && growth < 0 && (
+                          <span className="text-rose-400 text-sm">
+                            ↓ {Math.abs(growth)}%
+                          </span>
+                        )}
+                      </div>
+
+                      {/* SUBTEXT */}
+                      <p className="text-xs text-slate-500 mt-1">
+                        {revenueRange === "1m"
+                          ? "Revenue this month"
+                          : "Total revenue in selected period"}
+                      </p>
+
+                    </div>
+
+
+
+                    <select
+                      value={revenueRange}
+                      onChange={(e) => setRevenueRange(e.target.value as any)}
+                      className="bg-black/50 border border-white/12 text-[11px] rounded-xl px-2 py-1"
+                    >
+                      <option value="6m">Last 6 months</option>
+                      <option value="12m">Last 12 months</option>
+                      <option value="1m">This month</option>
+                    </select>
+                  </div>
+
+                  <div className="h-[260px] w-full">
+
+                    <div className="absolute inset-0 pointer-events-none">
+                      <div className="absolute left-1/3 top-0 h-full w-[200px] bg-violet-500/10 blur-[120px]" />
+                      <div className="absolute right-1/4 top-0 h-full w-[150px] bg-indigo-500/10 blur-[100px]" />
+                    </div>
+
+
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart
+                        data={revenueChartData}
+                        margin={{ top: 10, right: 20, left: 20, bottom: 20 }}
+                      >
+                        <defs>
+                          <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#8b5cf6" stopOpacity={1} />
+                            <stop offset="30%" stopColor="#8b5cf6" stopOpacity={0.45} />
+                            <stop offset="65%" stopColor="#6366f1" stopOpacity={0.18} />
+                            <stop offset="100%" stopColor="#6366f1" stopOpacity={0.02} />
+                          </linearGradient>
+                        </defs>
+
+                        <CartesianGrid
+                          stroke="rgba(255,255,255,0.04)"
+                          strokeDasharray="3 6"
+                          vertical={false}
+                        />
+
+                        <XAxis
+                          dataKey="label"
+                          stroke="#94a3b8"
+                          fontSize={11}
+                          tickLine={false}
+                          axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
+                          interval={0}
+                          padding={{ left: 10, right: 10 }}
+                          tick={{ fill: "#94a3b8", opacity: 0.8 }}
+                          minTickGap={20}
+                        />
+
+
+
+                        <Tooltip
+                          cursor={<CustomCursor />}
+                          contentStyle={{
+                            backgroundColor: "rgba(15,15,26,0.85)",
+                            backdropFilter: "blur(12px)",
+                            border: "1px solid rgba(124,58,237,0.25)",
+                            borderRadius: "12px",
+                            fontSize: "12px",
+                            boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
+                          }}
+                          formatter={(value: any, name, props: any) => {
+                            const isCurrent = props.payload?.isCurrent;
+                            const real = props.payload?.realValue ?? value;
+
+                            return `${isCurrent ? "So far: " : ""}${formatCurrency(Number(real) / 100, accountCurrency)}`
+                          }}
+                        />
+
+
+                        <Area
+                          type="monotone"
+                          dataKey="value"
+                          stroke="#8b5cf6"
+                          strokeWidth={6}
+                          fill="none"
+                          opacity={0.08}
+                          dot={false}
+                          tooltipType="none"
+                        />
+
+
+                        <Area
+                          type="monotone"
+                          animationDuration={700}
+                          animationEasing="ease-out"
+                          dataKey="value"
+                          stroke="#a78bfa"
+                          strokeWidth={3.2}
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          fill="url(#areaGradient)"
+                          dot={false}
+                          activeDot={(props: any) => {
+                            if (props.payload?.isCurrent) {
+                              return (
+                                <circle
+                                  cx={props.cx}
+                                  cy={props.cy}
+                                  r={7}
+                                  fill="#a78bfa"
+                                  stroke="#0b0b18"
+                                  strokeWidth={3}
+
+                                />
+
+
+                              );
+                            }
+                            return null;
+                          }}
+                        />
+
+
+
+                      </AreaChart>
+
+                    </ResponsiveContainer>
+                  </div>
+
+                  <div className="mt-5 flex flex-col gap-1">
+                    <span className="text-[11px] text-slate-500">
+                      Current period is still in progress
+                    </span>
+
+                    <div className="text-xs">
+                      {growth === "new" && (
+                        <span className="text-emerald-400">
+                          First revenue recorded
+                        </span>
+                      )}
 
                       {typeof growth === "number" && growth > 0 && (
-                        <span className="text-emerald-400 text-sm">
-                          ↑ {growth}%
+                        <span className="text-emerald-400">
+                          ↑ {growth}% growth
                         </span>
                       )}
 
                       {typeof growth === "number" && growth < 0 && (
-                        <span className="text-rose-400 text-sm">
-                          ↓ {Math.abs(growth)}%
+                        <span className="text-rose-400">
+                          ↓ {Math.abs(growth)}% decline
                         </span>
                       )}
                     </div>
+                  </div>
+                </div>
 
-                    {/* SUBTEXT */}
-                    <p className="text-xs text-slate-500 mt-1">
-                      {revenueRange === "1m"
-                        ? "Revenue this month"
-                        : "Total revenue in selected period"}
-                    </p>
 
+                {/* Recent invoices */}
+                <div className={`${cardBase} ${cardHover} p-6`}>
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <p className="text-xs text-slate-400">Recent invoices</p>
+                      <h2 className="text-sm font-semibold">Last activity</h2>
+                    </div>
+                    <Link href="/dashboard/invoices" className="text-[11px] text-violet-300 hover:text-violet-200">View all</Link>
                   </div>
 
 
+                  {/* TABLE */}
+                  <div className="rounded-[28px] border border-white/[0.06] bg-[#080b17]/90 p-6">
+                  <div className="w-full ">
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="text-slate-400 border-b border-white/12">
+                          <th className="py-2 pr-4 w-[110px]">Invoice</th>
+                          <th className="py-2 pr-4 w-[180px]">Client</th>
+                          <th className="py-2 pr-4 w-[100px]">Amount</th>
+                          <th className="py-2 pr-4 w-[110px]">Status</th>
+                          <th className="py-2 pr-4 w-[110px]">Date</th>
+                          <th className="py-2 pr-4 text-right w-[170px]">Actions</th>
 
-                  <select
-                    value={revenueRange}
-                    onChange={(e) => setRevenueRange(e.target.value as any)}
-                    className="bg-black/50 border border-white/12 text-[11px] rounded-xl px-2 py-1"
-                  >
-                    <option value="6m">Last 6 months</option>
-                    <option value="12m">Last 12 months</option>
-                    <option value="1m">This month</option>
-                  </select>
-                </div>
-
-                <div className="h-[260px] w-full">
-
-                  <div className="absolute inset-0 pointer-events-none">
-                    <div className="absolute left-1/3 top-0 h-full w-[200px] bg-violet-500/10 blur-[120px]" />
-                    <div className="absolute right-1/4 top-0 h-full w-[150px] bg-indigo-500/10 blur-[100px]" />
-                  </div>
-
-
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart
-                      data={revenueChartData}
-                      margin={{ top: 10, right: 20, left: 20, bottom: 20 }}
-                    >
-                      <defs>
-                        <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#8b5cf6" stopOpacity={1} />
-                          <stop offset="30%" stopColor="#8b5cf6" stopOpacity={0.45} />
-                          <stop offset="65%" stopColor="#6366f1" stopOpacity={0.18} />
-                          <stop offset="100%" stopColor="#6366f1" stopOpacity={0.02} />
-                        </linearGradient>
-                      </defs>
-
-                      <CartesianGrid
-                        stroke="rgba(255,255,255,0.04)"
-                        strokeDasharray="3 6"
-                        vertical={false}
-                      />
-
-                      <XAxis
-                        dataKey="label"
-                        stroke="#94a3b8"
-                        fontSize={11}
-                        tickLine={false}
-                        axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
-                        interval={0}
-                        padding={{ left: 10, right: 10 }}
-                        tick={{ fill: "#94a3b8", opacity: 0.8 }}
-                        minTickGap={20}
-                      />
-
-
-
-                      <Tooltip
-                        cursor={<CustomCursor />}
-                        contentStyle={{
-                          backgroundColor: "rgba(15,15,26,0.85)",
-                          backdropFilter: "blur(12px)",
-                          border: "1px solid rgba(124,58,237,0.25)",
-                          borderRadius: "12px",
-                          fontSize: "12px",
-                          boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
-                        }}
-                        formatter={(value: any, name, props: any) => {
-                          const isCurrent = props.payload?.isCurrent;
-                          const real = props.payload?.realValue ?? value;
-
-                          return `${isCurrent ? "So far: " : ""}${formatCurrency(Number(real) / 100, accountCurrency)}`
-                        }}
-                      />
-
-
-                      <Area
-                        type="monotone"
-                        dataKey="value"
-                        stroke="#8b5cf6"
-                        strokeWidth={6}
-                        fill="none"
-                        opacity={0.08}
-                        dot={false}
-                        tooltipType="none"
-                      />
-
-
-                      <Area
-                        type="monotone"
-                        animationDuration={700}
-                        animationEasing="ease-out"
-                        dataKey="value"
-                        stroke="#a78bfa"
-                        strokeWidth={3.2}
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        fill="url(#areaGradient)"
-                        dot={false}
-                        activeDot={(props: any) => {
-                          if (props.payload?.isCurrent) {
-                            return (
-                              <circle
-                                cx={props.cx}
-                                cy={props.cy}
-                                r={7}
-                                fill="#a78bfa"
-                                stroke="#0b0b18"
-                                strokeWidth={3}
-
-                              />
-
-
-                            );
-                          }
-                          return null;
-                        }}
-                      />
-
-
-
-                    </AreaChart>
-
-                  </ResponsiveContainer>
-                </div>
-
-                <div className="mt-5 flex flex-col gap-1">
-                  <span className="text-[11px] text-slate-500">
-                    Current period is still in progress
-                  </span>
-
-                  <div className="text-xs">
-                    {growth === "new" && (
-                      <span className="text-emerald-400">
-                        First revenue recorded
-                      </span>
-                    )}
-
-                    {typeof growth === "number" && growth > 0 && (
-                      <span className="text-emerald-400">
-                        ↑ {growth}% growth
-                      </span>
-                    )}
-
-                    {typeof growth === "number" && growth < 0 && (
-                      <span className="text-rose-400">
-                        ↓ {Math.abs(growth)}% decline
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-
-              {/* Recent invoices */}
-              <div className={`${cardBase} ${cardHover} p-6`}>
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <p className="text-xs text-slate-400">Recent invoices</p>
-                    <h2 className="text-sm font-semibold">Last activity</h2>
-                  </div>
-                  <Link href="/dashboard/invoices" className="text-[11px] text-violet-300 hover:text-violet-200">View all</Link>
-                </div>
-
-
-                {/* TABLE */}
-                <div className="w-full">
-                  <table className="w-full text-xs">
-                    <thead>
-                      <tr className="text-slate-400 border-b border-white/12">
-                        <th className="py-2 pr-4 w-[110px]">Invoice</th>
-                        <th className="py-2 pr-4 w-[180px]">Client</th>
-                        <th className="py-2 pr-4 w-[100px]">Amount</th>
-                        <th className="py-2 pr-4 w-[110px]">Status</th>
-                        <th className="py-2 pr-4 w-[110px]">Date</th>
-                        <th className="py-2 pr-4 text-right w-[170px]">Actions</th>
-
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      {recentInvoices.length === 0 && (
-                        <tr>
-                          <td colSpan={6} className="py-6 text-center text-slate-500 text-[11px]">No invoices found.</td>
                         </tr>
-                      )}
+                      </thead>
 
-                      {recentInvoices.map((inv) => (
-                        <tr key={inv.id} className="border-b border-white/12 last:border-0 hover:bg-white/5">
-                          <td className="py-2 pr-4 w-[120px]">
+                      <tbody>
+                        {recentInvoices.length === 0 && (
+                          <tr>
+                            <td colSpan={6} className="py-6 text-center text-slate-500 text-[11px]">No invoices found.</td>
+                          </tr>
+                        )}
 
-                            <span className="inline-block max-w-[110px] truncate px-2 py-1 rounded-md bg-violet-500/10 border border-violet-500/20 text-violet-300 text-[10px] font-medium">
-                              {inv.invoiceNumber
-                                ? inv.invoiceNumber
+                        {recentInvoices.map((inv) => (
+                          <tr key={inv.id} className="border-b border-white/12 last:border-0 hover:bg-white/5">
+                            <td className="py-2 pr-4 w-[120px]">
 
-                                : inv.id.slice(0, 6)}
+                              <span className="inline-block max-w-[110px] truncate px-2 py-1 rounded-md bg-violet-500/10 border border-violet-500/20 text-violet-300 text-[10px] font-medium">
+                                {inv.invoiceNumber
+                                  ? inv.invoiceNumber
 
-                            </span>
+                                  : inv.id.slice(0, 6)}
 
-                          </td>
+                              </span>
+
+                            </td>
 
 
-                          <td className="py-2 pr-4 truncate max-w-[180px]">
-                            {inv.client}
-                          </td>
+                            <td className="py-2 pr-4 truncate max-w-[180px]">
+                              {inv.client}
+                            </td>
 
-                          <td className="py-2 pr-4">
-                            {formatCurrency(
-                              parseAmount(inv.amount),
-                              accountCurrency
-                            )
-                            }
-                          </td>
-                          <td className="py-2 pr-4">
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] ${statusColors[computeInvoiceStatus(inv)]}`}>
-                              {computeInvoiceStatus(inv)}
-                            </span>
-                          </td>
-                          <td className="py-2 text-slate-400 text-[11px]">{inv.date}</td>
+                            <td className="py-2 pr-4">
+                              {formatCurrency(
+                                parseAmount(inv.amount),
+                                accountCurrency
+                              )
+                              }
+                            </td>
+                            <td className="py-2 pr-4">
+                              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] ${statusColors[computeInvoiceStatus(inv)]}`}>
+                                {computeInvoiceStatus(inv)}
+                              </span>
+                            </td>
+                            <td className="py-2 text-slate-400 text-[11px]">{inv.date}</td>
 
-                          <td className="py-2 pr-4 text-right">
-                            <div className="flex gap-2 items-center justify-end">
+                            <td className="py-2 pr-4 text-right">
+                              <div className="flex gap-2 items-center justify-end">
 
-                              {inv.lifecycle === "draft" && (
+                                {inv.lifecycle === "draft" && (
+                                  <button
+                                    onClick={() => issueInvoice(inv.id)}
+                                    className="text-[10px] px-2 py-1 rounded-md border border-violet-500/30 text-violet-300 hover:bg-violet-500/10 whitespace-nowrap"
+                                  >
+                                    Issue
+                                  </button>
+                                )}
+
+                                <Link href={`/invoice-editor?id=${inv.id}`} className="text-[10px] px-2 py-1 rounded-md bg-white/[0.03] hover:bg-white/[0.06] hover:bg-white/10 whitespace-nowrap"
+                                >Edit</Link>
+
                                 <button
-                                  onClick={() => issueInvoice(inv.id)}
-                                  className="text-[10px] px-2 py-1 rounded-md border border-violet-500/30 text-violet-300 hover:bg-violet-500/10 whitespace-nowrap"
+                                  onClick={() => exportInvoiceAsPDF(inv)}
+                                  className="text-[10px] px-2 py-1 rounded-md bg-white/[0.03] hover:bg-white/[0.06] hover:bg-white/10 whitespace-nowrap"
+                                  title="Open print dialog (choose 'Save as PDF')"
                                 >
-                                  Issue
+                                  PDF
                                 </button>
-                              )}
 
-                              <Link href={`/invoice-editor?id=${inv.id}`} className="text-[10px] px-2 py-1 rounded-md border border-white/10 hover:bg-white/10 whitespace-nowrap"
-                              >Edit</Link>
-
-                              <button
-                                onClick={() => exportInvoiceAsPDF(inv)}
-                                className="text-[10px] px-2 py-1 rounded-md border border-white/10 hover:bg-white/10 whitespace-nowrap"
-                                title="Open print dialog (choose 'Save as PDF')"
-                              >
-                                PDF
-                              </button>
-
-                              <button
-                                onClick={() => shareInvoice(inv)}
-                                className="text-[10px] px-2 py-1 rounded-md border border-white/10 hover:bg-white/10 whitespace-nowrap"
-                              >
-                                Share
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                                <button
+                                  onClick={() => shareInvoice(inv)}
+                                  className="text-[10px] px-2 py-1 rounded-md bg-white/[0.03] hover:bg-white/[0.06] hover:bg-white/10 whitespace-nowrap"
+                                >
+                                  Share
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </main>
+        </main >
       </div>
-    </RequireAuth>
+    </RequireAuth >
   );
 }
 

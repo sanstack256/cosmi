@@ -1,0 +1,57 @@
+Date : 2026-05-17 21:52:57
+Directory : /Users/nssanjeev/Documents/cosmi
+Total : 15 files,  455 codes, 20 comments, 149 blanks, all 624 lines
+
+Languages
++----------------+------------+------------+------------+------------+------------+
+| language       | files      | code       | comment    | blank      | total      |
++----------------+------------+------------+------------+------------+------------+
+| TypeScript JSX |         13 |        421 |         16 |        138 |        575 |
+| TypeScript     |          2 |         34 |          4 |         11 |         49 |
++----------------+------------+------------+------------+------------+------------+
+
+Directories
++-------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                      | files      | code       | comment    | blank      | total      |
++-------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                         |         15 |        455 |         20 |        149 |        624 |
+| app                                                                                       |         14 |        454 |         19 |        149 |        622 |
+| app (Files)                                                                               |          1 |         -1 |         -1 |          1 |         -1 |
+| app/api                                                                                   |          1 |         33 |          3 |         11 |         47 |
+| app/api/delete-account                                                                    |          1 |         33 |          3 |         11 |         47 |
+| app/dashboard                                                                             |          3 |        112 |          4 |         18 |        134 |
+| app/dashboard (Files)                                                                     |          2 |        113 |          4 |         15 |        132 |
+| app/dashboard/analytics                                                                   |          1 |         -1 |          0 |          3 |          2 |
+| app/invoice-editor                                                                        |          3 |         15 |          0 |         19 |         34 |
+| app/invoice-editor (Files)                                                                |          1 |          3 |          0 |         10 |         13 |
+| app/invoice-editor/components                                                             |          2 |         12 |          0 |          9 |         21 |
+| app/invoice-editor/components/invoice                                                     |          2 |         12 |          0 |          9 |         21 |
+| app/onboarding                                                                            |          1 |         68 |          4 |         31 |        103 |
+| app/profile                                                                               |          1 |         97 |          0 |         34 |        131 |
+| app/providers                                                                             |          1 |         13 |          2 |          4 |         19 |
+| app/signin                                                                                |          1 |          9 |          0 |          3 |         12 |
+| app/test                                                                                  |          2 |        108 |          7 |         28 |        143 |
+| lib                                                                                       |          1 |          1 |          1 |          0 |          2 |
++-------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++-------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+
+| filename                                                                                  | language       | code       | comment    | blank      | total      |
++-------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+
+| /Users/nssanjeev/Documents/cosmi/app/api/delete-account/route.ts                          | TypeScript     |         33 |          3 |         11 |         47 |
+| /Users/nssanjeev/Documents/cosmi/app/dashboard/analytics/page.tsx                         | TypeScript JSX |         -1 |          0 |          3 |          2 |
+| /Users/nssanjeev/Documents/cosmi/app/dashboard/layout.tsx                                 | TypeScript JSX |        105 |          2 |         11 |        118 |
+| /Users/nssanjeev/Documents/cosmi/app/dashboard/page.tsx                                   | TypeScript JSX |          8 |          2 |          4 |         14 |
+| /Users/nssanjeev/Documents/cosmi/app/head.tsx                                             | TypeScript JSX |         -1 |         -1 |          1 |         -1 |
+| /Users/nssanjeev/Documents/cosmi/app/invoice-editor/components/invoice/InvoiceForm.tsx    | TypeScript JSX |         12 |          0 |          6 |         18 |
+| /Users/nssanjeev/Documents/cosmi/app/invoice-editor/components/invoice/InvoicePreview.tsx | TypeScript JSX |          0 |          0 |          3 |          3 |
+| /Users/nssanjeev/Documents/cosmi/app/invoice-editor/page.tsx                              | TypeScript JSX |          3 |          0 |         10 |         13 |
+| /Users/nssanjeev/Documents/cosmi/app/onboarding/page.tsx                                  | TypeScript JSX |         68 |          4 |         31 |        103 |
+| /Users/nssanjeev/Documents/cosmi/app/profile/page.tsx                                     | TypeScript JSX |         97 |          0 |         34 |        131 |
+| /Users/nssanjeev/Documents/cosmi/app/providers/AuthProvider.tsx                           | TypeScript JSX |         13 |          2 |          4 |         19 |
+| /Users/nssanjeev/Documents/cosmi/app/signin/page.tsx                                      | TypeScript JSX |          9 |          0 |          3 |         12 |
+| /Users/nssanjeev/Documents/cosmi/app/test/CosmiLogo.tsx                                   | TypeScript JSX |        100 |          7 |         27 |        134 |
+| /Users/nssanjeev/Documents/cosmi/app/test/page.tsx                                        | TypeScript JSX |          8 |          0 |          1 |          9 |
+| /Users/nssanjeev/Documents/cosmi/lib/firebase-admin.ts                                    | TypeScript     |          1 |          1 |          0 |          2 |
+| Total                                                                                     |                |        455 |         20 |        149 |        624 |
++-------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+

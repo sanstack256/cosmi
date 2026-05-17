@@ -1,10 +1,10 @@
 # Details
 
-Date : 2026-04-05 01:12:52
+Date : 2026-05-17 21:52:57
 
 Directory /Users/nssanjeev/Documents/cosmi
 
-Total : 78 files,  20341 codes, 552 comments, 2471 blanks, all 23364 lines
+Total : 81 files,  21292 codes, 588 comments, 2737 blanks, all 24617 lines
 
 [Summary](results.md) / Details / [Diff Summary](diff.md) / [Diff Details](diff-details.md)
 
@@ -14,6 +14,7 @@ Total : 78 files,  20341 codes, 552 comments, 2471 blanks, all 23364 lines
 | [README.md](/README.md) | Markdown | 23 | 0 | 14 | 37 |
 | [app/ProvidersWrapper.tsx](/app/ProvidersWrapper.tsx) | TypeScript JSX | 26 | 0 | 6 | 32 |
 | [app/api/create-public-link/route.ts](/app/api/create-public-link/route.ts) | TypeScript | 50 | 2 | 12 | 64 |
+| [app/api/delete-account/route.ts](/app/api/delete-account/route.ts) | TypeScript | 33 | 3 | 11 | 47 |
 | [app/api/paypal-capture/route.ts](/app/api/paypal-capture/route.ts) | TypeScript | 132 | 7 | 40 | 179 |
 | [app/api/paypal-checkout/route.ts](/app/api/paypal-checkout/route.ts) | TypeScript | 88 | 5 | 19 | 112 |
 | [app/api/public-invoice/close/route.ts](/app/api/public-invoice/close/route.ts) | TypeScript | 27 | 0 | 7 | 34 |
@@ -29,23 +30,23 @@ Total : 78 files,  20341 codes, 552 comments, 2471 blanks, all 23364 lines
 | [app/components/UserMenu.tsx](/app/components/UserMenu.tsx) | TypeScript JSX | 107 | 5 | 17 | 129 |
 | [app/components/hero/HeroVisual.tsx](/app/components/hero/HeroVisual.tsx) | TypeScript JSX | 47 | 6 | 6 | 59 |
 | [app/components/ui/CosmiCalendar.tsx](/app/components/ui/CosmiCalendar.tsx) | TypeScript JSX | 139 | 6 | 28 | 173 |
-| [app/dashboard/analytics/page.tsx](/app/dashboard/analytics/page.tsx) | TypeScript JSX | 420 | 18 | 69 | 507 |
+| [app/dashboard/analytics/page.tsx](/app/dashboard/analytics/page.tsx) | TypeScript JSX | 419 | 18 | 72 | 509 |
 | [app/dashboard/clients/\[id\]/page.tsx](/app/dashboard/clients/%5Bid%5D/page.tsx) | TypeScript JSX | 31 | 0 | 11 | 42 |
 | [app/dashboard/clients/page.tsx](/app/dashboard/clients/page.tsx) | TypeScript JSX | 329 | 12 | 94 | 435 |
 | [app/dashboard/invoices/\[id\]/page.tsx](/app/dashboard/invoices/%5Bid%5D/page.tsx) | TypeScript JSX | 435 | 24 | 136 | 595 |
 | [app/dashboard/invoices/page.tsx](/app/dashboard/invoices/page.tsx) | TypeScript JSX | 565 | 9 | 141 | 715 |
-| [app/dashboard/layout.tsx](/app/dashboard/layout.tsx) | TypeScript JSX | 215 | 9 | 30 | 254 |
-| [app/dashboard/page.tsx](/app/dashboard/page.tsx) | TypeScript JSX | 812 | 46 | 239 | 1,097 |
+| [app/dashboard/layout.tsx](/app/dashboard/layout.tsx) | TypeScript JSX | 320 | 11 | 41 | 372 |
+| [app/dashboard/page.tsx](/app/dashboard/page.tsx) | TypeScript JSX | 820 | 48 | 243 | 1,111 |
 | [app/globals.css](/app/globals.css) | PostCSS | 275 | 15 | 49 | 339 |
-| [app/head.tsx](/app/head.tsx) | TypeScript JSX | 14 | 4 | 4 | 22 |
-| [app/invoice-editor/components/invoice/InvoiceForm.tsx](/app/invoice-editor/components/invoice/InvoiceForm.tsx) | TypeScript JSX | 896 | 41 | 224 | 1,161 |
-| [app/invoice-editor/components/invoice/InvoicePreview.tsx](/app/invoice-editor/components/invoice/InvoicePreview.tsx) | TypeScript JSX | 248 | 18 | 63 | 329 |
-| [app/invoice-editor/hooks/useInvoiceEditor.tsx](/app/invoice-editor/hooks/useInvoiceEditor.tsx) | TypeScript JSX | 309 | 40 | 118 | 467 |
+| [app/head.tsx](/app/head.tsx) | TypeScript JSX | 13 | 3 | 5 | 21 |
+| [app/invoice-editor/components/invoice/InvoiceForm.tsx](/app/invoice-editor/components/invoice/InvoiceForm.tsx) | TypeScript JSX | 1,264 | 53 | 316 | 1,633 |
+| [app/invoice-editor/components/invoice/InvoicePreview.tsx](/app/invoice-editor/components/invoice/InvoicePreview.tsx) | TypeScript JSX | 270 | 19 | 72 | 361 |
+| [app/invoice-editor/hooks/useInvoiceEditor.tsx](/app/invoice-editor/hooks/useInvoiceEditor.tsx) | TypeScript JSX | 383 | 40 | 132 | 555 |
 | [app/invoice-editor/loading.tsx](/app/invoice-editor/loading.tsx) | TypeScript JSX | 103 | 1 | 5 | 109 |
-| [app/invoice-editor/page.tsx](/app/invoice-editor/page.tsx) | TypeScript JSX | 1,077 | 36 | 255 | 1,368 |
-| [app/invoice/\[id\]/page.tsx](/app/invoice/%5Bid%5D/page.tsx) | TypeScript JSX | 610 | 35 | 171 | 816 |
+| [app/invoice-editor/page.tsx](/app/invoice-editor/page.tsx) | TypeScript JSX | 1,108 | 36 | 271 | 1,415 |
+| [app/invoice/\[id\]/page.tsx](/app/invoice/%5Bid%5D/page.tsx) | TypeScript JSX | 612 | 35 | 172 | 819 |
 | [app/layout.tsx](/app/layout.tsx) | TypeScript JSX | 44 | 4 | 10 | 58 |
-| [app/onboarding/page.tsx](/app/onboarding/page.tsx) | TypeScript JSX | 121 | 4 | 27 | 152 |
+| [app/onboarding/page.tsx](/app/onboarding/page.tsx) | TypeScript JSX | 189 | 8 | 58 | 255 |
 | [app/page.tsx](/app/page.tsx) | TypeScript JSX | 243 | 15 | 28 | 286 |
 | [app/payment-success/page.tsx](/app/payment-success/page.tsx) | TypeScript JSX | 30 | 0 | 13 | 43 |
 | [app/pricing/page.tsx](/app/pricing/page.tsx) | TypeScript JSX | 118 | 8 | 23 | 149 |
@@ -53,24 +54,26 @@ Total : 78 files,  20341 codes, 552 comments, 2471 blanks, all 23364 lines
 | [app/profile/components/CompanyLogoUploader.tsx](/app/profile/components/CompanyLogoUploader.tsx) | TypeScript JSX | 58 | 2 | 14 | 74 |
 | [app/profile/components/DeleteCompanyModal.tsx](/app/profile/components/DeleteCompanyModal.tsx) | TypeScript JSX | 47 | 0 | 7 | 54 |
 | [app/profile/components/EditCompanyModal.tsx](/app/profile/components/EditCompanyModal.tsx) | TypeScript JSX | 149 | 12 | 28 | 189 |
-| [app/profile/page.tsx](/app/profile/page.tsx) | TypeScript JSX | 311 | 14 | 62 | 387 |
-| [app/providers/AuthProvider.tsx](/app/providers/AuthProvider.tsx) | TypeScript JSX | 169 | 14 | 55 | 238 |
-| [app/providers/InvoiceProvider.tsx](/app/providers/InvoiceProvider.tsx) | TypeScript JSX | 367 | 44 | 137 | 548 |
+| [app/profile/page.tsx](/app/profile/page.tsx) | TypeScript JSX | 408 | 14 | 96 | 518 |
+| [app/providers/AuthProvider.tsx](/app/providers/AuthProvider.tsx) | TypeScript JSX | 182 | 16 | 59 | 257 |
+| [app/providers/InvoiceProvider.tsx](/app/providers/InvoiceProvider.tsx) | TypeScript JSX | 381 | 47 | 141 | 569 |
 | [app/providers/PayPalProvider.tsx](/app/providers/PayPalProvider.tsx) | TypeScript JSX | 18 | 0 | 4 | 22 |
 | [app/providers/ToastProvider.tsx](/app/providers/ToastProvider.tsx) | TypeScript JSX | 50 | 2 | 11 | 63 |
-| [app/signin/page.tsx](/app/signin/page.tsx) | TypeScript JSX | 184 | 11 | 24 | 219 |
+| [app/signin/page.tsx](/app/signin/page.tsx) | TypeScript JSX | 193 | 11 | 27 | 231 |
 | [app/signout/page.tsx](/app/signout/page.tsx) | TypeScript JSX | 19 | 1 | 5 | 25 |
 | [app/signup/page.tsx](/app/signup/page.tsx) | TypeScript JSX | 160 | 5 | 29 | 194 |
 | [app/test-auth/page.tsx](/app/test-auth/page.tsx) | TypeScript JSX | 12 | 0 | 4 | 16 |
 | [app/test-firebase.tsx](/app/test-firebase.tsx) | TypeScript JSX | 19 | 1 | 3 | 23 |
 | [app/test-firestore/page.tsx](/app/test-firestore/page.tsx) | TypeScript JSX | 33 | 0 | 9 | 42 |
+| [app/test/CosmiLogo.tsx](/app/test/CosmiLogo.tsx) | TypeScript JSX | 100 | 7 | 27 | 134 |
+| [app/test/page.tsx](/app/test/page.tsx) | TypeScript JSX | 8 | 0 | 1 | 9 |
 | [app/utils/currency.ts](/app/utils/currency.ts) | TypeScript | 27 | 0 | 5 | 32 |
 | [eslint.config.mjs](/eslint.config.mjs) | JavaScript | 14 | 2 | 3 | 19 |
 | [global.d.ts](/global.d.ts) | TypeScript | 12 | 2 | 3 | 17 |
 | [lib/currency.ts](/lib/currency.ts) | TypeScript | 4 | 0 | 0 | 4 |
 | [lib/date.ts](/lib/date.ts) | TypeScript | 6 | 1 | 3 | 10 |
 | [lib/emailTemplates.ts](/lib/emailTemplates.ts) | TypeScript | 20 | 0 | 0 | 20 |
-| [lib/firebase-admin.ts](/lib/firebase-admin.ts) | TypeScript | 17 | 1 | 6 | 24 |
+| [lib/firebase-admin.ts](/lib/firebase-admin.ts) | TypeScript | 18 | 2 | 6 | 26 |
 | [lib/firebase.ts](/lib/firebase.ts) | TypeScript | 16 | 3 | 5 | 24 |
 | [lib/invoiceLimits.ts](/lib/invoiceLimits.ts) | TypeScript | 20 | 1 | 4 | 25 |
 | [lib/razorpay.ts](/lib/razorpay.ts) | TypeScript | 5 | 0 | 2 | 7 |
