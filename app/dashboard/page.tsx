@@ -34,11 +34,10 @@ type InvoiceStatus = "Paid" | "Pending" | "Overdue" | "Draft";
 
 
 const cardBase =
-  "rounded-3xl bg-[#0b0b18]/80 backdrop-blur-xl border border-white/5 shadow-[0_0_40px_rgba(124,58,237,0.08)] transition-all duration-300";
+  "rounded-3xl bg-[#0B0F17] border border-white/[0.05] transition-all duration-300";
 
 const cardHover =
-  "hover:-translate-y-1 hover:shadow-[0_0_60px_rgba(124,58,237,0.15)]";
-
+  "hover:-translate-y-[2px] hover:border-white/[0.07]";
 
 
 const SignOutButton = dynamic(() => import("../components/SignOutButton"), { ssr: false }); // <- added  
@@ -520,16 +519,15 @@ export default function DashboardPage() {
 
               {/* Quick Actions Card */}
               <div className="lg:col-span-4 flex">
-                <div className="flex-1 relative overflow-hidden rounded-3xl p-4 bg-gradient-to-br from-[#0f0f25] via-[#141432] to-[#1b1b40] border border-violet-500/25 transition-all duration-300">
+                <div className="flex-1 relative overflow-hidden rounded-3xl p-4 bg-[#0B0B12] border border-white/[0.05] transition-all duration-300">
 
                   {/* Subtle background glow */}
-                  <div className="absolute -top-20 -right-20 w-72 h-72 bg-violet-400/10 blur-[140px] pointer-events-none" />
-
+                  <div className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-violet-500/10 blur-[120px] pointer-events-none" />
                   <div className="relative z-10 flex flex-col gap-3">
 
                     {/* LEFT CONTENT */}
                     <div>
-                      <p className="text-xs font-medium tracking-wide text-violet-300 uppercase min-h-[32px]">
+                      <p className="text-[11px] font-medium tracking-[0.18em] text-slate-500 uppercase">
                         Quick Actions
                       </p>
 
@@ -546,8 +544,18 @@ export default function DashboardPage() {
                     <div className="flex flex-wrap gap-3">
                       <button
                         onClick={() => router.push("/invoice-editor")}
-                        className="flex items-center gap-2 px-6 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-sm font-semibold shadow-[0_0_30px_rgba(124,58,237,0.6)] transition-all duration-200 hover:scale-105"
-                      >
+                        className="
+                          flex items-center gap-2
+                          px-6 py-3
+                          rounded-xl
+                          bg-gradient-to-b from-violet-500 to-violet-600
+                          text-sm font-semibold text-white
+                          shadow-[0_8px_30px_rgba(139,92,246,0.22)]
+                          transition-all duration-200
+                          hover:translate-y-[-1px]
+                          hover:shadow-[0_12px_40px_rgba(139,92,246,0.28)]
+                          "
+                        >
                         <Plus className="h-4 w-4" />
                         New AI Invoice
                       </button>
@@ -555,7 +563,16 @@ export default function DashboardPage() {
                       <button
                         type="button"
                         onClick={() => alert("Template coming soon")}
-                        className="px-6 py-3 rounded-xl border border-white/10 text-sm text-slate-300 hover:bg-white/5 transition-all duration-200"
+                        className="
+                        px-6 py-3
+                        rounded-xl
+                        border border-white/[0.06]
+                        bg-white/[0.02]
+                        text-sm font-medium text-slate-200
+                        transition-all duration-200
+                        hover:bg-white/[0.04]
+                        hover:border-white/[0.08]
+                        "
                       >
                         Import Template
                       </button>
@@ -571,7 +588,7 @@ export default function DashboardPage() {
       relative overflow-hidden
       rounded-[32px]
       border border-white/[0.05]
-      bg-[#0B111B]
+      bg-[#0A1019]
       px-8 py-8 md:px-10 md:py-10
     "
                 >
@@ -593,7 +610,7 @@ export default function DashboardPage() {
                         <div className="flex items-center gap-3 text-sm">
                           <div className="h-2 w-2 rounded-full bg-violet-400/80" />
 
-                          <span className="text-slate-300">
+                          <span className="text-slate-400">
                             {stats.pendingCount} awaiting payment
                           </span>
                         </div>
@@ -601,7 +618,7 @@ export default function DashboardPage() {
                         <div className="flex items-center gap-3 text-sm">
                           <div className="h-2 w-2 rounded-full bg-rose-400/80" />
 
-                          <span className="text-slate-300">
+                          <span className="text-slate-400">
                             {stats.overdueCount} overdue
                           </span>
                         </div>
@@ -609,7 +626,7 @@ export default function DashboardPage() {
                         <div className="flex items-center gap-3 text-sm">
                           <div className="h-2 w-2 rounded-full bg-emerald-400/80" />
 
-                          <span className="text-slate-300">
+                          <span className="text-slate-400">
                             {stats.paidCount} paid this month
                           </span>
                         </div>
