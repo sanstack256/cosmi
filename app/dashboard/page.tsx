@@ -31,19 +31,14 @@ import {
 
 type InvoiceStatus = "Paid" | "Pending" | "Overdue" | "Draft";
 
-
-
 const cardBase =
-  "rounded-3xl bg-[#0B0F17] border border-white/[0.05] transition-all duration-300";
+  "rounded-[32px] border border-white/[0.05] ";
 
 const cardHover =
-  "hover:-translate-y-[2px] hover:border-white/[0.07]";
+  "transition-colors duration-200";
 
 
 const SignOutButton = dynamic(() => import("../components/SignOutButton"), { ssr: false }); // <- added  
-
-
-
 
 
 /* ----------------------------------------
@@ -501,260 +496,270 @@ export default function DashboardPage() {
 
     <RequireAuth>
       <div className="relative min-h-screen bg-[#040407] text-slate-100 flex overflow-hidden">
-        {/* global ambient glow */}
-        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-violet-600/10 blur-[200px] pointer-events-none" />
-        <div className="absolute top-1/3 -right-40 w-[500px] h-[500px] bg-fuchsia-600/10 blur-[200px] pointer-events-none" />
-
-
 
         {/* MAIN */}
         <main className="flex-1 flex flex-col">
 
 
           {/* CONTENT */}
-          <div className="space-y-8">
+          <div className="space-y-10 px-8 py-8 md:px-10 md:py-10">
 
             {/* Top row */}
-            <div className="grid gap-4 lg:grid-cols-12 items-stretch">
+            <div className="grid grid-cols-1 xl:grid-cols-[380px_560px] gap-8 items-stretch">
 
               {/* Quick Actions Card */}
-              <div className="lg:col-span-4 flex">
-                <div className="flex-1 relative overflow-hidden rounded-3xl p-4 bg-[#0B0B12] border border-white/[0.05] transition-all duration-300">
+              <div
+                className="
+                relative overflow-hidden
+                rounded-[32px]
+                border border-white/[0.05]
+                bg-[#090B11]
+                px-6 py-3.5
+                min-h-[260px]
+                "
+              >
 
-                  {/* Subtle background glow */}
-                  <div className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-violet-500/10 blur-[120px] pointer-events-none" />
-                  <div className="relative z-10 flex flex-col gap-3">
+                <div className="relative z-10 flex flex-col justify-center gap-8 h-full">
 
-                    {/* LEFT CONTENT */}
-                    <div>
-                      <p className="text-[11px] font-medium tracking-[0.18em] text-slate-500 uppercase">
-                        Quick Actions
-                      </p>
+                  {/* LEFT CONTENT */}
+                  <div>
+                    <p className="text-[11px] font-medium tracking-[0.18em] text-slate-500 uppercase">
+                      Quick Actions
+                    </p>
 
-                      <h2 className="mt-2 text-xl font-semibold tracking-tight text-white">
-                        Create and send invoices in seconds
-                      </h2>
+                    <h2 className="
+                      max-w-[360px]
+                      text-[24px]
+                      leading-[1.08]
+                      tracking-[-0.035em]
+                      text-white
+                    ">
+                      Create and send
+                      invoices faster
+                    </h2>
+                    <p className="
+                      mt-8
+                      max-w-[340px]
+                      text-[15px]
+                      leading-8
+                      text-slate-400
+                    ">
+                      Create, manage and share invoices from one workspace.
+                    </p>
+                  </div>
 
-                      <p className="mt-2 text-sm text-slate-400">
-                        Generate professional invoices instantly using AI or import an existing template.
-                      </p>
-                    </div>
-
-                    {/* BUTTONS */}
-                    <div className="flex flex-wrap gap-3">
-                      <button
-                        onClick={() => router.push("/invoice-editor")}
-                        className="
+                  {/* BUTTONS */}
+                  <div className="flex items-center gap-4 pt-2">
+                    <button
+                      onClick={() => router.push("/invoice-editor")}
+                      className="
                           flex items-center gap-2
-                          px-6 py-3
+                          px-4 py-2
                           rounded-xl
-                          bg-gradient-to-b from-violet-500 to-violet-600
-                          text-sm font-semibold text-white
-                          shadow-[0_8px_30px_rgba(139,92,246,0.22)]
+                          bg-[#7C5CFA]
+                          text-[13px] font-semibold text-white
                           transition-all duration-200
                           hover:translate-y-[-1px]
-                          hover:shadow-[0_12px_40px_rgba(139,92,246,0.28)]
                           "
-                        >
-                        <Plus className="h-4 w-4" />
-                        New AI Invoice
-                      </button>
+                    >
+                      <Plus className="h-4 w-4" />
+                      New Invoice
+                    </button>
 
-                      <button
-                        type="button"
-                        onClick={() => alert("Template coming soon")}
-                        className="
-                        px-6 py-3
+                    <button
+                      type="button"
+                      onClick={() => alert("Template coming soon")}
+                      className="
+                        px-4 py-2
                         rounded-xl
                         border border-white/[0.06]
                         bg-white/[0.02]
-                        text-sm font-medium text-slate-200
+                        hover:bg-[#8A6BFF]
+                        text-[13px] font-medium text-slate-200
                         transition-all duration-200
                         hover:bg-white/[0.04]
                         hover:border-white/[0.08]
                         "
-                      >
-                        Import Template
-                      </button>
-                    </div>
+                    >
+                      Import Template
+                    </button>
                   </div>
                 </div>
+
               </div>
 
               {/* Business Pulse */}
-              <div className="lg:col-span-8">
-                <div
-                  className="
-      relative overflow-hidden
-      rounded-[32px]
-      border border-white/[0.05]
-      bg-[#0A1019]
-      px-8 py-8 md:px-10 md:py-10
-    "
-                >
-                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-10">
 
-                    {/* LEFT CONTENT */}
-                    <div className="max-w-xl">
+              <div
+                className="
+                  relative overflow-hidden
+                  rounded-[32px]
+                  bg-[#090B11]
+                  
+                  px-10 py-8 md:px-10 md:py-8
+                "
+              >
+                <div className="grid grid-cols-[1fr_220px] items-center gap-16 h-full">
 
-                      <div className="text-sm text-slate-500 mb-3">
-                        Outstanding Revenue
-                      </div>
+                  {/* LEFT CONTENT */}
+                  <div className="w-full lg:max-w-[420px]">
 
-                      <div className="text-5xl md:text-6xl font-semibold tracking-[-0.06em] text-white">
-                        {formatCurrency(stats.pendingAmount, accountCurrency)}
-                      </div>
-
-                      <div className="mt-8 space-y-3">
-
-                        <div className="flex items-center gap-3 text-sm">
-                          <div className="h-2 w-2 rounded-full bg-violet-400/80" />
-
-                          <span className="text-slate-400">
-                            {stats.pendingCount} awaiting payment
-                          </span>
-                        </div>
-
-                        <div className="flex items-center gap-3 text-sm">
-                          <div className="h-2 w-2 rounded-full bg-rose-400/80" />
-
-                          <span className="text-slate-400">
-                            {stats.overdueCount} overdue
-                          </span>
-                        </div>
-
-                        <div className="flex items-center gap-3 text-sm">
-                          <div className="h-2 w-2 rounded-full bg-emerald-400/80" />
-
-                          <span className="text-slate-400">
-                            {stats.paidCount} paid this month
-                          </span>
-                        </div>
-
-                      </div>
+                    <div className="text-sm text-slate-400 mb-3">
+                      Outstanding Revenue
                     </div>
 
-                    {/* RIGHT VISUAL */}
-                    <div className="flex items-center justify-center">
+                    <div className="text-5xl md:text-[36px] font-semibold tracking-[-0.06em] text-white">
+                      {formatCurrency(stats.pendingAmount, accountCurrency)}
+                    </div>
 
-                      {(() => {
+                    <div className="mt-6 space-y-3">
 
-                        const total =
-                          stats.paidCount +
-                          stats.pendingCount +
-                          stats.overdueCount;
+                      <div className="flex items-center gap-3 text-sm">
+                        <div className="h-2 w-2 rounded-full bg-violet-400/80" />
 
-                        const radius = 48;
-                        const circumference = 2 * Math.PI * radius;
+                        <span className="text-slate-400">
+                          {stats.pendingCount} awaiting payment
+                        </span>
+                      </div>
 
-                        const paid =
-                          total > 0
-                            ? (stats.paidCount / total) * circumference
-                            : 0;
+                      <div className="flex items-center gap-3 text-sm">
+                        <div className="h-2 w-2 rounded-full bg-rose-400/80" />
 
-                        const pending =
-                          total > 0
-                            ? (stats.pendingCount / total) * circumference
-                            : 0;
+                        <span className="text-slate-400">
+                          {stats.overdueCount} overdue
+                        </span>
+                      </div>
 
-                        const overdue =
-                          total > 0
-                            ? (stats.overdueCount / total) * circumference
-                            : 0;
+                      <div className="flex items-center gap-3 text-sm">
+                        <div className="h-2 w-2 rounded-full bg-emerald-400/80" />
 
-                        return (
-                          <div className="relative h-[140px] w-[140px] flex items-center justify-center">
-
-                            <svg
-                              width="140"
-                              height="140"
-                              viewBox="0 0 140 140"
-                              className="-rotate-90"
-                            >
-
-                              {/* Base Track */}
-                              <circle
-                                cx="70"
-                                cy="70"
-                                r={radius}
-                                fill="none"
-                                stroke="rgba(255,255,255,0.05)"
-                                strokeWidth="6"
-                              />
-
-                              {/* Paid */}
-                              <circle
-                                cx="70"
-                                cy="70"
-                                r={radius}
-                                fill="none"
-                                stroke="rgba(52,211,153,0.72)"
-                                strokeWidth="6"
-                                strokeLinecap="round"
-                                strokeDasharray={`${paid} ${circumference}`}
-                                strokeDashoffset="0"
-                              />
-
-                              {/* Pending */}
-                              <circle
-                                cx="70"
-                                cy="70"
-                                r={radius}
-                                fill="none"
-                                stroke="rgba(167,139,250,0.72)"
-                                strokeWidth="6"
-                                strokeLinecap="round"
-                                strokeDasharray={`${pending} ${circumference}`}
-                                strokeDashoffset={-paid - 8}
-                              />
-
-                              {/* Overdue */}
-                              <circle
-                                cx="70"
-                                cy="70"
-                                r={radius}
-                                fill="none"
-                                stroke="rgba(251,113,133,0.72)"
-                                strokeWidth="6"
-                                strokeLinecap="round"
-                                strokeDasharray={`${overdue} ${circumference}`}
-                                strokeDashoffset={-paid - pending - 16}
-                              />
-
-                            </svg>
-
-                            {/* Center Content */}
-                            <div className="absolute inset-0 flex flex-col items-center justify-center">
-
-                              <div className="text-3xl font-semibold tracking-[-0.05em] text-white">
-                                {stats.pendingCount}
-                              </div>
-
-                              <div className="mt-1 text-[11px] uppercase tracking-[0.22em] text-slate-500">
-                                Pending
-                              </div>
-
-                            </div>
-
-                          </div>
-                        );
-                      })()}
+                        <span className="text-slate-400">
+                          {stats.paidCount} paid this month
+                        </span>
+                      </div>
 
                     </div>
                   </div>
+
+                  {/* RIGHT VISUAL */}
+                  <div className="flex flex-1 items-center justify-center lg:justify-end pr-0">
+
+                    {(() => {
+
+                      const total =
+                        stats.paidCount +
+                        stats.pendingCount +
+                        stats.overdueCount;
+
+                      const radius = 48;
+                      const circumference = 2 * Math.PI * radius;
+
+                      const paid =
+                        total > 0
+                          ? (stats.paidCount / total) * circumference
+                          : 0;
+
+                      const pending =
+                        total > 0
+                          ? (stats.pendingCount / total) * circumference
+                          : 0;
+
+                      const overdue =
+                        total > 0
+                          ? (stats.overdueCount / total) * circumference
+                          : 0;
+
+                      return (
+                        <div className="relative h-[168px] w-[168px] flex items-center justify-center">
+
+                          <svg
+                            width="168"
+                            height="168"
+                            viewBox="0 0 168 168"
+                            className="-rotate-90"
+                          >
+
+                            {/* Base Track */}
+                            <circle
+                              cx="84"
+                              cy="84"
+                              r={radius}
+                              fill="none"
+                              stroke="rgba(255,255,255,0.05)"
+                              strokeWidth="6"
+                            />
+
+                            {/* Paid */}
+                            <circle
+                              cx="84"
+                              cy="84"
+                              r={radius}
+                              fill="none"
+                              stroke="rgba(52,211,153,0.72)"
+                              strokeWidth="6"
+                              strokeLinecap="round"
+                              strokeDasharray={`${paid} ${circumference}`}
+                              strokeDashoffset="0"
+                            />
+
+                            {/* Pending */}
+                            <circle
+                              cx="84"
+                              cy="84"
+                              r={radius}
+                              fill="none"
+                              stroke="rgba(167,139,250,0.72)"
+                              strokeWidth="6"
+                              strokeLinecap="round"
+                              strokeDasharray={`${pending} ${circumference}`}
+                              strokeDashoffset={-paid - 8}
+                            />
+
+                            {/* Overdue */}
+                            <circle
+                              cx="84"
+                              cy="84"
+                              r={radius}
+                              fill="none"
+                              stroke="rgba(251,113,133,0.72)"
+                              strokeWidth="6"
+                              strokeLinecap="round"
+                              strokeDasharray={`${overdue} ${circumference}`}
+                              strokeDashoffset={-paid - pending - 16}
+                            />
+
+                          </svg>
+
+                          {/* Center Content */}
+                          <div className="absolute inset-0 flex flex-col items-center justify-center">
+
+                            <div className="text-3xl font-semibold tracking-[-0.05em] text-white">
+                              {stats.pendingCount}
+                            </div>
+
+                            <div className="mt-1 text-[11px] uppercase tracking-[0.22em] text-slate-500">
+                              Pending
+                            </div>
+
+                          </div>
+
+                        </div>
+                      );
+                    })()}
+
+                  </div>
                 </div>
               </div>
+
             </div>
           </div>
 
 
-
-
           {/* Bottom row */}
-          <div className="grid gap-6 lg:grid-cols-[0.95fr_1.35fr] items-stretch min-w-0">
+          <div className="grid gap-8 lg:grid-cols-[0.92fr_1.38fr] items-stretch min-w-0">
 
             {/* LEFT — Revenue Chart */}
-            <div className="relative overflow-hidden rounded-[28px] border border-white/[0.035] bg-[#0b1020]/72 p-6 min-w-0">
+            <div className="relative overflow-hidden rounded-[28px] border border-white/[0.035]  p-7 min-w-0">
 
               {/* Chart header */}
               <div className="flex items-center justify-between mb-6">
@@ -777,7 +782,7 @@ export default function DashboardPage() {
                 <select
                   value={revenueRange}
                   onChange={(e) => setRevenueRange(e.target.value as any)}
-                  className="bg-black/50 border border-white/12 text-[11px] rounded-xl px-2 py-1"
+                  className="bg-[#12121A] border border-white/[0.06] text-[11px] rounded-xl px-2 py-1"
                 >
                   <option value="6m">Last 6 months</option>
                   <option value="12m">Last 12 months</option>
@@ -786,7 +791,7 @@ export default function DashboardPage() {
               </div>
 
               {/* Chart */}
-              <div className="h-[240px] w-full">
+              <div className="h-[210px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={revenueChartData}>
                     <defs>
@@ -846,7 +851,7 @@ export default function DashboardPage() {
             </div>
 
             {/* RIGHT — Recent invoices */}
-            <div className={`${cardBase} ${cardHover} p-6 min-w-0`}>
+            <div className={`${cardBase} ${cardHover} p-7 min-w-0`}>
 
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -861,20 +866,20 @@ export default function DashboardPage() {
 
                 <Link
                   href="/dashboard/invoices"
-                  className="text-[11px] text-violet-300 hover:text-violet-200"
+                  className="text-[11px] text-violet-300 hover:text-slate-300"
                 >
                   View all
                 </Link>
               </div>
 
-              <div className="relative overflow-hidden rounded-[28px] border border-white/[0.025] bg-[#0b1020]/72 p-5 min-w-0">
+              <div className="relative overflow-hidden rounded-[28px] border border-white/[0.025]  p-5 min-w-0">
 
                 <div className="w-full overflow-x-auto min-w-0">
 
                   <div className="flex flex-col gap-3">
 
                     {recentInvoices.length === 0 && (
-                      <div className="rounded-2xl border border-white/[0.04] bg-white/[0.02] px-5 py-8 text-center text-sm text-slate-500">
+                      <div className="rounded-2xl border border-white/[0.04] bg-[#101018] px-5 py-8 text-center text-sm text-slate-500">
                         No invoices yet.
                       </div>
                     )}
@@ -891,19 +896,13 @@ export default function DashboardPage() {
                             overflow-hidden
                             rounded-2xl
                             border border-white/[0.04]
-                            bg-white/[0.02]
-                            px-5 py-4
+                            bg-[#101018]
+                            px-4 py-3
                             transition-all duration-300
-                            hover:border-violet-500/20
-                            hover:bg-white/[0.035]
-                            hover:shadow-[0_0_30px_rgba(124,58,237,0.08)]
+                            hover:border-white/[0.06]
+                            hover:bg-[#151520]   
                           "
                         >
-
-                          {/* Ambient Glow */}
-                          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
-                            <div className="absolute -left-10 top-0 h-full w-32 bg-violet-500/10 blur-3xl" />
-                          </div>
 
                           <div className="relative z-10 flex items-center justify-between gap-6">
 
@@ -916,6 +915,7 @@ export default function DashboardPage() {
                                   rounded-xl
                                   border border-violet-500/20
                                   bg-violet-500/10
+                                  hover:bg-[#8B73FF]
                                   px-3 py-2
                                   text-[11px]
                                   font-medium
@@ -1010,12 +1010,12 @@ export default function DashboardPage() {
                                 onClick={() => shareInvoice(inv)}
                                 className="
                 rounded-xl
-                bg-violet-500/12
+                bg-[#171722]
                 px-3 py-2
                 text-[11px]
-                text-violet-200
+                text-slate-300
                 transition-all
-                hover:bg-violet-500/20
+                hover:bg-[#1D1D2A]
                 hover:text-white
               "
                               >
