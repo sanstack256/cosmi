@@ -502,7 +502,7 @@ export default function DashboardPage() {
 
 
           {/* CONTENT */}
-          <div className="space-y-10 px-8 py-8 md:px-10 md:py-10">
+          <div className="space-y-10 px-8 pt-8 pb-7 md:px-10 md:py-10">
 
             {/* Top row */}
             <div className="grid grid-cols-1 xl:grid-cols-[380px_560px] gap-8 items-stretch">
@@ -523,7 +523,7 @@ export default function DashboardPage() {
 
                   {/* LEFT CONTENT */}
                   <div>
-                    <p className="text-[11px] font-medium tracking-[0.18em] text-slate-500 uppercase">
+                    <p className="mb-3 text-[11px] font-medium tracking-[0.18em] text-slate-500 uppercase">
                       Quick Actions
                     </p>
 
@@ -538,7 +538,7 @@ export default function DashboardPage() {
                       invoices faster
                     </h2>
                     <p className="
-                      mt-8
+                      mt-4
                       max-w-[340px]
                       text-[15px]
                       leading-8
@@ -549,7 +549,7 @@ export default function DashboardPage() {
                   </div>
 
                   {/* BUTTONS */}
-                  <div className="flex items-center gap-4 pt-2">
+                  <div className="flex items-center gap-4 pt-1">
                     <button
                       onClick={() => router.push("/invoice-editor")}
                       className="
