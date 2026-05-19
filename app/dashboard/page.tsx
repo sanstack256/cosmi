@@ -95,10 +95,17 @@ function computeInvoiceStatus(inv: Invoice): InvoiceStatus {
 }
 
 const statusColors: Record<InvoiceStatus, string> = {
-  Paid: "bg-green-500/10 text-green-400",
-  Pending: "bg-yellow-500/10 text-yellow-400",
-  Overdue: "bg-red-500/10 text-red-400",
-  Draft: "bg-gray-500/10 text-gray-400",
+  Paid:
+    "bg-emerald-500/[0.12] text-emerald-200",
+
+  Pending:
+    "bg-violet-500/[0.10] text-violet-300",
+
+  Overdue:
+    "bg-rose-500/[0.12] text-rose-200",
+
+  Draft:
+    "bg-white/[0.06] text-slate-400",
 };
 
 
@@ -519,7 +526,7 @@ export default function DashboardPage() {
                 "
               >
 
-                <div className="relative z-10 flex flex-col justify-center gap-8 h-full">
+                <div className="relative z-10 flex flex-col justify-center gap-6 h-full">
 
                   {/* LEFT CONTENT */}
                   <div>
@@ -529,8 +536,8 @@ export default function DashboardPage() {
 
                     <h2 className="
                       max-w-[360px]
-                      text-[24px]
-                      leading-[1.08]
+                      text-[22px]
+                      leading-[1.02]
                       tracking-[-0.035em]
                       text-white
                     ">
@@ -538,10 +545,10 @@ export default function DashboardPage() {
                       invoices faster
                     </h2>
                     <p className="
-                      mt-4
+                      mt-5
                       max-w-[340px]
                       text-[15px]
-                      leading-8
+                      leading-[1.8]
                       text-slate-400
                     ">
                       Create, manage and share invoices from one workspace.
@@ -549,7 +556,7 @@ export default function DashboardPage() {
                   </div>
 
                   {/* BUTTONS */}
-                  <div className="flex items-center gap-4 pt-1">
+                  <div className="flex items-center gap-4 pt-3">
                     <button
                       onClick={() => router.push("/invoice-editor")}
                       className="
@@ -574,7 +581,6 @@ export default function DashboardPage() {
                         rounded-xl
                         border border-white/[0.06]
                         bg-white/[0.02]
-                        hover:bg-[#8A6BFF]
                         text-[13px] font-medium text-slate-200
                         transition-all duration-200
                         hover:bg-white/[0.04]
@@ -651,7 +657,7 @@ export default function DashboardPage() {
                         stats.pendingCount +
                         stats.overdueCount;
 
-                      const radius = 48;
+                      const radius = 56;
                       const circumference = 2 * Math.PI * radius;
 
                       const paid =
@@ -686,7 +692,7 @@ export default function DashboardPage() {
                               r={radius}
                               fill="none"
                               stroke="rgba(255,255,255,0.05)"
-                              strokeWidth="6"
+                              strokeWidth="7"
                             />
 
                             {/* Paid */}
@@ -695,8 +701,8 @@ export default function DashboardPage() {
                               cy="84"
                               r={radius}
                               fill="none"
-                              stroke="rgba(52,211,153,0.72)"
-                              strokeWidth="6"
+                              stroke="rgba(52,211,153,0.78)"
+                              strokeWidth="7"
                               strokeLinecap="round"
                               strokeDasharray={`${paid} ${circumference}`}
                               strokeDashoffset="0"
@@ -708,8 +714,8 @@ export default function DashboardPage() {
                               cy="84"
                               r={radius}
                               fill="none"
-                              stroke="rgba(167,139,250,0.72)"
-                              strokeWidth="6"
+                              stroke="rgba(167,139,250,0.82)"
+                              strokeWidth="7"
                               strokeLinecap="round"
                               strokeDasharray={`${pending} ${circumference}`}
                               strokeDashoffset={-paid - 8}
@@ -721,8 +727,8 @@ export default function DashboardPage() {
                               cy="84"
                               r={radius}
                               fill="none"
-                              stroke="rgba(251,113,133,0.72)"
-                              strokeWidth="6"
+                              stroke="rgba(251,113,133,0.78)"
+                              strokeWidth="7"
                               strokeLinecap="round"
                               strokeDasharray={`${overdue} ${circumference}`}
                               strokeDashoffset={-paid - pending - 16}
@@ -913,8 +919,8 @@ export default function DashboardPage() {
                               <div className="shrink-0">
                                 <div className="
                                   rounded-xl
-                                  border border-violet-500/20
-                                  bg-violet-500/10
+                                  border border-violet-400/15
+                                  bg-violet-500/[0.08]
                                   hover:bg-[#8B73FF]
                                   px-3 py-2
                                   text-[11px]
@@ -936,12 +942,13 @@ export default function DashboardPage() {
                                   </h3>
 
                                   <span
-                                    className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${status === "Paid"
-                                      ? "bg-emerald-500/10 text-emerald-300"
-                                      : status === "Overdue"
-                                        ? "bg-rose-500/10 text-rose-300"
-                                        : "bg-amber-500/10 text-amber-300"
-                                      }`}
+                                    className={`
+  rounded-full
+  px-2.5 py-1
+  text-[11px]
+  font-medium
+  ${statusColors[status]}
+`}
                                   >
                                     {status}
                                   </span>
