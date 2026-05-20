@@ -1073,6 +1073,7 @@ function StatCard({
       transition-all duration-300 hover:-translate-y-1
     "
     >
+      
       {/* subtle glow */}
       <div className="absolute -top-10 -right-10 w-40 h-40 bg-violet-500/10 blur-[90px]" />
 
