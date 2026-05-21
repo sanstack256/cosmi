@@ -40,7 +40,6 @@ const cardHover =
 
 const SignOutButton = dynamic(() => import("../components/SignOutButton"), { ssr: false }); // <- added  
 
-
 /* ----------------------------------------
    Helpers / small constants
 ----------------------------------------- */
