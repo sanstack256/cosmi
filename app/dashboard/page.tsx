@@ -45,6 +45,7 @@ const SignOutButton = dynamic(() => import("../components/SignOutButton"), { ssr
 ----------------------------------------- */
 
 
+
 function parseAmount(value: any): number {
   if (!value) return 0;
   if (typeof value === "number") return value;
