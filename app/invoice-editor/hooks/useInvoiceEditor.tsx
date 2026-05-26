@@ -129,6 +129,7 @@ export function useInvoiceEditor() {
 
   useEffect(() => {
     if (!editingInvoice) return;
+
     if (hasInitializedDuplicate.current) return;
 
     hasInitializedDuplicate.current = true;
@@ -136,18 +137,15 @@ export function useInvoiceEditor() {
     setClient(editingInvoice.client);
     setClientEmail((editingInvoice as any).clientEmail || "");
 
-
     if (editingInvoice.currency) {
       setCurrency(editingInvoice.currency);
       setCurrencySource("edit");
     }
 
-    //  set invoice date
     if (editingInvoice.date) {
       setDate(editingInvoice.date);
     }
 
-    // set due date
     if (editingInvoice.dueDate) {
       setDueDate(editingInvoice.dueDate);
     }
@@ -185,9 +183,7 @@ export function useInvoiceEditor() {
           rate: String(li.rate ?? ""),
         }))
       );
-
     }
-
   }, [editingInvoice]);
 
 
