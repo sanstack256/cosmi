@@ -129,6 +129,9 @@ export function useInvoiceEditor() {
 
   useEffect(() => {
     if (!editingInvoice) return;
+    if (hasInitializedDuplicate.current) return;
+
+    hasInitializedDuplicate.current = true;
 
     setClient(editingInvoice.client);
     setClientEmail((editingInvoice as any).clientEmail || "");
