@@ -372,6 +372,7 @@ export function useInvoiceEditor() {
 
       console.log("✅ PUBLIC LINK READY:");
       console.log(`https://cosmi-ten.vercel.app/invoice/${publicId}?t=${token}`);
+      return `https://cosmi-ten.vercel.app/invoice/${publicId}?t=${token}`;
 
     } catch (err) {
       console.error("Public link creation failed:", err);
@@ -460,8 +461,8 @@ export function useInvoiceEditor() {
       console.log("CREATED INVOICE:", created);
 
 
-      // 🔥 CREATE PUBLIC LINK HERE
-      console.log("🚀 CALLING ensurePublicLink with:", invoiceId);
+      //  CREATE PUBLIC LINK HERE
+      console.log(" CALLING ensurePublicLink with:", invoiceId);
       await ensurePublicLink(invoiceId);
 
 

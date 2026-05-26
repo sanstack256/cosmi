@@ -512,17 +512,17 @@ export default function DashboardPage() {
           <div className="space-y-10 px-8 pt-8 pb-7 md:px-10 md:py-10">
 
             {/* Top row */}
-            <div className="grid grid-cols-1 xl:grid-cols-[380px_560px] gap-8 items-stretch">
+            <div className="grid grid-cols-1 xl:grid-cols-[340px_1fr] gap-4 items-stretch">
 
               {/* Quick Actions Card */}
               <div
                 className="
                 relative overflow-hidden
-                rounded-[32px]
+                rounded-[28px]
                 border border-white/[0.05]
-                bg-[#090B11]
+                bg-[#0D111A]
                 px-6 py-3.5
-                min-h-[260px]
+                min-h-[190px]
                 "
               >
 
@@ -599,13 +599,13 @@ export default function DashboardPage() {
               <div
                 className="
                   relative overflow-hidden
-                  rounded-[32px]
-                  bg-[#090B11]
+                  rounded-[28px]
+                  bg-[#0D111A]
                   
                   px-10 py-8 md:px-10 md:py-8
                 "
               >
-                <div className="grid grid-cols-[1fr_220px] items-center gap-16 h-full">
+                <div className="grid grid-cols-[1fr_180px] items-center gap-8 min-h-[190px]">
 
                   {/* LEFT CONTENT */}
                   <div className="w-full lg:max-w-[420px]">
@@ -762,7 +762,7 @@ export default function DashboardPage() {
 
 
           {/* Bottom row */}
-          <div className="grid gap-8 lg:grid-cols-[0.92fr_1.38fr] items-stretch min-w-0">
+          <div className="grid gap-5 lg:grid-cols-[0.88fr_1.42fr] items-stretch min-w-0">
 
             {/* LEFT — Revenue Chart */}
             <div className="relative overflow-hidden rounded-[28px] border border-white/[0.035]  p-7 min-w-0">
@@ -1073,7 +1073,7 @@ function StatCard({
       transition-all duration-300 hover:-translate-y-1
     "
     >
-      
+
       {/* subtle glow */}
       <div className="absolute -top-10 -right-10 w-40 h-40 bg-violet-500/10 blur-[90px]" />
 

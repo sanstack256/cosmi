@@ -384,6 +384,17 @@ export default function InvoiceEditorPage() {
     }
     try {
       console.log("Sending invoice email to:", clientEmail);
+
+      const publicLink = await ensurePublicLink(idToUse);
+
+      if (!publicLink) {
+        showToast("Failed to generate public invoice link");
+        return;
+      }
+
+      const invoiceUrl = publicLink;
+
+
       const response = await fetch("/api/send-reminder", {
         method: "POST",
         headers: {
@@ -402,10 +413,10 @@ export default function InvoiceEditorPage() {
 <p><strong>Total:</strong> ${formatCurrency(total, currencySafe)}</p>
 
       <p>
-        <a href="https://cosmi.vercel.app/invoice/${idToUse}">
-  View Invoice
-</a>
-      </p>
+<a href="${invoiceUrl}">
+    View Invoice
+  </a>
+</p>
 
       <p>Thank you,<br/>${company?.name || "Cosmi"}</p>
     `,
@@ -808,7 +819,7 @@ export default function InvoiceEditorPage() {
   ------------------------------------------- */
 
 
-  
+
 
 
 
