@@ -321,29 +321,6 @@ export default function InvoiceForm({
   }, [onSave]);
 
 
-  useEffect(() => {
-    if (!isIssued) {
-      clientRef.current?.focus();
-    }
-  }, [isIssued]);
-
-
-  function focusNext(e: React.KeyboardEvent<any>) {
-    if (e.key !== "Enter") return;
-
-    e.preventDefault();
-
-    const focusable = Array.from(
-      document.querySelectorAll(
-        'input, select, textarea, button'
-      )
-    ).filter((el) => !(el as HTMLInputElement).disabled);
-
-    const index = focusable.indexOf(e.currentTarget);
-    const next = focusable[index + 1] as HTMLElement;
-
-    next?.focus();
-  }
 
 
   function getDueContext() {
@@ -561,110 +538,112 @@ export default function InvoiceForm({
               Client <span className="text-red-400">*</span>
             </label>
 
-            <input ref={clientRef}
+            <input
+              ref={clientRef}
               disabled={isIssued}
               title={isIssued ? "Locked after issuing invoice" : ""}
               value={client}
               placeholder="Search or type client name..."
               onChange={(e) => {
-
                 const value = e.target.value;
+
                 setClient(value);
-                setActiveIndex(-1);
                 setSearch(value);
                 setShowResults(true);
+                setActiveIndex(-1);
 
                 if (errors.client) {
-                  setErrors(prev => ({ ...prev, client: false }));
-                }
-
-
-                // 🔥 SMART AUTOFILL (PRO ONLY)
-                if (isPro) {
-
-                  // 🚨 SAFETY: don't run on empty input
-                  if (!value.trim()) return;
-
-                  const match = clients.find(
-                    c => c.name.toLowerCase() === value.toLowerCase()
-                  );
-
-                  if (match) {
-                    // ✅ Email
-                    setClientEmail(match.email || "");
-
-                    // 🔥 Find last invoice for this client
-                    const lastInvoice = invoices
-                      .filter(inv => inv.client.toLowerCase() === match.name.toLowerCase())
-                      .sort((a, b) => {
-                        return new Date(b.date).getTime() - new Date(a.date).getTime();
-                      })[0];
-
-                    if (lastInvoice) {
-                      // Currency
-                      if (lastInvoice.currency && !userTouchedCurrency) {
-                        setCurrency(lastInvoice.currency);
-                        setCurrencySource("client");
-                        setPreviousClientCurrency(lastInvoice.currency);
-                      }
-
-                    }
-                  }
+                  setErrors((prev) => ({
+                    ...prev,
+                    client: false,
+                  }));
                 }
               }}
-
-              onFocus={() => setShowResults(true)}
-
-
+              onFocus={() => {
+                if (search.trim()) {
+                  setShowResults(true);
+                }
+              }}
               onBlur={() => {
-                if (!isValidating.current) setShowResults(false);
+                requestAnimationFrame(() => {
+                  if (!isValidating.current) {
+                    setShowResults(false);
+                  }
+                });
               }}
-
               onKeyDown={(e) => {
                 if (!showResults || filteredClients.length === 0) return;
 
                 if (e.key === "ArrowDown") {
                   e.preventDefault();
+
                   setActiveIndex((prev) =>
-                    prev < filteredClients.length - 1 ? prev + 1 : 0
+                    prev < filteredClients.length - 1
+                      ? prev + 1
+                      : 0
                   );
+
+                  return;
                 }
 
                 if (e.key === "ArrowUp") {
                   e.preventDefault();
+
                   setActiveIndex((prev) =>
-                    prev > 0 ? prev - 1 : filteredClients.length - 1
+                    prev > 0
+                      ? prev - 1
+                      : filteredClients.length - 1
                   );
+
+                  return;
                 }
 
                 if (e.key === "Enter") {
                   e.preventDefault();
 
-                  if (activeIndex >= 0) {
-                    const selected = filteredClients[activeIndex];
+                  if (activeIndex < 0) return;
 
-                    setClient(selected.name);
-                    setClientEmail(selected.email || "");
+                  const selected = filteredClients[activeIndex];
 
-                    setSearch("");
-                    setShowResults(false);
-                    setActiveIndex(-1);
-                  } else {
-                    // fallback (typed value)
-                    setClient(search);
-                    setSearch("");
-                    setShowResults(false);
+                  setClient(selected.name);
+                  setClientEmail(selected.email || "");
+
+                  // 🔥 SMART AUTOFILL ONLY AFTER SELECTION
+                  if (isPro) {
+                    const lastInvoice = invoices
+                      .filter(
+                        (inv) =>
+                          inv.client.toLowerCase() ===
+                          selected.name.toLowerCase()
+                      )
+                      .sort(
+                        (a, b) =>
+                          new Date(b.date).getTime() -
+                          new Date(a.date).getTime()
+                      )[0];
+
+                    if (
+                      lastInvoice?.currency &&
+                      !userTouchedCurrency
+                    ) {
+                      setCurrency(lastInvoice.currency);
+                      setCurrencySource("client");
+                      setPreviousClientCurrency(
+                        lastInvoice.currency
+                      );
+                    }
                   }
 
-                  focusNext(e);
+                  setSearch("");
+                  setShowResults(false);
+                  setActiveIndex(-1);
                 }
               }}
-
               className={`
-  ${baseInput}
-  ${errors.client ? errorState : normalState}
-  ${!errors.client ? focusState : ""}
-`}
+      ${baseInput}
+      ${errors.client ? errorState : normalState}
+      ${!errors.client ? focusState : ""}
+    `}
             />
 
             {errors.client && (
@@ -673,7 +652,6 @@ export default function InvoiceForm({
               </div>
             )}
 
-            {/* 🚀 PRO GHOST CTA */}
             {!isPro && client.trim() && (
               <button
                 type="button"
@@ -688,61 +666,88 @@ export default function InvoiceForm({
             )}
 
             {isPro && showResults && search && (
-              <div className="absolute z-20 mt-2 w-full bg-[#0f0f18] border border-white/10
-rounded-xl shadow-lg max-h-48 overflow-y-auto
-transition-all duration-150
-bg-[#0f0f18]">
-
+              <div
+                className="
+        absolute z-20 mt-2 w-full
+        rounded-xl border border-white/10
+        bg-[#0f0f18]
+        shadow-lg
+        max-h-48 overflow-y-auto
+      "
+              >
                 {filteredClients.map((c, idx) => (
                   <div
                     key={c.id}
                     onMouseDown={() => {
                       setClient(c.name);
                       setClientEmail(c.email || "");
+
+                      // 🔥 SMART AUTOFILL ONLY AFTER SELECTION
+                      const lastInvoice = invoices
+                        .filter(
+                          (inv) =>
+                            inv.client.toLowerCase() ===
+                            c.name.toLowerCase()
+                        )
+                        .sort(
+                          (a, b) =>
+                            new Date(b.date).getTime() -
+                            new Date(a.date).getTime()
+                        )[0];
+
+                      if (
+                        lastInvoice?.currency &&
+                        !userTouchedCurrency
+                      ) {
+                        setCurrency(lastInvoice.currency);
+                        setCurrencySource("client");
+                        setPreviousClientCurrency(
+                          lastInvoice.currency
+                        );
+                      }
+
                       setSearch("");
                       setShowResults(false);
-
-                      if (isPro) {
-                        const lastInvoice = invoices
-                          .filter(inv => inv.client.toLowerCase() === c.name.toLowerCase())
-                          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
-
-                        if (lastInvoice) {
-                          if (lastInvoice.currency && !userTouchedCurrency) {
-                            setCurrency(lastInvoice.currency);
-                            setCurrencySource("client");
-                            setPreviousClientCurrency(lastInvoice.currency);
-                          }
-
-
-                        }
-                      }
+                      setActiveIndex(-1);
                     }}
-                    className={`px-3 py-2 text-sm text-white cursor-pointer rounded-md transition
-  ${activeIndex === idx ? "bg-white/15" : "hover:bg-white/10"}
-`}
+                    className={`
+            px-3 py-2 text-sm text-white
+            cursor-pointer rounded-md transition
+            ${activeIndex === idx
+                        ? "bg-white/15"
+                        : "hover:bg-white/10"
+                      }
+          `}
                   >
                     {c.name}
                   </div>
                 ))}
 
-                {search && !clients.some(c => c.name.toLowerCase() === search.toLowerCase()) && (
-                  <div
-                    onClick={async () => {
-                      setClient(search);
-                      setSearch("");
-                      setShowResults(false);
-                    }}
-                    className="px-3 py-2 text-sm text-white cursor-pointer rounded-md transition hover:bg-white/10"
-                  >
-                    + Create "{search}"
-                  </div>
-                )}
-
+                {search &&
+                  !clients.some(
+                    (c) =>
+                      c.name.toLowerCase() ===
+                      search.toLowerCase()
+                  ) && (
+                    <div
+                      onMouseDown={() => {
+                        setClient(search);
+                        setSearch("");
+                        setShowResults(false);
+                        setActiveIndex(-1);
+                      }}
+                      className="
+              px-3 py-2 text-sm text-white
+              cursor-pointer rounded-md transition
+              hover:bg-white/10
+            "
+                    >
+                      + Create "{search}"
+                    </div>
+                  )}
               </div>
             )}
           </div>
-
           <div className="grid grid-cols-2 gap-4 mb-5">
 
             {/* Email */}
@@ -767,7 +772,6 @@ bg-[#0f0f18]">
                     setErrors(prev => ({ ...prev, clientEmail: true }));
                   }
                 }}
-                onKeyDown={focusNext}
                 placeholder="client@email.com"
                 className={`
                 ${baseInput}
@@ -833,7 +837,6 @@ bg-[#0f0f18]">
                       setErrors(prev => ({ ...prev, date: false }));
                     }
                   }}
-                  onKeyDown={focusNext}
                   className={`
                   ${baseInput}
                   ${errors.date ? errorState : normalState}
@@ -868,7 +871,6 @@ bg-[#0f0f18]">
                       setErrors(prev => ({ ...prev, dueDate: false }));
                     }
                   }}
-                  onKeyDown={focusNext}
                   className={`
                   ${baseInput}
                   ${errors.dueDate ? errorState : normalState}
@@ -1159,7 +1161,6 @@ bg-[#0f0f18]">
                     ref={idx === 0 ? firstDescRef : undefined}
                     placeholder="Service description"
                     value={li.desc}
-                    onKeyDown={focusNext}
                     onChange={(e) => {
                       updateLine(idx, { desc: e.target.value });
                       if (errors.lineItems) setErrors(prev => ({ ...prev, lineItems: false }));
@@ -1182,7 +1183,6 @@ bg-[#0f0f18]">
                     onWheel={(e) => (e.target as HTMLInputElement).blur()}
                     min="1"
                     value={li.qty}
-                    onKeyDown={focusNext}
                     onChange={(e) => {
                       updateLine(idx, { qty: Number(e.target.value) || 1 });
                       if (errors.lineItems) setErrors(prev => ({ ...prev, lineItems: false }));
@@ -1293,7 +1293,6 @@ bg-[#0f0f18]">
                   onWheel={(e) => (e.target as HTMLInputElement).blur()}
                   value={taxRate || ""}
                   placeholder="0"
-                  onKeyDown={focusNext}
                   onChange={(e) => setTaxRate(Number(e.target.value))}
                   className={`w-full rounded-lg bg-white/5 border border-white/10 hover:bg-white/[0.03] hover:scale-[1.01] px-3 py-2 text-sm text-white focus:outline-none ${lockStyle} focus:ring-2 focus:ring-violet-500/30
                 `} />
@@ -1309,7 +1308,6 @@ bg-[#0f0f18]">
                   onWheel={(e) => (e.target as HTMLInputElement).blur()}
                   value={discount || ""}
                   placeholder="0"
-                  onKeyDown={focusNext}
                   onChange={(e) => setDiscount(Number(e.target.value))}
                   className={`
                 ${baseInput}
@@ -1327,7 +1325,6 @@ bg-[#0f0f18]">
               <label className="text-xs text-slate-400">Notes</label>
               <textarea
                 value={notes}
-                onKeyDown={focusNext}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}
                 className="w-full rounded-lg bg-white/5 border border-white/10 hover:bg-white/[0.03] hover:scale-[1.01] px-3 py-2 text-sm text-white focus:ring-2 focus:ring-violet-500/30
